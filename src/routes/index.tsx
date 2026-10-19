@@ -1,24 +1,341 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { toJpeg, toPng } from "html-to-image";
+import { Download, Keyboard, Upload, RotateCcw, Type, Image as ImageIcon, Palette, LayoutTemplate, Share2 } from "lucide-react";
+import { Poster } from "@/components/poster/Poster";
+import { BASE, PRESETS } from "@/lib/poster/presets";
+import { ASPECTS, LATIN_FONTS, THAANA_FONTS, type Aspect, type PosterState } from "@/lib/poster/types";
+import { thaanaKeyDown } from "@/lib/poster/thaana";
+import sampleSpeaker from "@/assets/sample-speaker.png";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
-  component: Index,
+  head: () => ({
+    meta: [
+      { title: "Akuru Poster Studio — Dhivehi news poster maker" },
+      { name: "description", content: "Design Dhivehi and English news quote posters with Thaana fonts, phonetic typing and high-res export." },
+      { property: "og:title", content: "Akuru Poster Studio" },
+      { property: "og:description", content: "Dhivehi-first social media news poster maker with RTL Thaana support." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
+  component: Studio,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
+const readFile = (f: File) =>
+  new Promise<string>((res) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result as string);
+    r.readAsDataURL(f);
+  });
+
+function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
+    <div className="space-y-1.5">
+      <Label className="text-xs uppercase tracking-wider text-muted-foreground">{label}</Label>
+      {children}
+    </div>
+  );
+}
+
+function Studio() {
+  const [s, setS] = useState<PosterState>({ ...BASE, photo: sampleSpeaker });
+  const [thaanaKb, setThaanaKb] = useState(true);
+  const [exportScale, setExportScale] = useState(2);
+  const [format, setFormat] = useState<"png" | "jpg">("png");
+  const [busy, setBusy] = useState(false);
+  const [customFonts, setCustomFonts] = useState<string[]>([]);
+  const [zoom, setZoom] = useState(0.4);
+  const posterRef = useRef<HTMLDivElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const set = <K extends keyof PosterState>(k: K, v: PosterState[K]) => setS((p) => ({ ...p, [k]: v }));
+  const { w, h } = ASPECTS[s.aspect];
+  const thaanaFonts = [...THAANA_FONTS, ...customFonts];
+
+  useEffect(() => {
+    const fit = () => {
+      const el = stageRef.current;
+      if (!el) return;
+      setZoom(Math.min((el.clientWidth - 48) / w, (el.clientHeight - 48) / h));
+    };
+    fit();
+    window.addEventListener("resize", fit);
+    return () => window.removeEventListener("resize", fit);
+  }, [w, h]);
+
+  const kb = (k: keyof PosterState) => ({
+    onKeyDown: (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+      thaanaKeyDown(e, thaanaKb, (v) => set(k, v as never)),
+    dir: "auto" as const,
+    style: { fontFamily: `"Faruma", "Space Grotesk", sans-serif` },
+  });
+
+  const txt = (k: keyof PosterState, area = false, rows = 3) =>
+    area ? (
+      <Textarea rows={rows} value={s[k] as string} onChange={(e) => set(k, e.target.value as never)} {...kb(k)} />
+    ) : (
+      <Input value={s[k] as string} onChange={(e) => set(k, e.target.value as never)} {...kb(k)} />
+    );
+
+  const slider = (label: string, k: keyof PosterState, min: number, max: number, step = 1) => (
+    <Field label={`${label} · ${s[k]}`}>
+      <Slider min={min} max={max} step={step} value={[s[k] as number]} onValueChange={([v]) => set(k, v as never)} />
+    </Field>
+  );
+
+  const toggle = (label: string, k: keyof PosterState) => (
+    <label className="flex items-center justify-between gap-2 text-sm">
+      {label}
+      <Switch checked={s[k] as boolean} onCheckedChange={(v) => set(k, v as never)} />
+    </label>
+  );
+
+  const color = (label: string, k: keyof PosterState) => (
+    <label className="flex items-center gap-2 text-sm">
+      <input type="color" value={s[k] as string} onChange={(e) => set(k, e.target.value as never)} className="h-8 w-10 cursor-pointer rounded border border-border bg-transparent" />
+      {label}
+    </label>
+  );
+
+  const fontSel = (label: string, k: keyof PosterState, list: string[]) => (
+    <Field label={label}>
+      <Select value={s[k] as string} onValueChange={(v) => set(k, v as never)}>
+        <SelectTrigger><SelectValue /></SelectTrigger>
+        <SelectContent>
+          {list.map((f) => (
+            <SelectItem key={f} value={f}><span style={{ fontFamily: `"${f}"` }}>{f} — ދިވެހި Aa</span></SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </Field>
+  );
+
+  const upload = (k: "photo" | "logo" | "bgImage" | "backPhoto") => (
+    <label className="flex cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-border px-3 py-2 text-sm hover:bg-accent">
+      <Upload className="h-4 w-4" /> Upload
+      <input type="file" accept="image/*" className="hidden" onChange={async (e) => { const f = e.target.files?.[0]; if (f) set(k, await readFile(f)); }} />
+    </label>
+  );
+
+  const addFont = async (f: File) => {
+    const url = await readFile(f);
+    const name = f.name.replace(/\.[^.]+$/, "");
+    const st = document.createElement("style");
+    st.textContent = `@font-face { font-family: "${name}"; src: url("${url}"); }`;
+    document.head.appendChild(st);
+    setCustomFonts((c) => [...c, name]);
+  };
+
+  const exportImg = async () => {
+    if (!posterRef.current) return;
+    setBusy(true);
+    try {
+      await document.fonts.ready;
+      const opts = { width: w, height: h, pixelRatio: exportScale, cacheBust: true };
+      const url = format === "png" ? await toPng(posterRef.current, opts) : await toJpeg(posterRef.current, { ...opts, quality: 0.95 });
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `poster-${s.aspect.replace(":", "x")}-${w * exportScale}x${h * exportScale}.${format}`;
+      a.click();
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="flex h-screen flex-col bg-background text-foreground">
+      <header className="flex items-center justify-between gap-4 border-b border-border px-5 py-3">
+        <div className="flex items-center gap-3">
+          <div className="grid h-9 w-9 place-items-center rounded bg-primary text-lg font-bold text-primary-foreground" style={{ fontFamily: '"MV A Waheed"' }}>އ</div>
+          <div>
+            <h1 className="text-base font-bold leading-tight">Akuru Poster Studio</h1>
+            <p className="text-xs text-muted-foreground">ދިވެހި ޚަބަރު ޕޯސްޓަރު · News poster maker</p>
+          </div>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button variant={thaanaKb ? "default" : "secondary"} size="sm" onClick={() => setThaanaKb((v) => !v)}>
+            <Keyboard className="h-4 w-4" /> {thaanaKb ? "ތާނަ Phonetic ON" : "English typing"}
+          </Button>
+          <div className="flex rounded-md border border-border p-0.5">
+            {(Object.keys(ASPECTS) as Aspect[]).map((a) => (
+              <button key={a} onClick={() => set("aspect", a)} className={`rounded px-3 py-1 text-xs font-medium ${s.aspect === a ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}>{a}</button>
+            ))}
+          </div>
+          <Select value={String(exportScale)} onValueChange={(v) => setExportScale(Number(v))}>
+            <SelectTrigger className="h-9 w-[150px]"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {[1, 2, 3, 4].map((x) => <SelectItem key={x} value={String(x)}>{x}× · {w * x}×{h * x}</SelectItem>)}
+            </SelectContent>
+          </Select>
+          <Select value={format} onValueChange={(v) => setFormat(v as "png" | "jpg")}>
+            <SelectTrigger className="h-9 w-[80px]"><SelectValue /></SelectTrigger>
+            <SelectContent><SelectItem value="png">PNG</SelectItem><SelectItem value="jpg">JPG</SelectItem></SelectContent>
+          </Select>
+          <Button size="sm" onClick={exportImg} disabled={busy}><Download className="h-4 w-4" /> {busy ? "Exporting…" : "Export"}</Button>
+        </div>
+      </header>
+
+      <div className="flex min-h-0 flex-1">
+        <aside className="w-[380px] shrink-0 overflow-y-auto border-e border-border">
+          <Tabs defaultValue="presets" className="p-4">
+            <TabsList className="grid w-full grid-cols-5">
+              <TabsTrigger value="presets" title="Presets"><LayoutTemplate className="h-4 w-4" /></TabsTrigger>
+              <TabsTrigger value="text" title="Text"><Type className="h-4 w-4" /></TabsTrigger>
+              <TabsTrigger value="photo" title="Photo"><ImageIcon className="h-4 w-4" /></TabsTrigger>
+              <TabsTrigger value="style" title="Style"><Palette className="h-4 w-4" /></TabsTrigger>
+              <TabsTrigger value="brand" title="Branding"><Share2 className="h-4 w-4" /></TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="presets" className="mt-4 space-y-3">
+              {PRESETS.map((p) => (
+                <button key={p.id} onClick={() => setS((c) => ({ ...c, ...BASE, photo: c.photo, logo: c.logo, backPhoto: c.backPhoto, aspect: c.aspect, ...p.apply }))} className="w-full rounded-lg border border-border bg-card p-3 text-start transition hover:border-primary">
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold">{p.name}</span>
+                    <span className="flex gap-1">{p.swatch.map((c) => <span key={c} className="h-4 w-4 rounded-full border border-border" style={{ background: c }} />)}</span>
+                  </div>
+                  <p className="mt-1 text-xs text-muted-foreground">{p.description}</p>
+                </button>
+              ))}
+              <Field label="Layout">
+                <Select value={s.layout} onValueChange={(v) => set("layout", v as PosterState["layout"])}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="paper">Paper statement</SelectItem>
+                    <SelectItem value="archive">Archive portrait</SelectItem>
+                    <SelectItem value="bubble">Speech bubble</SelectItem>
+                    <SelectItem value="headline">Breaking headline</SelectItem>
+                  </SelectContent>
+                </Select>
+              </Field>
+              <Button variant="secondary" className="w-full" onClick={() => setS({ ...BASE, photo: sampleSpeaker })}><RotateCcw className="h-4 w-4" /> Reset</Button>
+            </TabsContent>
+
+            <TabsContent value="text" className="mt-4 space-y-4">
+              <p className="rounded-md bg-muted p-2 text-xs text-muted-foreground">Wrap words in *asterisks* to highlight them. Phonetic keyboard: type "dhivehi" → ދހިވެހި.</p>
+              <Field label="Direction">
+                <div className="grid grid-cols-2 gap-2">
+                  <Button size="sm" variant={s.dir === "rtl" ? "default" : "secondary"} onClick={() => set("dir", "rtl")}>ދިވެހި RTL</Button>
+                  <Button size="sm" variant={s.dir === "ltr" ? "default" : "secondary"} onClick={() => set("dir", "ltr")}>English LTR</Button>
+                </div>
+              </Field>
+              {toggle("Show headline", "showHeadline")}
+              <Field label="Headline (new line = new strip)">{txt("headline", true, 3)}</Field>
+              <Field label="Headline style">
+                <Select value={s.headlineStyle} onValueChange={(v) => set("headlineStyle", v as PosterState["headlineStyle"])}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent><SelectItem value="strip">Torn paper strips</SelectItem><SelectItem value="plain">Plain</SelectItem><SelectItem value="block">Solid block</SelectItem></SelectContent>
+                </Select>
+              </Field>
+              <Field label="Quote / body">{txt("quote", true, 6)}</Field>
+              <Field label="Speaker name">{txt("name")}</Field>
+              <Field label="Designation">{txt("designation")}</Field>
+              <Field label="Category badge">{txt("category")}</Field>
+              {toggle("Show category", "showCategory")}
+              <Field label="Date">{txt("date")}</Field>
+              {toggle("Show date", "showDate")}
+              <Field label="Quote alignment">
+                <Select value={s.quoteAlign} onValueChange={(v) => set("quoteAlign", v as PosterState["quoteAlign"])}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent><SelectItem value="start">Start</SelectItem><SelectItem value="center">Center</SelectItem><SelectItem value="justify">Justify</SelectItem></SelectContent>
+                </Select>
+              </Field>
+              <Field label="Quote mark">
+                <Select value={s.quoteMark} onValueChange={(v) => set("quoteMark", v as PosterState["quoteMark"])}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent><SelectItem value="box">Boxed</SelectItem><SelectItem value="big">Large</SelectItem><SelectItem value="none">None</SelectItem></SelectContent>
+                </Select>
+              </Field>
+            </TabsContent>
+
+            <TabsContent value="photo" className="mt-4 space-y-4">
+              <p className="rounded-md bg-muted p-2 text-xs text-muted-foreground">For the cutout look, upload a PNG with the background removed.</p>
+              <Field label="Speaker photo">{upload("photo")}</Field>
+              {s.photo && <Button size="sm" variant="secondary" onClick={() => set("photo", undefined)}>Remove photo</Button>}
+              {slider("Size %", "photoScale", 30, 200)}
+              {slider("Move sideways", "photoX", -600, 600)}
+              {slider("Move up/down", "photoY", -600, 600)}
+              {slider("White cutout outline", "photoOutline", 0, 20)}
+              {toggle("Black & white", "photoGray")}
+              {toggle("Drop shadow", "photoShadow")}
+              <Field label="Background collage photo (paper / archive)">{upload("backPhoto")}</Field>
+              {s.backPhoto && <Button size="sm" variant="secondary" onClick={() => set("backPhoto", undefined)}>Remove collage photo</Button>}
+            </TabsContent>
+
+            <TabsContent value="style" className="mt-4 space-y-4">
+              <Field label="Background">
+                <Select value={s.bgType} onValueChange={(v) => set("bgType", v as PosterState["bgType"])}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent><SelectItem value="paper">Paper texture</SelectItem><SelectItem value="solid">Solid</SelectItem><SelectItem value="gradient">Gradient</SelectItem><SelectItem value="image">Image</SelectItem></SelectContent>
+                </Select>
+              </Field>
+              {s.bgType === "image" && upload("bgImage")}
+              {s.bgType === "paper" && slider("Texture strength", "textureOpacity", 0, 1, 0.05)}
+              {toggle("Grid lines", "showGrid")}
+              {toggle("Torn paper edges", "tornEdges")}
+              <div className="grid grid-cols-2 gap-3">
+                {color("Background", "bgColor")}
+                {color("Gradient end", "bgColor2")}
+                {color("Accent", "accent")}
+                {color("Text", "textColor")}
+                {color("Card", "cardColor")}
+                {color("Card text", "cardText")}
+                {color("Highlight", "highlightColor")}
+                {color("Highlight text", "highlightText")}
+              </div>
+              {fontSel("Headline font (Thaana)", "headlineFont", thaanaFonts)}
+              {fontSel("Body font (Thaana)", "bodyFont", thaanaFonts)}
+              {fontSel("Name tag font (Thaana)", "nameFont", thaanaFonts)}
+              {fontSel("English font", "latinFont", LATIN_FONTS)}
+              <Field label="Add your own font (e.g. A-Kalaa .ttf/.otf)">
+                <label className="flex cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-border px-3 py-2 text-sm hover:bg-accent">
+                  <Upload className="h-4 w-4" /> Upload font
+                  <input type="file" accept=".ttf,.otf,.woff,.woff2" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) addFont(f); }} />
+                </label>
+              </Field>
+              {slider("Headline size", "headlineSize", 24, 120)}
+              {slider("Quote size", "quoteSize", 18, 70)}
+              {slider("Line height", "lineHeight", 1, 2.6, 0.05)}
+              {slider("Name size", "nameSize", 16, 60)}
+              {slider("Headline nudge", "headlineOffset", -200, 200)}
+              {slider("Quote card nudge", "quoteOffset", -300, 300)}
+            </TabsContent>
+
+            <TabsContent value="brand" className="mt-4 space-y-4">
+              {toggle("Show outlet branding", "showOutlet")}
+              <Field label="Outlet name">{txt("outlet")}</Field>
+              {fontSel("Outlet font", "outletFont", thaanaFonts)}
+              <Field label="Outlet logo (replaces name)">{upload("logo")}</Field>
+              {s.logo && <Button size="sm" variant="secondary" onClick={() => set("logo", undefined)}>Remove logo</Button>}
+              {toggle("Show social footer", "showFooter")}
+              <Field label="Social handle"><Input value={s.handle} onChange={(e) => set("handle", e.target.value)} /></Field>
+              <Field label="Social icons">
+                <div className="flex flex-wrap gap-2">
+                  {["x", "instagram", "facebook", "youtube", "tiktok", "telegram"].map((k) => (
+                    <Button key={k} size="sm" variant={s.socials.includes(k) ? "default" : "secondary"} onClick={() => set("socials", s.socials.includes(k) ? s.socials.filter((x) => x !== k) : [...s.socials, k])}>{k}</Button>
+                  ))}
+                </div>
+              </Field>
+            </TabsContent>
+          </Tabs>
+        </aside>
+
+        <main ref={stageRef} className="relative flex min-w-0 flex-1 items-center justify-center overflow-hidden bg-canvas">
+          <div style={{ width: w * zoom, height: h * zoom }} className="shadow-2xl">
+            <div style={{ width: w, height: h, transform: `scale(${zoom})`, transformOrigin: "top left" }}>
+              <Poster ref={posterRef} s={s} />
+            </div>
+          </div>
+          <span className="absolute bottom-3 end-4 text-xs text-muted-foreground">{w}×{h} · {Math.round(zoom * 100)}%</span>
+        </main>
+      </div>
     </div>
   );
 }
