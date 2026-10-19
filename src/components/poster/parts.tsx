@@ -251,10 +251,41 @@ export function QuoteBox({ s, children, style, pad = "40px 48px", tail = true }:
 
 export function Outlet({ s, color, size = 56, style }: { s: PosterState; color: string; size?: number; style?: CSSProperties }) {
   if (!s.showOutlet) return null;
+  const k = (s.logoSize ?? 100) / 100;
   return s.logo ? (
-    <img src={s.logo} alt="" style={{ height: size * 1.9, maxWidth: 300, objectFit: "contain", ...style }} />
+    <img src={s.logo} alt="" style={{ height: size * 1.9 * k, maxWidth: 300 * k, objectFit: "contain", ...style }} />
   ) : (
-    <div style={{ fontFamily: fam(s.latinFont, s.outletFont), fontSize: size, color, lineHeight: 1.2, fontWeight: 700, ...THAANA_TYPO, ...style }}>{s.outlet}</div>
+    <div style={{ fontFamily: fam(s.latinFont, s.outletFont), fontSize: size * k, color, lineHeight: 1.2, fontWeight: 700, ...THAANA_TYPO, ...style }}>{s.outlet}</div>
+  );
+}
+
+/** Secondary image (dome, books, building, emblem) — fully user-adjustable. */
+export function Extra({ s, fallback, style, cover }: { s: PosterState; fallback?: string; style?: CSSProperties; cover?: boolean }) {
+  const src = s.extraImage ?? fallback;
+  if (!src || !s.showExtra) return null;
+  const tone = s.extraTone;
+  return (
+    <div style={{ position: "absolute", opacity: s.extraOpacity, transform: `translate(${s.extraX}px, ${s.extraY}px) scale(${s.extraScale / 100})`, transformOrigin: "center bottom", ...style }}>
+      <img src={src} alt="" style={{ width: "100%", height: cover ? "100%" : "auto", objectFit: cover ? "cover" : "contain", display: "block", filter: tone !== "color" ? "grayscale(1) contrast(1.05)" : undefined }} />
+      {tone === "duotone" && (
+        <div style={{ position: "absolute", inset: 0, background: s.accent, mixBlendMode: "color", ...(cover ? {} : { maskImage: `url(${src})`, maskSize: "100% 100%" }) }} />
+      )}
+    </div>
+  );
+}
+
+export function Watermark({ s, style }: { s: PosterState; style?: CSSProperties }) {
+  if (!s.watermark || !s.showDecor) return null;
+  return <div style={{ position: "absolute", fontFamily: fam(s.latinFont, s.outletFont), whiteSpace: "nowrap", lineHeight: 1, pointerEvents: "none", ...style }}>{s.watermark}</div>;
+}
+
+export function Waves({ color, style, width = 260 }: { color: string; style?: CSSProperties; width?: number }) {
+  const d = Array.from({ length: 6 }, (_, i) => `${i ? "" : "M0 20 "}Q ${i * 44 + 11} 0, ${i * 44 + 22} 20 T ${i * 44 + 44} 20`).join(" ");
+  return (
+    <svg width={width} height="90" viewBox="0 0 264 90" style={{ position: "absolute", ...style }}>
+      <path d={d} fill="none" stroke={color} strokeWidth="7" strokeLinecap="round" />
+      <path d={d} transform="translate(0 40)" fill="none" stroke={color} strokeWidth="7" strokeLinecap="round" />
+    </svg>
   );
 }
 
@@ -271,7 +302,7 @@ const ICONS: Record<FooterKind, typeof Facebook> = {
   x: Twitter, instagram: Instagram, facebook: Facebook, youtube: Youtube, tiktok: Music2, website: Globe, phone: Phone, email: Mail, whatsapp: MessageCircle,
 };
 
-export type FooterVariant = "icons" | "bar" | "pill" | "split" | "line" | "stack";
+export type FooterVariant = "icons" | "bar" | "pill" | "split" | "line" | "stack" | "circles" | "squares";
 
 export function Footer({ s, color, variant, bg, style }: { s: PosterState; color: string; variant: FooterVariant; bg?: string; style?: CSSProperties }) {
   if (!s.showFooter) return null;
@@ -303,6 +334,18 @@ export function Footer({ s, color, variant, bg, style }: { s: PosterState; color
 
   const row: CSSProperties = { display: "flex", alignItems: "center", direction: "ltr", ...style };
 
+  if (variant === "circles" || variant === "squares")
+    return (
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10, ...style }}>
+        <div style={{ display: "flex", gap: 10, direction: "ltr" }}>
+          {items.map((f) => {
+            const I = ICONS[f.kind];
+            return <span key={f.kind} style={{ width: 46, height: 46, borderRadius: variant === "circles" ? 999 : 8, background: color, display: "grid", placeItems: "center" }}><I size={24} color={bg ?? "#fff"} strokeWidth={2.4} /></span>;
+          })}
+        </div>
+        {s.handle && <span dir="ltr" style={{ ...txt, fontSize: 24, color }}>{s.handle}</span>}
+      </div>
+    );
   if (variant === "bar")
     return (
       <div style={{ ...row, justifyContent: "center", gap: 36, background: bg ?? s.accent, padding: "18px 40px" }}>

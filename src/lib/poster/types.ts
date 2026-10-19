@@ -1,7 +1,9 @@
 export type Layout =
   | "paper" | "archive" | "torngreen" | "bubble" | "headline" | "banner" | "arch"
-  | "topo" | "capsule" | "glass" | "editorial" | "card";
-export type Aspect = "1:1" | "4:5" | "9:16";
+  | "topo" | "capsule" | "glass" | "editorial" | "card"
+  | "greencard" | "collage" | "academy" | "midan" | "circletop" | "circleside"
+  | "statement" | "tanween" | "vintage" | "tweet";
+export type Aspect = "1:1" | "4:5" | "9:16" | "fb" | "x" | "yt" | "pin" | "li" | "custom";
 export type BgType = "grid" | "paper" | "topo" | "dark" | "bokeh" | "solid" | "mesh" | "noise" | "image";
 export type QuoteBox = "torn" | "frame" | "glass" | "speech" | "arch" | "none";
 export type PhotoTone = "color" | "gray" | "duotone";
@@ -81,13 +83,39 @@ export interface PosterState {
   showDecor: boolean;
 
   latinFont: string;
+
+  /* second speaker + secondary image (dome, books, building, emblem) */
+  photo2?: string | undefined;
+  extraImage?: string | undefined;
+  showExtra: boolean;
+  extraScale: number;
+  extraX: number;
+  extraY: number;
+  extraOpacity: number;
+  extraTone: PhotoTone;
+
+  tagline: string;
+  cta: string;
+  watermark: string;
+  logoSize: number;
+  customW: number;
+  customH: number;
 }
 
-export const ASPECTS: Record<Aspect, { w: number; h: number; label: string }> = {
-  "1:1": { w: 1080, h: 1080, label: "Square 1:1" },
-  "4:5": { w: 1080, h: 1350, label: "Portrait 4:5" },
-  "9:16": { w: 1080, h: 1920, label: "Story 9:16" },
+export const ASPECTS: Record<Aspect, { w: number; h: number; label: string; group: string }> = {
+  "1:1": { w: 1080, h: 1080, label: "Instagram / Facebook Square", group: "Feed" },
+  "4:5": { w: 1080, h: 1350, label: "Instagram / Facebook Portrait", group: "Feed" },
+  "9:16": { w: 1080, h: 1920, label: "Story · Reels · TikTok · WhatsApp Status", group: "Story" },
+  fb: { w: 1200, h: 630, label: "Facebook Landscape / Link", group: "Landscape" },
+  x: { w: 1600, h: 900, label: "X (Twitter) Post", group: "Landscape" },
+  yt: { w: 1280, h: 720, label: "YouTube Thumbnail", group: "Landscape" },
+  li: { w: 1200, h: 627, label: "LinkedIn Post", group: "Landscape" },
+  pin: { w: 1000, h: 1500, label: "Pinterest Pin", group: "Tall" },
+  custom: { w: 1080, h: 1080, label: "Custom size", group: "Custom" },
 };
+
+export const sizeOf = (s: Pick<PosterState, "aspect" | "customW" | "customH">) =>
+  s.aspect === "custom" ? { w: s.customW, h: s.customH } : ASPECTS[s.aspect];
 
 export const THAANA_FONTS = [
   "Faruma", "MV Waheed", "MV A Waheed", "MV Eamaan XP", "MV Amaan XP", "MV Faseyha",

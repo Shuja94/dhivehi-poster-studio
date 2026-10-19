@@ -77,6 +77,18 @@ export const BASE: PosterState = {
   photoGhost: false,
   showDecor: true,
   latinFont: "Plus Jakarta Sans",
+  showExtra: true,
+  extraScale: 100,
+  extraX: 0,
+  extraY: 0,
+  extraOpacity: 1,
+  extraTone: "color",
+  tagline: "ޚަބަރު · ޚަބަރު · ޚަބަރު",
+  cta: "",
+  watermark: "ދިވެހި",
+  logoSize: 100,
+  customW: 1080,
+  customH: 1080,
 };
 
 export interface Preset {
@@ -147,6 +159,56 @@ export const PRESETS: Preset[] = [
     id: "headline", name: "Breaking Headline", description: "Full-bleed photo, bold headline with highlighted keyword, category badge",
     swatch: ["#0b0b0f", "#e11d2a", "#ffffff"],
     apply: { layout: "headline", bgType: "solid", bgColor: "#0b0b0f", accent: "#e11d2a", highlightColor: "#e11d2a", highlightText: "#ffffff", textColor: "#ffffff", headlineStyle: "plain", headlineSize: 70, quoteMark: "none", quoteBox: "none", photoOutline: 0, showGrid: false, category: "ބްރޭކިންގް", showDate: true, showTranslation: true },
+  },
+  {
+    id: "greencard", name: "Green Card Conference", description: "Blurred dark-green portrait, rounded gradient quote card, gold quote marks, event title + date pill, pattern strip",
+    swatch: ["#2b3f2a", "#5f8a2a", "#f2b134"],
+    apply: { layout: "greencard", bgType: "dark", bgColor: "#3d5a3a", bgColor2: "#142014", accent: "#4c7a26", accent2: "#8fbf4a", cardColor: "#6b9a30", cardText: "#ffffff", highlightColor: "#f2b134", highlightText: "#ffffff", textColor: "#ffffff", photoTone: "gray", photoOutline: 0, photoShadow: false, quoteMark: "big", quoteBox: "none", quoteSize: 34, quoteAlign: "start", showHeadline: false, category: "މީލާދު\nކޮންފަރެންސް", showDate: true, date: "31 އޮގަސްޓު 2026 · 4:30", tagline: "ޖާމިޢާ ނޫރިއްޔާ", footer: foot(["facebook", "instagram"]) },
+  },
+  {
+    id: "collage", name: "Two-Speaker Collage", description: "Slate grain, cyan headline block, two cutouts with flag stripes, landmark image, justified story text",
+    swatch: ["#33414f", "#1fb3d1", "#9c2a3c"],
+    apply: { layout: "collage", bgType: "noise", bgColor: "#35434f", accent: "#1fb3d1", accent2: "#9c2a3c", highlightColor: "#1fb3d1", highlightText: "#ffffff", textColor: "#ffffff", headline: "*ކާކު* ފަހަތުގައި ތިބީ؟", headlineStyle: "plain", headlineSize: 54, photoTone: "gray", photoOutline: 0, photoShadow: true, quoteSize: 34, quoteAlign: "justify", quoteBox: "none", quoteMark: "none", footer: foot(["x", "instagram"]) },
+  },
+  {
+    id: "academy", name: "Academy Glass Quote", description: "Textured green with glowing arrows, frosted quote card, ringed circle avatar, series title, CTA",
+    swatch: ["#0f4d22", "#3ee07a", "#ffffff"],
+    apply: { layout: "academy", bgType: "noise", bgColor: "#0f4d22", accent: "#0f4d22", accent2: "#3ee07a", cardColor: "#ffffff", textColor: "#ffffff", quoteSize: 46, quoteMark: "big", quoteAlign: "start", showHeadline: false, photoTone: "color", tagline: "ވިޔަފާރި ބިނާކުރުން", category: "ވިޔަފާރީގެ\nނަފްސާނީ ދިރާސާ", handle: "#ޚަބަރު_އެކެޑަމީ", cta: "*ސަބްސްކްރައިބް* ކުރައްވާ:\nkhabaru.mv/academy", footer: foot(["instagram", "youtube"]) },
+  },
+  {
+    id: "midan", name: "Calligraphy Cutout", description: "Pale teal grain, calligraphy watermark, two-tone headline, slanted name tag, cutout on teal circle",
+    swatch: ["#d6e4e3", "#2d8f8b", "#e7891f"],
+    apply: { layout: "midan", bgType: "noise", bgColor: "#d6e4e3", accent: "#2d8f8b", accent2: "#e7891f", highlightColor: "transparent", highlightText: "#e7891f", textColor: "#2d8f8b", cardText: "#2c4a49", headline: "އަނބުރާ *ވިސްނާލަން*\nޖެހޭ ވަގުތެއް..", headlineStyle: "plain", headlineSize: 58, photoTone: "gray", photoOutline: 10, photoShadow: false, quoteBox: "none", quoteSize: 30, quoteAlign: "start", watermark: "ދިވެހި ބަސް", footer: foot(["facebook", "instagram", "x"]) },
+  },
+  {
+    id: "circletop", name: "Circle Portrait · Top", description: "Airy light canvas, wave squiggles, portrait over a teal circle, orange quote marks, bold headline + body",
+    swatch: ["#e3f1f2", "#2bb3b6", "#f0a01c"],
+    apply: { layout: "circletop", bgType: "noise", bgColor: "#e6f2f3", accent: "#2bb3b6", accent2: "#f0a01c", textColor: "#1f8c8f", cardText: "#204a4c", highlightColor: "transparent", highlightText: "#f0a01c", headline: "*މިއަދު* ތިބާއަށް\nސަމާލުކަން ދީ", headlineStyle: "plain", headlineSize: 60, photoTone: "gray", photoOutline: 0, photoShadow: false, quoteMark: "big", quoteBox: "none", quoteSize: 30, quoteAlign: "start", footer: foot(["facebook", "x", "youtube", "website"]) },
+  },
+  {
+    id: "circleside", name: "Circle Portrait · Side", description: "Portrait on a side circle with grey base, centred headline, orange question bar, justified body",
+    swatch: ["#e6f2f3", "#2bb3b6", "#f0a01c"],
+    apply: { layout: "circleside", bgType: "noise", bgColor: "#e6f2f3", accent: "#2bb3b6", accent2: "#f0a01c", textColor: "#1f8c8f", cardText: "#204a4c", highlightColor: "#f0a01c", highlightText: "#ffffff", headline: "މިއީ އެންމެ\nމުހިންމު ބައި", headlineStyle: "plain", headlineSize: 58, category: "ކީއްވެގެން ބަދަލަކަށް ބޭނުންވަނީ؟", photoTone: "gray", photoOutline: 0, photoShadow: false, quoteMark: "big", quoteBox: "none", quoteSize: 32, quoteAlign: "justify", footer: foot(["facebook", "x", "youtube", "website"]) },
+  },
+  {
+    id: "statement", name: "Agency Statement", description: "Light newsprint, centred logo, faded emblem, speaker at podium, name block, tag rule, square social icons",
+    swatch: ["#ecebe7", "#1f6b45", "#c9a227"],
+    apply: { layout: "statement", bgType: "paper", bgColor: "#ecebe7", textureOpacity: 0.35, accent: "#1f6b45", accent2: "#c9a227", textColor: "#1b1b1b", highlightColor: "#1f6b45", highlightText: "#ffffff", photoTone: "color", photoOutline: 0, photoShadow: false, extraOpacity: 0.25, extraTone: "gray", category: "ބަޔާން", quoteBox: "none", quoteSize: 34, quoteAlign: "justify", showHeadline: false, footer: foot(["facebook", "x", "instagram"]) },
+  },
+  {
+    id: "tanween", name: "Chalk Grid & Books", description: "Dark chalkboard grain, torn edges, red halo circle, B&W portrait, books with flower, torn note card",
+    swatch: ["#2a2e2c", "#9b2a26", "#f2d21b"],
+    apply: { layout: "tanween", bgType: "noise", bgColor: "#2b2f2d", textureOpacity: 1, accent: "#9b2a26", cardColor: "#e8e6e0", highlightColor: "#f2d21b", highlightText: "#111111", textColor: "#ffffff", photoTone: "gray", photoOutline: 0, photoShadow: true, quoteSize: 32, quoteAlign: "center", quoteBox: "none", watermark: "ތާރީޚު", showHeadline: false, tornEdges: true, footer: foot(["x", "instagram"]) },
+  },
+  {
+    id: "vintage", name: "Paper Sheet on Sky", description: "Cyan sky clouds, crumpled paper sheet, faded B&W portrait over pale circle, corner ornaments, name rule",
+    swatch: ["#9fe0e6", "#ecebe8", "#3d4a50"],
+    apply: { layout: "vintage", bgType: "bokeh", bgColor: "#a8e3e8", bgColor2: "#22c3cf", accent: "#7fd3d8", accent2: "#ffffff", cardColor: "#ecebe8", cardText: "#3d4a50", textColor: "#ffffff", textureOpacity: 0.85, photoTone: "gray", photoShadow: false, quoteSize: 32, quoteAlign: "justify", quoteMark: "big", quoteBox: "none", showHeadline: false, footer: foot(["instagram"]) },
+  },
+  {
+    id: "tweet", name: "Tweet on Torn Paper", description: "Tinted landmark photo on top, torn paper bottom, name + @handle tag, big teal quote marks, date, social circles",
+    swatch: ["#22384f", "#efefed", "#1f9c8f"],
+    apply: { layout: "tweet", bgType: "solid", bgColor: "#22384f", accent: "#1f9c8f", cardColor: "#efefed", cardText: "#203040", extraTone: "duotone", textureOpacity: 0.6, highlightColor: "transparent", highlightText: "#1f9c8f", quoteSize: 32, quoteAlign: "justify", quoteMark: "big", quoteBox: "none", showDate: true, date: "ހޯމަ · 19 އޮކްޓޫބަރު 2026", handle: "@khabaru", showHeadline: false, footer: foot(["youtube", "x", "facebook", "tiktok"]) },
   },
   {
     id: "english", name: "English Editorial", description: "Left-to-right paper quote card for English posts",
