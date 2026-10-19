@@ -168,3 +168,20 @@
     color: var(--color-foreground);
   }
 }
+
+/* Jump-to-control highlight after picking a style */
+@keyframes ctl-flash {
+  0% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--primary) 70%, transparent); }
+  35% { box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary) 45%, transparent); }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+.ctl-flash {
+  animation: ctl-flash 1.7s ease-out;
+  border-radius: 0.5rem;
+  outline: 1px solid color-mix(in oklab, var(--primary) 55%, transparent);
+  outline-offset: 3px;
+  background-color: color-mix(in oklab, var(--primary) 8%, transparent);
+}
+@media (prefers-reduced-motion: reduce) {
+  .ctl-flash { animation: none; }
+}
