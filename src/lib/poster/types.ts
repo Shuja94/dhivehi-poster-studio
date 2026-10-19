@@ -9,7 +9,7 @@ export interface PosterState {
   bgType: BgType;
   bgColor: string;
   bgColor2: string;
-  bgImage?: string;
+  bgImage?: string | undefined;
   textureOpacity: number;
   showGrid: boolean;
   tornEdges: boolean;
@@ -46,7 +46,7 @@ export interface PosterState {
 
   outlet: string;
   outletFont: string;
-  logo?: string;
+  logo?: string | undefined;
   showOutlet: boolean;
 
   date: string;
@@ -56,14 +56,14 @@ export interface PosterState {
   socials: string[];
   showFooter: boolean;
 
-  photo?: string;
+  photo?: string | undefined;
   photoScale: number;
   photoX: number;
   photoY: number;
   photoGray: boolean;
   photoOutline: number;
   photoShadow: boolean;
-  backPhoto?: string;
+  backPhoto?: string | undefined;
 
   latinFont: string;
 }
