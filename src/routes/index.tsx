@@ -7,6 +7,7 @@ import { FOOTER_LABELS, FOOTER_PLACEHOLDERS } from "@/lib/poster/footer-labels";
 import { BASE, PRESETS } from "@/lib/poster/presets";
 import { ASPECTS, HIGHLIGHTS, LATIN_FONTS, THAANA_FONTS, sizeOf, type Aspect, type PosterState } from "@/lib/poster/types";
 import { brandOf, withPreset, type BrandKit, type BrandLocks } from "@/lib/poster/brand";
+import { KEY_LABEL, KEY_TAB, presetFocus, type Key as PosterKey, type TabId } from "@/lib/poster/controls";
 import { thaanaKeyDown } from "@/lib/poster/thaana";
 import sampleSpeaker from "@/assets/sample-speaker.png";
 import { Button } from "@/components/ui/button";
@@ -39,18 +40,18 @@ const readFile = (f: File) =>
     r.readAsDataURL(f);
   });
 
-function Field({ label, children }: { label: string; children: ReactNode }) {
+function Field({ label, children, ctl }: { label: string; children: ReactNode; ctl?: string }) {
   return (
-    <div className="space-y-1.5">
+    <div className="space-y-1.5" data-ctl={ctl}>
       <Label className="text-xs uppercase tracking-wider text-muted-foreground">{label}</Label>
       {children}
     </div>
   );
 }
 
-function Section({ title, children }: { title: string; children: ReactNode }) {
+function Section({ title, children, ctl }: { title: string; children: ReactNode; ctl?: string }) {
   return (
-    <div className="space-y-3 rounded-lg border border-border bg-card/40 p-3">
+    <div className="space-y-3 rounded-lg border border-border bg-card/40 p-3" data-ctl={ctl}>
       <p className="text-sm font-semibold">{title}</p>
       {children}
     </div>
@@ -124,12 +125,26 @@ function Studio() {
     catch { setBrandSaveNote("Your logo is too large to remember automatically — use “Download kit” to keep it."); }
   }, [brandJson, brandReady]);
   const hasBrand = s.outlet !== BASE.outlet || !!s.logo;
-  const [tab, setTab] = useState("quick");
+  const [tab, setTab] = useState<TabId>("quick");
+  const [focus, setFocus] = useState<{ id: string; name: string; tab: TabId; keys: PosterKey[] } | null>(null);
+  const [flash, setFlash] = useState<{ k: string; n: number } | null>(null);
+  const panelRef = useRef<HTMLElement>(null);
   const thumbBase = useMemo(() => ({ photo: s.photo, logo: s.logo, outlet: s.outlet, partners: s.partners }), [s.photo, s.logo, s.outlet, s.partners]);
   const thumbs = useMemo(() => PRESETS.map((p) => ({ p, state: { ...withPreset({ ...s, ...thumbBase }, BASE, p.apply, { colors: false, fonts: false, footer: true }), aspect: "4:5" as Aspect } })),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [thumbBase]);
-  const pickPreset = (p: (typeof PRESETS)[number]) => setS((c) => withPreset(c, BASE, p.apply, locks));
+  const pickPreset = (p: (typeof PRESETS)[number]) => {
+    setS((c) => withPreset(c, BASE, p.apply, locks));
+    const f = presetFocus(p);
+    setFocus({ id: p.id, name: p.name, tab: f.tab, keys: f.keys });
+    setTab(f.tab);
+    setFlash((x) => ({ k: String(f.keys[0]), n: (x?.n ?? 0) + 1 }));
+  };
+  const gotoKey = (k: PosterKey) => {
+    const t = KEY_TAB[k];
+    if (t) setTab(t);
+    setFlash((x) => ({ k: String(k), n: (x?.n ?? 0) + 1 }));
+  };
   const activeId = PRESETS.find((p) => p.apply.layout === s.layout && p.apply.bgColor === s.bgColor)?.id ?? PRESETS.find((p) => p.apply.layout === s.layout)?.id;
   const shuffle = () => { const o = PRESETS.filter((p) => p.id !== activeId); const p = o[Math.floor(Math.random() * o.length)]; if (p) pickPreset(p); };
   const applyKit = (k: BrandKit) => setS((c) => ({ ...c, ...k.data }));
@@ -153,6 +168,20 @@ function Studio() {
     return () => window.removeEventListener("resize", fit);
   }, [w, h]);
 
+  // After picking a style: scroll its key control into view and flash it.
+  useEffect(() => {
+    if (!flash) return;
+    let el: HTMLElement | null = null;
+    const show = window.setTimeout(() => {
+      el = panelRef.current?.querySelector<HTMLElement>(`[data-ctl="${flash.k}"]`) ?? null;
+      if (!el) return;
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      el.classList.add("ctl-flash");
+      window.setTimeout(() => el?.classList.remove("ctl-flash"), 1800);
+    }, 90);
+    return () => { window.clearTimeout(show); el?.classList.remove("ctl-flash"); };
+  }, [flash]);
+
   const kb = (k: keyof PosterState) => ({
     onKeyDown: (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) =>
       thaanaKeyDown(e, thaanaKb, (v) => set(k, v as never)),
@@ -168,27 +197,27 @@ function Studio() {
     );
 
   const slider = (label: string, k: keyof PosterState, min: number, max: number, step = 1) => (
-    <Field label={`${label} · ${s[k]}`}>
+    <Field label={`${label} · ${s[k]}`} ctl={k}>
       <Slider min={min} max={max} step={step} value={[s[k] as number]} onValueChange={([v]) => set(k, v as never)} />
     </Field>
   );
 
   const toggle = (label: string, k: keyof PosterState) => (
-    <label className="flex items-center justify-between gap-2 text-sm">
+    <label className="flex items-center justify-between gap-2 text-sm" data-ctl={k}>
       {label}
       <Switch checked={s[k] as boolean} onCheckedChange={(v) => set(k, v as never)} />
     </label>
   );
 
   const color = (label: string, k: keyof PosterState) => (
-    <label className="flex items-center gap-2 text-sm">
+    <label className="flex items-center gap-2 text-sm" data-ctl={k}>
       <input type="color" value={s[k] as string} onChange={(e) => set(k, e.target.value as never)} className="h-8 w-10 cursor-pointer rounded border border-border bg-transparent" />
       {label}
     </label>
   );
 
   const optColor = (label: string, k: "patternColor" | "decorColor" | "watermarkColor", fallback: string) => (
-    <div className="flex items-center gap-2 text-sm">
+    <div className="flex items-center gap-2 text-sm" data-ctl={k}>
       <input type="color" value={s[k] || fallback} onChange={(e) => set(k, e.target.value)} className="h-8 w-10 cursor-pointer rounded border border-border bg-transparent" />
       <span className="flex-1">{label}</span>
       {s[k] ? <Button size="sm" variant="ghost" onClick={() => set(k, "")}>Auto</Button> : <span className="text-xs text-muted-foreground">auto</span>}
@@ -196,7 +225,7 @@ function Studio() {
   );
 
   const fontSel = (label: string, k: keyof PosterState, list: string[]) => (
-    <Field label={label}>
+    <Field label={label} ctl={k}>
       <Select value={s[k] as string} onValueChange={(v) => set(k, v as never)}>
         <SelectTrigger><SelectValue /></SelectTrigger>
         <SelectContent>
@@ -209,7 +238,7 @@ function Studio() {
   );
 
   const upload = (k: "photo" | "logo" | "bgImage" | "backPhoto" | "photo2" | "extraImage") => (
-    <label className="flex cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-border px-3 py-2 text-sm hover:bg-accent">
+    <label className="flex cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-border px-3 py-2 text-sm hover:bg-accent" data-ctl={k}>
       <Upload className="h-4 w-4" /> Upload
       <input type="file" accept="image/*" className="hidden" onChange={async (e) => { const f = e.target.files?.[0]; if (f) set(k, await readFile(f)); }} />
     </label>
@@ -286,14 +315,39 @@ function Studio() {
       </header>
 
       <div className="flex min-h-0 flex-1">
-        <aside className="w-[380px] shrink-0 overflow-y-auto border-e border-border">
-          <Tabs value={tab} onValueChange={setTab} className="p-4">
+        <aside ref={panelRef} className="w-[380px] shrink-0 overflow-y-auto border-e border-border">
+          <Tabs value={tab} onValueChange={(v) => setTab(v as TabId)} className="p-4">
+            <div className="sticky top-0 z-30 -mx-4 -mt-4 border-b border-border/60 bg-background/95 px-4 pb-2 pt-4 backdrop-blur">
             <TabsList className="grid h-auto w-full grid-cols-6">
               {[["quick", Zap, "Quick"], ["presets", LayoutTemplate, "Styles"], ["text", Type, "Text"], ["photo", ImageIcon, "Images"], ["style", Palette, "Look"], ["brand", Share2, "Brand"]].map(([v, I, l]) => {
                 const Icon = I as typeof Zap;
                 return <TabsTrigger key={v as string} value={v as string} className="flex flex-col gap-0.5 px-1 py-1.5 text-[10px]"><Icon className="h-4 w-4" />{l as string}</TabsTrigger>;
               })}
             </TabsList>
+
+            {focus && tab !== "presets" && tab !== "quick" && (
+              <div className="mt-3 rounded-lg border border-primary/40 bg-primary/5 p-2.5">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 shrink-0 text-primary" />
+                  <p className="flex-1 text-xs font-semibold leading-tight">{focus.name} — its key controls</p>
+                  <Button size="sm" variant="ghost" className="h-7 shrink-0 px-2 text-xs" onClick={() => setTab("presets")}>
+                    <LayoutTemplate className="h-3.5 w-3.5" /> Styles
+                  </Button>
+                </div>
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {focus.keys.map((k) => (
+                    <button
+                      key={k}
+                      onClick={() => gotoKey(k)}
+                      className={`rounded-full border px-2.5 py-1 text-[11px] transition hover:border-primary ${flash?.k === k ? "border-primary bg-primary/15" : "border-border bg-background"}`}
+                    >
+                      {KEY_LABEL[k] ?? k}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            </div>
 
             <TabsContent value="quick" className="mt-4 space-y-4">
               {!hasBrand && (
@@ -364,26 +418,26 @@ function Studio() {
 
             <TabsContent value="text" className="mt-4 space-y-4">
               <p className="rounded-md bg-muted p-2 text-xs text-muted-foreground">Wrap words in *asterisks* to highlight them. Phonetic keyboard: type "dhivehi" → ދހިވެހި.</p>
-              <Field label="Direction">
+              <Field label="Direction" ctl="dir">
                 <div className="grid grid-cols-2 gap-2">
                   <Button size="sm" variant={s.dir === "rtl" ? "default" : "secondary"} onClick={() => set("dir", "rtl")}>ދިވެހި RTL</Button>
                   <Button size="sm" variant={s.dir === "ltr" ? "default" : "secondary"} onClick={() => set("dir", "ltr")}>English LTR</Button>
                 </div>
               </Field>
               {toggle("Show headline", "showHeadline")}
-              <Field label="Headline (new line = new strip)">{txt("headline", true, 3)}</Field>
-              <Field label="English translation (under headline)">
+              <Field label="Headline (new line = new strip)" ctl="headline">{txt("headline", true, 3)}</Field>
+              <Field label="English translation (under headline)" ctl="translation">
                 <Textarea rows={2} dir="ltr" value={s.translation} onChange={(e) => set("translation", e.target.value)} />
               </Field>
               {toggle("Show translation", "showTranslation")}
-              <Field label="Headline style">
+              <Field label="Headline style" ctl="headlineStyle">
                 <Select value={s.headlineStyle} onValueChange={(v) => set("headlineStyle", v as PosterState["headlineStyle"])}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent><SelectItem value="strip">Torn paper strips</SelectItem><SelectItem value="plain">Plain</SelectItem><SelectItem value="block">Solid block</SelectItem></SelectContent>
                 </Select>
               </Field>
-              <Field label="Quote / body">{txt("quote", true, 6)}</Field>
-              <Field label="Quote container">
+              <Field label="Quote / body" ctl="quote">{txt("quote", true, 6)}</Field>
+              <Field label="Quote container" ctl="quoteBox">
                 <Select value={s.quoteBox} onValueChange={(v) => set("quoteBox", v as PosterState["quoteBox"])}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -396,22 +450,22 @@ function Studio() {
                   </SelectContent>
                 </Select>
               </Field>
-              <Field label="Speaker name">{txt("name")}</Field>
-              <Field label="Designation">{txt("designation")}</Field>
-              <Field label="Category / #tag badge">{txt("category", true, 2)}</Field>
+              <Field label="Speaker name" ctl="name">{txt("name")}</Field>
+              <Field label="Designation" ctl="designation">{txt("designation")}</Field>
+              <Field label="Category / #tag badge" ctl="category">{txt("category", true, 2)}</Field>
               {toggle("Show category", "showCategory")}
-              <Field label="Tagline (top of poster, some styles)">{txt("tagline")}</Field>
-              <Field label="Call to action (academy style)">{txt("cta", true, 2)}</Field>
-              <Field label="Big date (e.g. 23-25)"><Input dir="ltr" value={s.dateBig} onChange={(e) => set("dateBig", e.target.value)} /></Field>
-              <Field label="Date text">{txt("date")}</Field>
+              <Field label="Tagline (top of poster, some styles)" ctl="tagline">{txt("tagline")}</Field>
+              <Field label="Call to action (academy style)" ctl="cta">{txt("cta", true, 2)}</Field>
+              <Field label="Big date (e.g. 23-25)" ctl="dateBig"><Input dir="ltr" value={s.dateBig} onChange={(e) => set("dateBig", e.target.value)} /></Field>
+              <Field label="Date text" ctl="date">{txt("date")}</Field>
               {toggle("Show date", "showDate")}
-              <Field label="Quote alignment">
+              <Field label="Quote alignment" ctl="quoteAlign">
                 <Select value={s.quoteAlign} onValueChange={(v) => set("quoteAlign", v as PosterState["quoteAlign"])}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent><SelectItem value="start">Start</SelectItem><SelectItem value="center">Center</SelectItem><SelectItem value="justify">Justify</SelectItem></SelectContent>
                 </Select>
               </Field>
-              <Field label="Quote mark">
+              <Field label="Quote mark" ctl="quoteMark">
                 <Select value={s.quoteMark} onValueChange={(v) => set("quoteMark", v as PosterState["quoteMark"])}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent><SelectItem value="box">Boxed</SelectItem><SelectItem value="big">Large</SelectItem><SelectItem value="none">None</SelectItem></SelectContent>
@@ -427,7 +481,7 @@ function Studio() {
               {slider("Move sideways", "photoX", -600, 600)}
               {slider("Move up/down", "photoY", -600, 600)}
               {slider("White cutout outline", "photoOutline", 0, 20)}
-              <Field label="Photo tone">
+              <Field label="Photo tone" ctl="photoTone">
                 <Select value={s.photoTone} onValueChange={(v) => set("photoTone", v as PosterState["photoTone"])}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent><SelectItem value="color">Full colour</SelectItem><SelectItem value="gray">Black & white</SelectItem><SelectItem value="duotone">Duotone (accent tint)</SelectItem></SelectContent>
@@ -447,7 +501,7 @@ function Studio() {
                 {slider("Move sideways", "extraX", -600, 600)}
                 {slider("Move up/down", "extraY", -600, 600)}
                 {slider("Opacity", "extraOpacity", 0, 1, 0.05)}
-                <Field label="Tone">
+                <Field label="Tone" ctl="extraTone">
                   <Select value={s.extraTone} onValueChange={(v) => set("extraTone", v as PosterState["extraTone"])}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent><SelectItem value="color">Full colour</SelectItem><SelectItem value="gray">Black & white</SelectItem><SelectItem value="duotone">Tinted with accent</SelectItem></SelectContent>
@@ -459,7 +513,7 @@ function Studio() {
             </TabsContent>
 
             <TabsContent value="style" className="mt-4 space-y-4">
-              <Field label="Background">
+              <Field label="Background" ctl="bgType">
                 <Select value={s.bgType} onValueChange={(v) => set("bgType", v as PosterState["bgType"])}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -487,13 +541,13 @@ function Studio() {
                 {optColor("Pattern colour", "patternColor", s.accent)}
                 {s.showDecor && slider("Shapes strength", "decorOpacity", 0, 1, 0.05)}
                 {s.showDecor && optColor("Shapes colour", "decorColor", s.accent2)}
-                <Field label="Calligraphy / watermark text">{txt("watermark")}</Field>
+                <Field label="Calligraphy / watermark text" ctl="watermark">{txt("watermark")}</Field>
                 {slider("Watermark strength", "watermarkOpacity", 0, 6, 0.1)}
                 {slider("Watermark size %", "watermarkSize", 30, 200)}
                 {optColor("Watermark colour", "watermarkColor", s.accent)}
                 <Button size="sm" variant="secondary" onClick={() => setS((c) => ({ ...c, patternColor: "", patternOpacity: 1, patternScale: 1, decorOpacity: 1, decorColor: "", watermarkOpacity: 1, watermarkSize: 100, watermarkColor: "" }))}><RotateCcw className="h-4 w-4" /> Reset background details</Button>
               </Section>
-              <Field label="Keyword highlight colour">
+              <Field label="Keyword highlight colour" ctl="highlightColor">
                 <div className="flex flex-wrap gap-2">
                   {HIGHLIGHTS.map((c) => (
                     <button key={c.name} title={c.name} onClick={() => setS((p) => ({ ...p, highlightColor: c.bg, highlightText: c.fg }))} className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs ${s.highlightColor === c.bg ? "border-primary" : "border-border"}`}>
@@ -553,8 +607,8 @@ function Studio() {
               <Section title="Your social accounts">
                 <p className="text-xs text-muted-foreground">Switch on the ones to show in the footer. Leave a box empty to show only the icon.</p>
                 {toggle("Show social footer", "showFooter")}
-                <Field label="Main handle"><Input dir="ltr" placeholder="@youroutlet" value={s.handle} onChange={(e) => set("handle", e.target.value)} /></Field>
-                <div className="space-y-2">
+                <Field label="Main handle" ctl="handle"><Input dir="ltr" placeholder="@youroutlet" value={s.handle} onChange={(e) => set("handle", e.target.value)} /></Field>
+                <div className="space-y-2" data-ctl="footer">
                   {s.footer.map((f, i) => (
                     <div key={f.kind} className="flex items-center gap-2">
                       <Switch checked={f.on} onCheckedChange={(v) => set("footer", s.footer.map((x, j) => (j === i ? { ...x, on: v } : x)))} />
@@ -592,9 +646,9 @@ function Studio() {
                 </div>
               </div>
               {toggle("Show outlet branding", "showOutlet")}
-              <Field label="Outlet name">{txt("outlet")}</Field>
+              <Field label="Outlet name" ctl="outlet">{txt("outlet")}</Field>
               {fontSel("Outlet font", "outletFont", thaanaFonts)}
-              <Field label="Partner / sponsor logos (footer row)">
+              <Field label="Partner / sponsor logos (footer row)" ctl="partners">
                 <label className="flex cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-border px-3 py-2 text-sm hover:bg-accent">
                   <Upload className="h-4 w-4" /> Add partner logo
                   <input type="file" accept="image/*" className="hidden" onChange={async (e) => { const f = e.target.files?.[0]; if (f) { const u = await readFile(f); set("partners", [...s.partners, u]); } }} />
