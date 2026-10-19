@@ -73,6 +73,7 @@ const PresetThumb = memo(function PresetThumb({ state, active, name, onPick }: {
 });
 
 const QUICK_SIZES: Aspect[] = ["4:5", "1:1", "9:16", "fb", "x", "yt"];
+const SIZE_NAMES: Partial<Record<Aspect, string>> = { "4:5": "Insta / FB post", "1:1": "Square post", "9:16": "Story / Status", fb: "Facebook wide", x: "X post", yt: "YouTube" };
 
 function Studio() {
   const [s, setS] = useState<PosterState>({ ...BASE, photo: sampleSpeaker });
@@ -335,7 +336,7 @@ function Studio() {
                 <div className="grid grid-cols-3 gap-1.5">
                   {QUICK_SIZES.map((a) => (
                     <button key={a} onClick={() => set("aspect", a)} className={`rounded-md border px-1.5 py-1.5 text-[11px] leading-tight ${s.aspect === a ? "border-primary bg-primary/10" : "border-border hover:border-primary"}`}>
-                      {ASPECTS[a].label.split("·")[0].split("/")[0].trim()}<br /><span className="text-muted-foreground">{ASPECTS[a].w}×{ASPECTS[a].h}</span>
+                      {SIZE_NAMES[a]}<br /><span className="text-muted-foreground">{ASPECTS[a].w}×{ASPECTS[a].h}</span>
                     </button>
                   ))}
                 </div>
