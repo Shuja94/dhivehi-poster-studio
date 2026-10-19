@@ -100,7 +100,7 @@ const KIND: Record<NewsVariant["kind"], { title: string; presets: string[] }> = 
   editorial: { title: "Editorial brief", presets: ["editorial", "card", "glass"] },
 };
 
-export function NewsPanel({ onApply, dir }: { onApply: (v: NewsVariant, presetId: string) => void; dir: "rtl" | "ltr" }) {
+export function NewsPanel({ onApply, dir, names }: { onApply: (v: NewsVariant, presetId: string) => void; dir: "rtl" | "ltr"; names: Record<string, string> }) {
   const gen = useServerFn(newsToPoster);
   const [article, setArticle] = useState("");
   const [busy, setBusy] = useState(false);
@@ -129,7 +129,7 @@ export function NewsPanel({ onApply, dir }: { onApply: (v: NewsVariant, presetId
           {v.name && <p dir={dir} className="text-[11px]">{v.name} · {v.designation}</p>}
           <div className="flex flex-wrap gap-1.5">
             {KIND[v.kind].presets.map((p) => (
-              <Button key={p} size="sm" variant={p === KIND[v.kind].presets[0] ? "default" : "secondary"} className="h-7 text-[11px]" onClick={() => onApply(v, p)}>Use · {p}</Button>
+              <Button key={p} size="sm" variant={p === KIND[v.kind].presets[0] ? "default" : "secondary"} className="h-7 text-[11px]" onClick={() => onApply(v, p)}>{names[p] ?? p}</Button>
             ))}
           </div>
         </div>

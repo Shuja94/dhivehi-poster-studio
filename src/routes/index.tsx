@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { memo, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { toJpeg, toPng } from "html-to-image";
-import { Download, Keyboard, Upload, RotateCcw, Type, Image as ImageIcon, Palette, LayoutTemplate, Share2, Zap, Sparkles, Shuffle, Check } from "lucide-react";
+import { Download, Keyboard, Upload, RotateCcw, Type, Image as ImageIcon, Palette, LayoutTemplate, Share2, Zap, Sparkles, Shuffle, Check, Scissors, Newspaper } from "lucide-react";
 import { Poster } from "@/components/poster/Poster";
+import { CutoutPanel, NewsPanel } from "@/components/poster/Tools";
 import { FOOTER_LABELS, FOOTER_PLACEHOLDERS } from "@/lib/poster/footer-labels";
 import { BASE, PRESETS } from "@/lib/poster/presets";
 import { ASPECTS, HIGHLIGHTS, LATIN_FONTS, THAANA_FONTS, sizeOf, type Aspect, type PosterState } from "@/lib/poster/types";
@@ -139,6 +140,15 @@ function Studio() {
     setFocus({ id: p.id, name: p.name, tab: f.tab, keys: f.keys });
     setTab(f.tab);
     setFlash((x) => ({ k: String(f.keys[0]), n: (x?.n ?? 0) + 1 }));
+  };
+  const presetNames = useMemo(() => Object.fromEntries(PRESETS.map((p) => [p.id, p.name])), []);
+  const applyNews = (v: { headline: string; quote: string; name: string; designation: string; category: string; translation: string }, id: string) => {
+    const p = PRESETS.find((x) => x.id === id);
+    setS((c) => {
+      const n = p ? withPreset(c, BASE, p.apply, locks) : c;
+      return { ...n, headline: v.headline, quote: v.quote, name: v.name, designation: v.designation, category: v.category, translation: v.translation, showTranslation: !!v.translation && n.showTranslation, showCategory: !!v.category || n.showCategory };
+    });
+    setFocus(null); setTab("text");
   };
   const gotoKey = (k: PosterKey) => {
     const t = KEY_TAB[k];
@@ -318,14 +328,14 @@ function Studio() {
         <aside ref={panelRef} className="w-[380px] shrink-0 overflow-y-auto border-e border-border">
           <Tabs value={tab} onValueChange={(v) => setTab(v as TabId)} className="p-4">
             <div className="sticky top-0 z-30 -mx-4 -mt-4 border-b border-border/60 bg-background/95 px-4 pb-2 pt-4 backdrop-blur">
-            <TabsList className="grid h-auto w-full grid-cols-6">
-              {[["quick", Zap, "Quick"], ["presets", LayoutTemplate, "Styles"], ["text", Type, "Text"], ["photo", ImageIcon, "Images"], ["style", Palette, "Look"], ["brand", Share2, "Brand"]].map(([v, I, l]) => {
+            <TabsList className="grid h-auto w-full grid-cols-8">
+              {[["quick", Zap, "Quick"], ["news", Newspaper, "News"], ["cutout", Scissors, "Cutout"], ["presets", LayoutTemplate, "Styles"], ["text", Type, "Text"], ["photo", ImageIcon, "Images"], ["style", Palette, "Look"], ["brand", Share2, "Brand"]].map(([v, I, l]) => {
                 const Icon = I as typeof Zap;
                 return <TabsTrigger key={v as string} value={v as string} className="flex flex-col gap-0.5 px-1 py-1.5 text-[10px]"><Icon className="h-4 w-4" />{l as string}</TabsTrigger>;
               })}
             </TabsList>
 
-            {focus && tab !== "presets" && tab !== "quick" && (
+            {focus && !["presets", "quick", "news", "cutout"].includes(tab) && (
               <div className="mt-3 rounded-lg border border-primary/40 bg-primary/5 p-2.5">
                 <div className="flex items-center gap-2">
                   <Sparkles className="h-4 w-4 shrink-0 text-primary" />
@@ -396,6 +406,13 @@ function Studio() {
                 </div>
                 <Button className="w-full" onClick={exportImg} disabled={busy}><Download className="h-4 w-4" /> {busy ? "Preparing…" : `Download ${format.toUpperCase()} · ${w * exportScale}×${h * exportScale}`}</Button>
               </Section>
+            </TabsContent>
+
+            <TabsContent value="news" className="mt-4">
+              <NewsPanel names={presetNames} dir={s.dir} onApply={applyNews} />
+            </TabsContent>
+            <TabsContent value="cutout" className="mt-4">
+              <CutoutPanel onUse={(slot, url) => { set(slot, url); setTab("photo"); }} />
             </TabsContent>
 
             <TabsContent value="presets" className="mt-4 space-y-3">
@@ -474,7 +491,7 @@ function Studio() {
             </TabsContent>
 
             <TabsContent value="photo" className="mt-4 space-y-4">
-              <p className="rounded-md bg-muted p-2 text-xs text-muted-foreground">For the cutout look, upload a PNG with the background removed.</p>
+              <button onClick={() => setTab("cutout")} className="w-full rounded-md bg-primary/10 p-2 text-start text-xs text-primary">✂ Photo has a background? Open <b>Cutout</b> to remove it automatically.</button>
               <Field label="Speaker photo">{upload("photo")}</Field>
               {s.photo && <Button size="sm" variant="secondary" onClick={() => set("photo", undefined)}>Remove photo</Button>}
               {slider("Size %", "photoScale", 30, 200)}
