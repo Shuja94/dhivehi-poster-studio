@@ -42,10 +42,11 @@ export function torn(seed: number, amp = 1.2) {
     return Math.round((x - Math.floor(x)) * 1000) / 1000;
   };
   const steps = 48;
-  for (let i = 0; i <= steps; i++) pts.push(`${(i / steps) * 100}% ${r(i) * amp}%`);
-  for (let i = 0; i <= steps; i++) pts.push(`${100 - r(i + 50) * amp * 0.4}% ${(i / steps) * 100}%`);
-  for (let i = steps; i >= 0; i--) pts.push(`${(i / steps) * 100}% ${100 - r(i + 100) * amp}%`);
-  for (let i = steps; i >= 0; i--) pts.push(`${r(i + 150) * amp * 0.4}% ${(i / steps) * 100}%`);
+  const f = (v: number) => `${v.toFixed(2)}%`;
+  for (let i = 0; i <= steps; i++) pts.push(`${f((i / steps) * 100)} ${f(r(i) * amp)}`);
+  for (let i = 0; i <= steps; i++) pts.push(`${f(100 - r(i + 50) * amp * 0.4)} ${f((i / steps) * 100)}`);
+  for (let i = steps; i >= 0; i--) pts.push(`${f((i / steps) * 100)} ${f(100 - r(i + 100) * amp)}`);
+  for (let i = steps; i >= 0; i--) pts.push(`${f(r(i + 150) * amp * 0.4)} ${f((i / steps) * 100)}`);
   return `polygon(${pts.join(",")})`;
 }
 
