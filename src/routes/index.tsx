@@ -600,7 +600,7 @@ function Studio() {
               <Field label="Add your own font (e.g. A-Kalaa .ttf/.otf)">
                 <label className="flex cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-border px-3 py-2 text-sm hover:bg-accent">
                   <Upload className="h-4 w-4" /> Upload font
-                  <input type="file" accept=".ttf,.otf,.woff,.woff2" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) addFont(f); }} />
+                  <input type="file" accept=".ttf,.otf,.woff,.woff2" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ""; if (f) addFont(f); }} />
                 </label>
               </Field>
               {slider("Headline size", "headlineSize", 24, 120)}
@@ -667,7 +667,7 @@ function Studio() {
                   <Button size="sm" variant="secondary" onClick={exportKit}>Download kit</Button>
                   <label className="inline-flex cursor-pointer items-center justify-center rounded-md bg-secondary px-3 text-sm hover:bg-accent">
                     Load kit file
-                    <input type="file" accept="application/json" className="hidden" onChange={async (e) => { const f = e.target.files?.[0]; if (!f) return; try { const k = JSON.parse(await f.text()) as BrandKit; if (k?.data) { applyKit(k); saveKits([...kits.filter((x) => x.name !== k.name), k]); } } catch { setKitMsg("That file is not a brand kit."); } }} />
+                    <input type="file" accept="application/json" className="hidden" onChange={async (e) => { const f = e.target.files?.[0]; e.target.value = ""; if (!f) return; try { const k = JSON.parse(await f.text()) as BrandKit; if (k?.data) { applyKit(k); saveKits([...kits.filter((x) => x.name !== k.name), k]); } } catch { setKitMsg("That file is not a brand kit."); } }} />
                   </label>
                 </div>
               </div>
@@ -677,7 +677,7 @@ function Studio() {
               <Field label="Partner / sponsor logos (footer row)" ctl="partners">
                 <label className="flex cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-border px-3 py-2 text-sm hover:bg-accent">
                   <Upload className="h-4 w-4" /> Add partner logo
-                  <input type="file" accept="image/*" className="hidden" onChange={async (e) => { const f = e.target.files?.[0]; if (f) { const u = await readFile(f); set("partners", [...s.partners, u]); } }} />
+                  <input type="file" accept="image/*" className="hidden" onChange={async (e) => { const f = e.target.files?.[0]; e.target.value = ""; if (f) { const u = await readFile(f); set("partners", [...s.partners, u]); } }} />
                 </label>
                 {s.partners.length > 0 && <Button size="sm" variant="secondary" onClick={() => set("partners", [])}>Clear {s.partners.length} partner logo(s)</Button>}
               </Field>
