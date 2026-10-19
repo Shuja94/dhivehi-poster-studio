@@ -620,6 +620,7 @@ export const Poster = forwardRef<HTMLDivElement, { s: PosterState }>(function Po
             <div style={abs({ top: 0, bottom: 0, ...(atRight ? { left: 0, width: w - sw } : { right: 0, width: w - sw }), display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 24, padding: 40 })}>
               <Outlet s={s} color={s.textColor} size={46} />
               {s.showCategory && <Category s={s} />}
+              <Footer s={s} variant="icons" color={s.textColor} bg={s.bgColor} style={{ flexWrap: "wrap", justifyContent: "center" }} />
             </div>
           )}
           <div style={abs({ left, top, width: dw, height: dh, transform: `scale(${scale})`, transformOrigin: "top left", overflow: "hidden", maskImage: fadeX ?? fadeY, WebkitMaskImage: fadeX ?? fadeY })}>
