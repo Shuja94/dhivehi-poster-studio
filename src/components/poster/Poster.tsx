@@ -1,10 +1,13 @@
 import { forwardRef, type CSSProperties, type ReactNode } from "react";
 import dome from "@/assets/dome.png";
+import books from "@/assets/books.png";
+import minaret from "@/assets/minaret.jpg";
+import paperTexture from "@/assets/paper-texture.jpg";
 import type { PosterState } from "@/lib/poster/types";
-import { ASPECTS } from "@/lib/poster/types";
+import { sizeOf } from "@/lib/poster/types";
 import {
-  Background, Category, Footer, Headline, Outlet, Partners, Photo, QuoteBox, QuoteGlyph, QuoteText,
-  Rich, THAANA_TYPO, Translation, fam, torn,
+  Background, Category, Extra, Footer, Headline, Outlet, Partners, Photo, QuoteBox, QuoteGlyph, QuoteText,
+  Rich, THAANA_TYPO, Translation, Watermark, Waves, fam, torn,
 } from "./parts";
 
 /* Poster artwork is user-coloured: inline colour values here are intentional. */
@@ -67,7 +70,7 @@ function body(s: PosterState, w: number, h: number): ReactNode {
               </div>
             </div>
           </QuoteBox>
-          {s.showDecor && <img src={dome} alt="" style={abs({ bottom: "14.5%", insetInlineStart: "5%", width: "36%" })} />}
+          <Extra s={s} fallback={dome} style={{ bottom: "14.5%", insetInlineStart: "5%", width: "36%" }} />
           <div style={abs({ bottom: "6%", left: "6%", right: "6%" })}><Footer s={s} variant="split" color={s.accent} /></div>
         </>
       );
@@ -230,7 +233,7 @@ function body(s: PosterState, w: number, h: number): ReactNode {
       return (
         <>
           <div style={abs({ top: "2.5%", left: "50%", transform: "translateX(-50%)" })}><Outlet s={s} color={s.accent} size={46} /></div>
-          {s.showDecor && <img src={dome} alt="" style={abs({ bottom: "22%", insetInlineEnd: "-6%", width: "48%", opacity: 0.55, filter: "saturate(.4)" })} />}
+          <Extra s={s} fallback={dome} style={{ bottom: "22%", insetInlineEnd: "-6%", width: "48%" }} />
           <div style={abs({ top: "15%", left: "17%", right: "17%", height: "56%", borderRadius: 40, background: `linear-gradient(to bottom, ${s.cardColor} 55%, ${s.cardColor}00)`, padding: "44px 50px" })}>
             <Headline s={s} color={s.cardText} />
           </div>
@@ -269,6 +272,254 @@ function body(s: PosterState, w: number, h: number): ReactNode {
             </div>
             <div style={{ marginTop: 36 }}><Footer s={s} variant="icons" color={s.textColor} bg={s.bgColor} /></div>
           </div>
+        </>
+      );
+
+    /* Green rounded quote card over B&W portrait (event / conference) */
+    case "greencard":
+      return (
+        <>
+          <Layer style={{ top: "13%", bottom: 0, insetInlineEnd: "-14%", width: "66%" }}><Photo s={s} /></Layer>
+          <div style={abs({ inset: 0, background: `linear-gradient(to top, ${s.bgColor} 3%, transparent 26%)` })} />
+          {s.showDecor && <div style={abs({ bottom: 0, left: 0, right: 0, height: "4.5%", backgroundImage: `linear-gradient(45deg, ${s.accent2}66 25%, transparent 25%, transparent 75%, ${s.accent2}66 75%), linear-gradient(45deg, ${s.accent2}66 25%, transparent 25%, transparent 75%, ${s.accent2}66 75%)`, backgroundSize: "44px 44px", backgroundPosition: "0 0, 22px 22px" })} />}
+          <div style={abs({ top: "6%", left: "9%", right: "9%", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 20 })}>
+            <Outlet s={s} color={s.highlightColor} size={44} />
+            {s.tagline && <div style={{ flex: 1, ...nm, fontSize: 16, color: s.textColor, opacity: 0.35, textAlign: "center", overflow: "hidden", lineHeight: 1.3, maxHeight: 64 }}>{Array(6).fill(s.tagline).join(" · ")}</div>}
+            <Partners s={s} />
+          </div>
+          <div style={abs({ top: "19%", insetInlineStart: "12%", width: "50%", minHeight: "44%", borderRadius: 44, background: `linear-gradient(165deg, ${s.cardColor}, ${s.accent})`, padding: "56px 54px", display: "flex", flexDirection: "column", gap: 22, transform: `translateY(${s.quoteOffset}px)`, boxShadow: "0 30px 60px rgba(0,0,0,.25)" })}>
+            <QuoteGlyph s={s} size={100} color={s.highlightText} bg={s.highlightColor} />
+            <QuoteText s={s} color={s.cardText} />
+            <div style={{ borderTop: `2px solid ${s.cardText}44`, paddingTop: 18 }}>
+              <div style={{ ...nm, fontSize: s.nameSize, color: s.cardText, fontWeight: 700, lineHeight: 1.5 }}>{s.name}</div>
+              {s.designation && <div style={{ ...nm, fontSize: s.nameSize * 0.7, color: s.cardText, opacity: 0.8, lineHeight: 1.6 }}>{s.designation}</div>}
+            </div>
+          </div>
+          <div style={abs({ bottom: "10%", left: "8%", right: "8%", display: "flex", justifyContent: "center", alignItems: "center", gap: 30 })}>
+            {s.showCategory && <div style={{ fontFamily: fam(s.latinFont, s.headlineFont), fontSize: 60, color: s.textColor, lineHeight: 1.15, whiteSpace: "pre-wrap", ...THAANA_TYPO }}>{s.category}</div>}
+            {s.showDate && <div style={{ border: `2px solid ${s.textColor}`, borderRadius: 999, padding: "10px 30px", ...nm, fontSize: 24, color: s.textColor, lineHeight: 1.5 }}>{s.date}</div>}
+          </div>
+          <div style={abs({ bottom: "5.5%", left: "50%", transform: "translateX(-50%)" })}><Footer s={s} variant="line" color={s.textColor} style={{ borderTop: "none", paddingTop: 0 }} /></div>
+        </>
+      );
+
+    /* Two-speaker collage with stripes + landmark */
+    case "collage":
+      return (
+        <>
+          <div style={abs({ top: pad, insetInlineEnd: pad })}><Outlet s={s} color={s.textColor} size={46} /></div>
+          {s.showHeadline && (
+            <div style={abs({ top: "13%", insetInlineStart: "18%", transform: `translateY(${s.headlineOffset}px)` })}>
+              <span style={{ display: "inline-block", background: s.highlightColor, color: s.highlightText, fontFamily: fam(s.latinFont, s.headlineFont), fontSize: s.headlineSize, padding: "6px 34px", borderRadius: 8, lineHeight: 1.5, whiteSpace: "pre-wrap", ...THAANA_TYPO }}>
+                <Rich text={s.headline} s={s} bg={s.accent2} fg="#fff" />
+              </span>
+              <Translation s={s} color={s.textColor} style={{ marginTop: 12 }} />
+            </div>
+          )}
+          {s.showDecor && (
+            <>
+              <div style={abs({ top: "27%", bottom: "24%", insetInlineEnd: "30%", width: "22%", backgroundImage: `repeating-linear-gradient(90deg, ${s.accent2} 0 22px, transparent 22px 54px)`, opacity: 0.6 })} />
+              <div style={abs({ top: "34%", bottom: "6%", insetInlineEnd: "35%", width: 34, background: s.highlightColor, opacity: 0.85 })} />
+            </>
+          )}
+          <Layer style={{ top: "30%", bottom: "8%", insetInlineEnd: "24%", width: "42%" }}><Photo s={{ ...s, photo: s.photo2 ?? s.photo, photoX: -s.photoX }} /></Layer>
+          <Layer style={{ top: "38%", bottom: 0, insetInlineEnd: "-4%", width: "46%" }}><Photo s={s} /></Layer>
+          <Extra s={s} fallback={dome} style={{ bottom: 0, insetInlineEnd: "30%", width: "34%" }} />
+          <div style={abs({ top: "34%", insetInlineStart: "6%", width: "42%", transform: `translateY(${s.quoteOffset}px)` })}>
+            <QuoteText s={s} color={s.textColor} />
+            {s.name && <div style={{ ...nm, fontSize: s.nameSize * 0.8, color: s.highlightColor, marginTop: 20 }}>— {s.name}{s.designation ? ` · ${s.designation}` : ""}</div>}
+          </div>
+          <div style={abs({ bottom: "4%", insetInlineStart: "6%" })}><Footer s={s} variant="circles" color={s.textColor} bg={s.bgColor} /></div>
+        </>
+      );
+
+    /* Frosted green card + circular avatar (academy / course) */
+    case "academy":
+      return (
+        <>
+          {s.showDecor && ([[78, 8, 520, 30], [62, 28, 380, 30], [8, 92, 360, 45]] as [number, number, number, number][]).map(([x, y, r, rot], i) => (
+            <div key={i} style={abs({ left: `${x}%`, top: `${y}%`, width: r, height: r, marginLeft: -r / 2, marginTop: -r / 2, background: s.accent2, opacity: 0.35, filter: "blur(28px)", transform: `rotate(${rot}deg)`, clipPath: "polygon(50% 0,100% 100%,0 100%)" })} />
+          ))}
+          <div style={abs({ top: "5%", left: "7%", right: "7%", display: "flex", justifyContent: "space-between", alignItems: "center" })}>
+            <Outlet s={s} color={s.textColor} size={40} />
+            <span style={{ ...nm, fontSize: 26, color: s.textColor, fontWeight: 700 }}>{s.tagline}</span>
+          </div>
+          <div style={abs({ top: "20%", bottom: "23%", left: "20%", right: "20%", borderRadius: 40, background: `color-mix(in srgb, ${s.cardColor} 14%, transparent)`, backdropFilter: "blur(8px)", padding: "80px 64px", transform: `translateY(${s.quoteOffset}px)` })}>
+            <QuoteGlyph s={s} size={70} color={s.accent2} bg={s.accent2} />
+            <QuoteText s={s} color={s.textColor} style={{ fontWeight: 700, marginTop: 10 }} />
+            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 10 }}><div style={{ transform: "rotate(180deg)" }}><QuoteGlyph s={s} size={70} color={s.accent2} bg={s.accent2} /></div></div>
+          </div>
+          <div style={abs({ bottom: "14%", insetInlineStart: "38%", display: "flex", alignItems: "center", gap: 26 })}>
+            <div style={{ width: 280, height: 280, borderRadius: "50%", border: `10px solid ${s.accent2}`, background: "#fff", overflow: "hidden", boxShadow: "0 20px 40px rgba(0,0,0,.35)" }}>
+              {s.photo && <img src={s.photo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top", transform: `translate(${s.photoX / 4}px, ${s.photoY / 4}px) scale(${s.photoScale / 100})`, filter: s.photoTone !== "color" ? "grayscale(1)" : undefined }} />}
+            </div>
+            <div>
+              <div style={{ ...nm, fontSize: s.nameSize * 1.1, color: s.textColor, fontStyle: s.dir === "ltr" ? "italic" : undefined, lineHeight: 1.4 }}>{s.name}</div>
+              {s.designation && <div style={{ ...nm, fontSize: s.nameSize * 0.6, color: s.accent2 }}>{s.designation}</div>}
+            </div>
+          </div>
+          <div style={abs({ bottom: "5%", insetInlineStart: "7%", maxWidth: "45%" })}>
+            {s.showCategory && <div style={{ fontFamily: fam(s.latinFont, s.headlineFont), fontSize: 48, color: s.textColor, lineHeight: 1.15, whiteSpace: "pre-wrap", textTransform: "uppercase", ...THAANA_TYPO }}>{s.category}</div>}
+            {s.handle && <div dir="ltr" style={{ ...nm, fontSize: 26, color: s.textColor, fontWeight: 700, marginTop: 14 }}>{s.handle}</div>}
+          </div>
+          <div style={abs({ bottom: "5%", insetInlineEnd: "7%", textAlign: "end", display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 12, maxWidth: "45%" })}>
+            <Footer s={{ ...s, handle: "" }} variant="circles" color={s.accent2} bg={s.bgColor} />
+            {s.cta && <div style={{ ...nm, fontSize: 26, color: s.textColor, fontWeight: 700, whiteSpace: "pre-wrap", lineHeight: 1.4 }}><Rich text={s.cta} s={s} bg="transparent" fg={s.accent2} /></div>}
+          </div>
+        </>
+      );
+
+    /* Calligraphy watermark, two-tone headline, slanted name tag */
+    case "midan":
+      return (
+        <>
+          <Watermark s={s} style={{ top: "4%", insetInlineEnd: "-18%", fontSize: 380, color: s.accent, opacity: 0.1, transform: "rotate(-14deg)" }} />
+          <div style={abs({ top: pad, insetInlineStart: pad })}><Outlet s={s} color={s.accent} size={44} /></div>
+          <div style={abs({ bottom: "12%", insetInlineStart: "8%", width: "40%", aspectRatio: "1", borderRadius: "50%", background: s.accent })} />
+          <Layer style={{ top: "36%", bottom: 0, insetInlineStart: "-2%", width: "58%" }}><Photo s={s} /></Layer>
+          <div style={abs({ top: "20%", insetInlineEnd: "7%", width: "50%", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 26 })}>
+            <Headline s={s} color={s.textColor} />
+            <QuoteText s={s} color={s.cardText} />
+            <div style={{ position: "relative", marginTop: 20 }}>
+              <div style={abs({ top: -20, insetInlineEnd: 0, width: 80, height: 26, background: s.accent2, clipPath: "polygon(0 100%,100% 0,100% 100%)" })} />
+              <div style={{ background: s.accent, color: "#fff", ...nm, fontSize: s.nameSize, padding: "12px 46px", lineHeight: 1.5, clipPath: "polygon(0 0,100% 0,100% 100%,4% 100%)" }}>{s.name}</div>
+              {s.designation && <div style={{ ...nm, fontSize: s.nameSize * 0.65, color: s.cardText, opacity: 0.75, marginTop: 8 }}>{s.designation}</div>}
+            </div>
+          </div>
+          <div style={abs({ bottom: "4%", insetInlineEnd: "6%" })}><Footer s={s} variant="line" color={s.cardText} style={{ borderTop: "none", paddingTop: 0 }} /></div>
+        </>
+      );
+
+    /* Circle behind portrait — top or side */
+    case "circletop":
+    case "circleside": {
+      const side = s.layout === "circleside";
+      return (
+        <>
+          {s.showDecor && <Waves color={s.accent} style={side ? { bottom: "16%", insetInlineEnd: 0 } : { top: "10%", insetInlineEnd: 0 }} />}
+          <div style={abs({ top: pad * 0.8, insetInlineStart: pad })}><Outlet s={s} color={s.accent} size={42} /></div>
+          {side ? (
+            <>
+              <div style={abs({ top: "16%", insetInlineStart: "8%", width: "38%", aspectRatio: "1", borderRadius: "50%", background: s.accent })} />
+              <div style={abs({ bottom: "10%", insetInlineStart: "10%", width: "40%", height: "3.5%", background: s.cardText, opacity: 0.35 })} />
+              <Layer style={{ top: "18%", bottom: "13%", insetInlineStart: "-2%", width: "60%" }}><Photo s={s} /></Layer>
+              <div style={abs({ top: "26%", insetInlineStart: "50%" })}><QuoteGlyph s={s} size={80} color={s.accent2} bg={s.accent2} /></div>
+              <div style={abs({ top: "24%", insetInlineEnd: "6%", width: "46%", display: "flex", flexDirection: "column", alignItems: "center", gap: 22, textAlign: "center" })}>
+                <Headline s={s} color={s.textColor} />
+                <Category s={s} />
+                <QuoteText s={s} color={s.cardText} />
+              </div>
+            </>
+          ) : (
+            <>
+              <div style={abs({ top: "12%", left: "50%", transform: "translateX(-50%)", width: "38%", aspectRatio: "1", borderRadius: "50%", background: s.accent })} />
+              <Layer style={{ top: "9%", bottom: "42%", left: "12%", right: "12%" }}><Photo s={s} /></Layer>
+              <div style={abs({ top: "57%", left: "12%", right: "12%", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 14, transform: `translateY(${s.quoteOffset}px)` })}>
+                <QuoteGlyph s={s} size={70} color={s.accent2} bg={s.accent2} />
+                <Headline s={s} color={s.textColor} />
+                <QuoteText s={s} color={s.cardText} />
+              </div>
+            </>
+          )}
+          <div style={abs({ bottom: "4%", left: "10%", right: "10%" })}><Footer s={s} variant="line" color={s.accent} /></div>
+        </>
+      );
+    }
+
+    /* Agency statement: emblem, name block, tag rule, justified body */
+    case "statement":
+      return (
+        <>
+          <div style={abs({ top: "4.5%", left: "50%", transform: "translateX(-50%)" })}><Outlet s={s} color={s.accent} size={48} /></div>
+          {s.showDecor && [[8, 52, 18], [70, 50, 14], [6, 34, 10]].map(([x, y, w2], i) => (
+            <div key={i} style={abs({ left: `${x}%`, top: `${y}%`, width: `${w2}%`, height: 90, backgroundImage: `repeating-linear-gradient(${s.textColor}22 0 6px, transparent 6px 14px)`, filter: "blur(1.5px)" })} />
+          ))}
+          <Extra s={s} fallback={dome} style={{ top: "17%", insetInlineStart: "14%", width: "26%" }} />
+          <Layer style={{ top: "19%", bottom: "39%", insetInlineEnd: "16%", width: "50%" }}><Photo s={s} /></Layer>
+          <div style={abs({ top: "40%", insetInlineStart: "13%" })}>
+            {s.designation && <div style={{ ...nm, fontSize: s.nameSize * 0.85, color: s.accent, lineHeight: 1.6 }}>{s.designation}</div>}
+            <div style={{ ...nm, fontSize: s.nameSize * 1.6, color: s.textColor, fontWeight: 800, lineHeight: 1.4 }}>{s.name}</div>
+          </div>
+          <div style={abs({ top: "58.5%", left: "13%", right: "13%", height: 58 })}>
+            <div style={abs({ bottom: 0, left: 0, right: 0, height: 6, background: s.accent2 })} />
+            {s.showCategory && <span style={abs({ bottom: 6, insetInlineStart: 0, background: s.accent, color: "#fff", ...nm, fontSize: 26, padding: "4px 26px", lineHeight: 1.6 })}>{s.category}</span>}
+          </div>
+          <div style={abs({ top: "64%", left: "11%", right: "11%", transform: `translateY(${s.quoteOffset}px)` })}><QuoteText s={s} color={s.textColor} /></div>
+          <div style={abs({ bottom: "3%", left: "50%", transform: "translateX(-50%)" })}><Footer s={s} variant="squares" color={s.accent} /></div>
+        </>
+      );
+
+    /* Dark chalk grid, red circle, books, torn note */
+    case "tanween":
+      return (
+        <>
+          <div style={abs({ top: -10, left: 0, right: 0, height: "3%", background: s.cardColor, clipPath: torn(21, 30) })} />
+          <div style={abs({ bottom: -10, left: 0, right: 0, height: "3%", background: s.cardColor, clipPath: torn(22, 30) })} />
+          <Watermark s={s} style={{ top: "10%", left: "50%", transform: "translateX(-50%)", fontSize: 300, color: "#fff", opacity: 0.06 }} />
+          <div style={abs({ top: "9%", insetInlineStart: "7%" })}><Outlet s={s} color={s.textColor} size={46} /></div>
+          <div style={abs({ top: "18%", left: "50%", transform: "translateX(-50%)", width: "50%", aspectRatio: "1", borderRadius: "50%", background: `radial-gradient(circle, ${s.accent}, ${s.accent}55 70%, transparent 72%)` })} />
+          <Layer style={{ top: "17%", bottom: "41%", left: "16%", right: "16%" }}><Photo s={s} /></Layer>
+          <Extra s={s} fallback={books} style={{ top: "44%", insetInlineEnd: "14%", width: "26%" }} />
+          <div style={abs({ top: "59%", left: "15%", right: "15%", height: 6, background: s.highlightColor })} />
+          <div style={abs({ top: "64%", left: "9%", right: "9%", transform: `translateY(${s.quoteOffset}px)`, filter: "drop-shadow(0 12px 18px rgba(0,0,0,.4))" })}>
+            <div style={{ background: s.cardColor, padding: 4, clipPath: s.tornEdges ? torn(31, 1.5) : undefined }}>
+              <div style={{ background: s.bgColor, padding: "40px 48px", clipPath: s.tornEdges ? torn(32, 1.5) : undefined }}>
+                <QuoteText s={s} color={s.textColor} align={s.quoteAlign} />
+                {s.name && <div style={{ ...nm, fontSize: s.nameSize * 0.7, color: s.highlightColor, textAlign: "center", marginTop: 14 }}>{s.name}{s.designation ? ` · ${s.designation}` : ""}</div>}
+              </div>
+            </div>
+          </div>
+          <div style={abs({ bottom: "4.5%", left: "10%", right: "10%" })}><Footer s={s} variant="line" color={s.textColor} style={{ borderTop: "none" }} /></div>
+        </>
+      );
+
+    /* Crumpled paper sheet on sky clouds */
+    case "vintage":
+      return (
+        <>
+          {s.showDecor && (
+            <>
+              <div style={abs({ top: 30, insetInlineEnd: 50, width: 140, height: 160, borderInlineEnd: "3px solid #fff", borderBottom: "3px solid #fff", opacity: 0.85 })} />
+              <div style={abs({ bottom: 30, insetInlineStart: 50, width: 140, height: 160, borderInlineStart: "3px solid #fff", borderTop: "3px solid #fff", opacity: 0.85 })} />
+            </>
+          )}
+          <div style={abs({ top: "7%", bottom: "8%", left: "11%", right: "11%", background: s.cardColor, boxShadow: "0 30px 60px rgba(0,0,0,.25)", transform: "rotate(-0.5deg)", overflow: "hidden" })}>
+            <img src={paperTexture} alt="" style={abs({ inset: 0, width: "100%", height: "100%", objectFit: "cover", mixBlendMode: "multiply", opacity: s.textureOpacity })} />
+            <div style={abs({ top: "20%", left: "50%", transform: "translateX(-50%)", width: "34%", aspectRatio: "1", borderRadius: "50%", background: s.accent, opacity: 0.75 })} />
+            <Layer style={{ top: "2%", bottom: "40%", left: "8%", right: "8%", maskImage: "linear-gradient(to bottom, #000 70%, transparent 100%)" }}><Photo s={{ ...s, photoOutline: 0 }} /></Layer>
+            <div style={abs({ top: "9%", insetInlineStart: "12%" })}><QuoteGlyph s={s} size={70} color={s.cardText} bg={s.cardText} /></div>
+            <div style={abs({ top: "62%", left: "9%", right: "9%", transform: `translateY(${s.quoteOffset}px)` })}><QuoteText s={s} color={s.cardText} /></div>
+            <div style={abs({ bottom: "6%", insetInlineEnd: "9%", width: "34%" })}>
+              <div style={{ height: 2, background: s.accent, marginBottom: 14 }} />
+              <div style={{ ...nm, fontSize: s.nameSize * 0.8, color: s.cardText, lineHeight: 1.5 }}>{s.name}</div>
+              {s.designation && <div style={{ ...nm, fontSize: s.nameSize * 0.6, color: s.cardText, opacity: 0.7 }}>{s.designation}</div>}
+            </div>
+            <div style={abs({ bottom: "5%", insetInlineStart: "9%", border: `2px solid ${s.cardText}33`, padding: "10px 24px" })}><Outlet s={s} color={s.cardText} size={36} /></div>
+          </div>
+          <div style={abs({ bottom: "2%", left: "50%", transform: "translateX(-50%)" })}><Footer s={s} variant="line" color={s.textColor} style={{ borderTop: "none", paddingTop: 0 }} /></div>
+        </>
+      );
+
+    /* Tweet card: tinted landmark photo, torn paper, name + handle tag */
+    case "tweet":
+      return (
+        <>
+          <Extra s={{ ...s, extraScale: s.extraScale }} fallback={minaret} cover style={{ top: 0, left: 0, right: 0, height: "50%" }} />
+          <div style={abs({ top: 0, left: 0, right: 0, height: "50%", background: `linear-gradient(to bottom, transparent 40%, ${s.bgColor}aa)` })} />
+          <div style={abs({ top: "6%", insetInlineEnd: "7%" })}><Outlet s={s} color="#fff" size={44} /></div>
+          <div style={abs({ top: "44%", bottom: 0, left: 0, right: 0, background: s.cardColor, clipPath: s.tornEdges ? torn(41, 1.6) : undefined, overflow: "hidden" })}>
+            <img src={paperTexture} alt="" style={abs({ inset: 0, width: "100%", height: "100%", objectFit: "cover", mixBlendMode: "multiply", opacity: s.textureOpacity * 0.6 })} />
+          </div>
+          <div style={abs({ top: "41%", left: "50%", transform: "translateX(-50%) rotate(-0.6deg)", background: "#fff", padding: "14px 40px", boxShadow: "0 10px 24px rgba(0,0,0,.2)", display: "flex", gap: 24, alignItems: "center", whiteSpace: "nowrap" })}>
+            <span style={{ ...nm, fontSize: s.nameSize, color: s.accent, fontWeight: 700, lineHeight: 1.5 }}>{s.name}</span>
+            {s.handle && <span dir="ltr" style={{ fontFamily: `"${s.latinFont}"`, fontSize: s.nameSize * 0.9, color: s.cardText }}>{s.handle}</span>}
+          </div>
+          <div style={abs({ top: "39%", insetInlineStart: "6%" })}><QuoteGlyph s={s} size={120} color={s.accent} bg={s.accent} /></div>
+          <div style={abs({ top: "53%", left: "8%", right: "8%", paddingBottom: 26, borderBottom: `2px solid ${s.cardText}22`, transform: `translateY(${s.quoteOffset}px)` })}><QuoteText s={s} color={s.cardText} /></div>
+          <div style={abs({ bottom: "13%", insetInlineEnd: "7%", transform: "rotate(180deg)" })}><QuoteGlyph s={s} size={110} color={s.accent} bg={s.accent} /></div>
+          {s.showDate && <div style={abs({ bottom: "17%", left: "50%", transform: "translateX(-50%)", ...nm, fontSize: 26, color: s.cardText })}>{s.date}</div>}
+          <div style={abs({ bottom: "3%", left: "50%", transform: "translateX(-50%)" })}><Footer s={s} variant="circles" color={s.cardText} bg={s.cardColor} /></div>
+          <div style={abs({ bottom: "4%", insetInlineStart: "6%" })}><Partners s={s} /></div>
         </>
       );
 
@@ -329,7 +580,7 @@ function body(s: PosterState, w: number, h: number): ReactNode {
 }
 
 export const Poster = forwardRef<HTMLDivElement, { s: PosterState }>(function Poster({ s }, ref) {
-  const { w, h } = ASPECTS[s.aspect];
+  const { w, h } = sizeOf(s);
   return (
     <div ref={ref} lang={s.dir === "rtl" ? "dv" : "en"} style={{ width: w, height: h, position: "relative", overflow: "hidden", direction: s.dir, color: s.textColor }}>
       <Background s={s} w={w} h={h} />

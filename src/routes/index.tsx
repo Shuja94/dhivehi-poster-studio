@@ -4,7 +4,8 @@ import { toJpeg, toPng } from "html-to-image";
 import { Download, Keyboard, Upload, RotateCcw, Type, Image as ImageIcon, Palette, LayoutTemplate, Share2 } from "lucide-react";
 import { Poster } from "@/components/poster/Poster";
 import { BASE, PRESETS } from "@/lib/poster/presets";
-import { ASPECTS, HIGHLIGHTS, LATIN_FONTS, THAANA_FONTS, type Aspect, type PosterState } from "@/lib/poster/types";
+import { ASPECTS, HIGHLIGHTS, LATIN_FONTS, THAANA_FONTS, sizeOf, type Aspect, type PosterState } from "@/lib/poster/types";
+import { brandOf, withPreset, type BrandKit, type BrandLocks } from "@/lib/poster/brand";
 import { thaanaKeyDown } from "@/lib/poster/thaana";
 import sampleSpeaker from "@/assets/sample-speaker.png";
 import { Button } from "@/components/ui/button";
@@ -57,7 +58,36 @@ function Studio() {
   const posterRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const set = <K extends keyof PosterState>(k: K, v: PosterState[K]) => setS((p) => ({ ...p, [k]: v }));
-  const { w, h } = ASPECTS[s.aspect];
+  const { w, h } = sizeOf(s);
+  const [locks, setLocks] = useState<BrandLocks>({ colors: false, fonts: false, footer: true });
+  const [kits, setKits] = useState<BrandKit[]>([]);
+  const [kitName, setKitName] = useState("");
+  const [kitMsg, setKitMsg] = useState("");
+  useEffect(() => {
+    try {
+      const k = localStorage.getItem("akuru-brand-kits");
+      if (k) setKits(JSON.parse(k));
+      const l = localStorage.getItem("akuru-brand-locks");
+      if (l) setLocks(JSON.parse(l));
+    } catch { /* ignore */ }
+  }, []);
+  const saveKits = (k: BrandKit[]) => {
+    try { localStorage.setItem("akuru-brand-kits", JSON.stringify(k)); setKitMsg(""); } catch { setKitMsg("Saved for this session only — the logo is too large to store in the browser."); }
+    setKits(k);
+  };
+  const setLock = (k: keyof BrandLocks, v: boolean) => {
+    const n = { ...locks, [k]: v };
+    setLocks(n);
+    try { localStorage.setItem("akuru-brand-locks", JSON.stringify(n)); } catch { /* ignore */ }
+  };
+  const applyKit = (k: BrandKit) => setS((c) => ({ ...c, ...k.data }));
+  const exportKit = () => {
+    const blob = new Blob([JSON.stringify({ name: kitName || s.outlet, data: brandOf(s) })], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `brand-${(kitName || "kit").replace(/\s+/g, "_")}.json`;
+    a.click();
+  };
   const thaanaFonts = [...THAANA_FONTS, ...customFonts];
 
   useEffect(() => {
@@ -118,7 +148,7 @@ function Studio() {
     </Field>
   );
 
-  const upload = (k: "photo" | "logo" | "bgImage" | "backPhoto") => (
+  const upload = (k: "photo" | "logo" | "bgImage" | "backPhoto" | "photo2" | "extraImage") => (
     <label className="flex cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-border px-3 py-2 text-sm hover:bg-accent">
       <Upload className="h-4 w-4" /> Upload
       <input type="file" accept="image/*" className="hidden" onChange={async (e) => { const f = e.target.files?.[0]; if (f) set(k, await readFile(f)); }} />
@@ -164,11 +194,23 @@ function Studio() {
           <Button variant={thaanaKb ? "default" : "secondary"} size="sm" onClick={() => setThaanaKb((v) => !v)}>
             <Keyboard className="h-4 w-4" /> {thaanaKb ? "ތާނަ Phonetic ON" : "English typing"}
           </Button>
-          <div className="flex rounded-md border border-border p-0.5">
-            {(Object.keys(ASPECTS) as Aspect[]).map((a) => (
-              <button key={a} onClick={() => set("aspect", a)} className={`rounded px-3 py-1 text-xs font-medium ${s.aspect === a ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}>{a}</button>
-            ))}
-          </div>
+          <Select value={s.aspect} onValueChange={(v) => set("aspect", v as Aspect)}>
+            <SelectTrigger className="h-9 w-[260px]"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {(Object.keys(ASPECTS) as Aspect[]).map((a) => (
+                <SelectItem key={a} value={a}>
+                  {ASPECTS[a].label}{a !== "custom" && <span className="text-muted-foreground"> · {ASPECTS[a].w}×{ASPECTS[a].h}</span>}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {s.aspect === "custom" && (
+            <div className="flex items-center gap-1">
+              <Input className="h-9 w-20" type="number" min={400} max={4000} value={s.customW} onChange={(e) => set("customW", Math.max(400, Math.min(4000, Number(e.target.value) || 1080)))} />
+              <span className="text-xs text-muted-foreground">×</span>
+              <Input className="h-9 w-20" type="number" min={400} max={4000} value={s.customH} onChange={(e) => set("customH", Math.max(400, Math.min(4000, Number(e.target.value) || 1080)))} />
+            </div>
+          )}
           <Select value={String(exportScale)} onValueChange={(v) => setExportScale(Number(v))}>
             <SelectTrigger className="h-9 w-[150px]"><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -196,7 +238,7 @@ function Studio() {
 
             <TabsContent value="presets" className="mt-4 space-y-3">
               {PRESETS.map((p) => (
-                <button key={p.id} onClick={() => setS((c) => ({ ...c, ...BASE, photo: c.photo, logo: c.logo, backPhoto: c.backPhoto, partners: c.partners, aspect: c.aspect, ...p.apply }))} className={`w-full rounded-lg border bg-card p-3 text-start transition hover:border-primary ${s.layout === p.apply.layout ? "border-primary" : "border-border"}`}>
+                <button key={p.id} onClick={() => setS((c) => withPreset(c, BASE, p.apply, locks))} className={`w-full rounded-lg border bg-card p-3 text-start transition hover:border-primary ${s.layout === p.apply.layout ? "border-primary" : "border-border"}`}>
                   <div className="flex items-center justify-between">
                     <span className="font-semibold">{p.name}</span>
                     <span className="flex gap-1">{p.swatch.map((c) => <span key={c} className="h-4 w-4 rounded-full border border-border" style={{ background: c }} />)}</span>
@@ -214,7 +256,7 @@ function Studio() {
                   </SelectContent>
                 </Select>
               </Field>
-              <Button variant="secondary" className="w-full" onClick={() => setS({ ...BASE, photo: sampleSpeaker })}><RotateCcw className="h-4 w-4" /> Reset</Button>
+              <Button variant="secondary" className="w-full" onClick={() => setS((c) => withPreset(c, { ...BASE, photo: sampleSpeaker }, {}, locks))}><RotateCcw className="h-4 w-4" /> Reset</Button>
             </TabsContent>
 
             <TabsContent value="text" className="mt-4 space-y-4">
@@ -255,6 +297,9 @@ function Studio() {
               <Field label="Designation">{txt("designation")}</Field>
               <Field label="Category / #tag badge">{txt("category", true, 2)}</Field>
               {toggle("Show category", "showCategory")}
+              <Field label="Tagline (top of poster, some styles)">{txt("tagline")}</Field>
+              <Field label="Call to action (academy style)">{txt("cta", true, 2)}</Field>
+              <Field label="Calligraphy watermark text">{txt("watermark")}</Field>
               <Field label="Big date (e.g. 23-25)"><Input dir="ltr" value={s.dateBig} onChange={(e) => set("dateBig", e.target.value)} /></Field>
               <Field label="Date text">{txt("date")}</Field>
               {toggle("Show date", "showDate")}
@@ -288,6 +333,25 @@ function Studio() {
               </Field>
               {toggle("Ghost silhouette behind (topographic)", "photoGhost")}
               {toggle("Drop shadow", "photoShadow")}
+              <Field label="Second speaker photo (collage style)">{upload("photo2")}</Field>
+              {s.photo2 && <Button size="sm" variant="secondary" onClick={() => set("photo2", undefined)}>Remove second photo</Button>}
+              <div className="space-y-4 rounded-lg border border-border p-3">
+                <p className="text-sm font-semibold">Secondary image</p>
+                <p className="text-xs text-muted-foreground">The dome, books, building or emblem in a style. Upload your own to replace it.</p>
+                {toggle("Show secondary image", "showExtra")}
+                {upload("extraImage")}
+                {s.extraImage && <Button size="sm" variant="secondary" onClick={() => set("extraImage", undefined)}>Use default image</Button>}
+                {slider("Size %", "extraScale", 20, 250)}
+                {slider("Move sideways", "extraX", -600, 600)}
+                {slider("Move up/down", "extraY", -600, 600)}
+                {slider("Opacity", "extraOpacity", 0, 1, 0.05)}
+                <Field label="Tone">
+                  <Select value={s.extraTone} onValueChange={(v) => set("extraTone", v as PosterState["extraTone"])}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent><SelectItem value="color">Full colour</SelectItem><SelectItem value="gray">Black & white</SelectItem><SelectItem value="duotone">Tinted with accent</SelectItem></SelectContent>
+                  </Select>
+                </Field>
+              </div>
               <Field label="Background collage photo (paper / archive)">{upload("backPhoto")}</Field>
               {s.backPhoto && <Button size="sm" variant="secondary" onClick={() => set("backPhoto", undefined)}>Remove collage photo</Button>}
             </TabsContent>
@@ -353,11 +417,45 @@ function Studio() {
             </TabsContent>
 
             <TabsContent value="brand" className="mt-4 space-y-4">
+              <div className="space-y-3 rounded-lg border border-primary/40 bg-card p-3">
+                <p className="text-sm font-semibold">Your brand kit</p>
+                <p className="text-xs text-muted-foreground">Your logo, name, handle and contact details stay on every style. Choose what else to keep when switching styles.</p>
+                <label className="flex items-center justify-between text-sm">Keep my brand colours<Switch checked={locks.colors} onCheckedChange={(v) => setLock("colors", v)} /></label>
+                <label className="flex items-center justify-between text-sm">Keep my fonts<Switch checked={locks.fonts} onCheckedChange={(v) => setLock("fonts", v)} /></label>
+                <label className="flex items-center justify-between text-sm">Keep my footer icons<Switch checked={locks.footer} onCheckedChange={(v) => setLock("footer", v)} /></label>
+                <div className="flex gap-2">
+                  <Input className="h-8" placeholder="Brand name" value={kitName} onChange={(e) => setKitName(e.target.value)} />
+                  <Button size="sm" onClick={() => { const name = kitName.trim() || s.outlet || "My brand"; saveKits([...kits.filter((k) => k.name !== name), { name, data: brandOf(s) }]); }}>Save</Button>
+                </div>
+                {kitMsg && <p className="text-xs text-destructive">{kitMsg}</p>}
+                {kits.map((k) => (
+                  <div key={k.name} className="flex items-center gap-2 text-sm">
+                    <span className="flex gap-1">{[k.data.accent, k.data.accent2, k.data.highlightColor].map((c, i) => <span key={i} className="h-3.5 w-3.5 rounded-full border border-border" style={{ background: c }} />)}</span>
+                    <span className="flex-1 truncate">{k.name}</span>
+                    <Button size="sm" variant="secondary" onClick={() => applyKit(k)}>Apply</Button>
+                    <Button size="sm" variant="ghost" onClick={() => saveKits(kits.filter((x) => x.name !== k.name))}>✕</Button>
+                  </div>
+                ))}
+                <div className="grid grid-cols-2 gap-2">
+                  <Button size="sm" variant="secondary" onClick={exportKit}>Download kit</Button>
+                  <label className="inline-flex cursor-pointer items-center justify-center rounded-md bg-secondary px-3 text-sm hover:bg-accent">
+                    Load kit file
+                    <input type="file" accept="application/json" className="hidden" onChange={async (e) => { const f = e.target.files?.[0]; if (!f) return; try { const k = JSON.parse(await f.text()) as BrandKit; if (k?.data) { applyKit(k); saveKits([...kits.filter((x) => x.name !== k.name), k]); } } catch { setKitMsg("That file is not a brand kit."); } }} />
+                  </label>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                {color("Brand colour", "accent")}
+                {color("Brand colour 2", "accent2")}
+                {color("Highlight", "highlightColor")}
+                {color("Highlight text", "highlightText")}
+              </div>
               {toggle("Show outlet branding", "showOutlet")}
               <Field label="Outlet name">{txt("outlet")}</Field>
               {fontSel("Outlet font", "outletFont", thaanaFonts)}
               <Field label="Outlet logo (replaces name)">{upload("logo")}</Field>
               {s.logo && <Button size="sm" variant="secondary" onClick={() => set("logo", undefined)}>Remove logo</Button>}
+              {slider("Logo / name size %", "logoSize", 40, 250)}
               <Field label="Partner / sponsor logos (footer row)">
                 <label className="flex cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-border px-3 py-2 text-sm hover:bg-accent">
                   <Upload className="h-4 w-4" /> Add partner logo
