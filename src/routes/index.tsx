@@ -130,7 +130,7 @@ function Studio() {
     [thumbBase]);
   const pickPreset = (p: (typeof PRESETS)[number]) => setS((c) => withPreset(c, BASE, p.apply, locks));
   const activeId = PRESETS.find((p) => p.apply.layout === s.layout && p.apply.bgColor === s.bgColor)?.id ?? PRESETS.find((p) => p.apply.layout === s.layout)?.id;
-  const shuffle = () => { const o = PRESETS.filter((p) => p.id !== activeId); pickPreset(o[Math.floor(Math.random() * o.length)]); };
+  const shuffle = () => { const o = PRESETS.filter((p) => p.id !== activeId); const p = o[Math.floor(Math.random() * o.length)]; if (p) pickPreset(p); };
   const applyKit = (k: BrandKit) => setS((c) => ({ ...c, ...k.data }));
   const exportKit = () => {
     const blob = new Blob([JSON.stringify({ name: kitName || s.outlet, data: brandOf(s) })], { type: "application/json" });
