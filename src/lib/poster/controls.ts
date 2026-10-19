@@ -1,7 +1,7 @@
 import type { Preset } from "./presets";
 import type { PosterState } from "./types";
 
-export type TabId = "quick" | "presets" | "text" | "photo" | "style" | "brand";
+export type TabId = "quick" | "news" | "cutout" | "presets" | "text" | "photo" | "style" | "brand";
 export type Key = keyof PosterState;
 
 /** Which editor tab owns each poster setting. */
