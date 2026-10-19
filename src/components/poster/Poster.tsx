@@ -338,4 +338,3 @@ export const Poster = forwardRef<HTMLDivElement, { s: PosterState }>(function Po
   );
 });
 
-export { Translation };

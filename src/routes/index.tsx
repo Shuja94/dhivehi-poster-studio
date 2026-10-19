@@ -4,7 +4,7 @@ import { toJpeg, toPng } from "html-to-image";
 import { Download, Keyboard, Upload, RotateCcw, Type, Image as ImageIcon, Palette, LayoutTemplate, Share2 } from "lucide-react";
 import { Poster } from "@/components/poster/Poster";
 import { BASE, PRESETS } from "@/lib/poster/presets";
-import { ASPECTS, LATIN_FONTS, THAANA_FONTS, type Aspect, type PosterState } from "@/lib/poster/types";
+import { ASPECTS, HIGHLIGHTS, LATIN_FONTS, THAANA_FONTS, type Aspect, type PosterState } from "@/lib/poster/types";
 import { thaanaKeyDown } from "@/lib/poster/thaana";
 import sampleSpeaker from "@/assets/sample-speaker.png";
 import { Button } from "@/components/ui/button";
