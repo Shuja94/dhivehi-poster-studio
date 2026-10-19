@@ -10,3 +10,4 @@
 <!-- LOVABLE:END -->
 - Poster layouts are designed on a 1080-wide canvas (ratio 9:16..1:1) and scaled by designBox() in Poster.tsx; never hand-tune layouts per export size. Why: guarantees no clipping/overlap on any platform size.
 - Layout decorations go through <Decor> so users can control their strength/colour.
+- Background removal runs in the browser via @imgly/background-removal (lazy-imported); article-to-poster text uses a createServerFn in src/lib/poster/news.functions.ts. Why: cutouts stay private/free, AI key stays server-side.
