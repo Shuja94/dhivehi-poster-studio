@@ -161,7 +161,7 @@ function body(s: PosterState, w: number, h: number): ReactNode {
         <>
           <div style={abs({ top: `${top}%`, height: `${ch}%`, left: "16%", right: "16%", borderRadius: 90, overflow: "hidden", boxShadow: "0 30px 60px rgba(0,0,0,.3)" })}>
             <div style={abs({ inset: 0, bottom: "55%", background: s.accent, overflow: "hidden" })}>
-              {s.showDecor && [[10, 20, 260], [70, 60, 300], [40, 90, 200], [90, 0, 180]].map(([x, y, r], i) => (
+              {s.showDecor && ([[10, 20, 260], [70, 60, 300], [40, 90, 200], [90, 0, 180]] as [number, number, number][]).map(([x, y, r], i) => (
                 <div key={i} style={abs({ left: `${x}%`, top: `${y}%`, width: r, height: r * 1.4, borderRadius: "48% 52% 60% 40%", border: "34px solid rgba(255,255,255,.1)", transform: "translate(-50%,-50%) rotate(25deg)" })} />
               ))}
             </div>

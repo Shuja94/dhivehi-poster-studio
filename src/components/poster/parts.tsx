@@ -51,7 +51,7 @@ export function torn(seed: number, amp = 1.2) {
 /* ---------- backgrounds ---------- */
 
 function topoPaths(w: number, h: number) {
-  const centers = [[0.12, 0.18, 1], [0.88, 0.62, 2], [0.3, 0.95, 3], [0.95, 0.05, 4]];
+  const centers: [number, number, number][] = [[0.12, 0.18, 1], [0.88, 0.62, 2], [0.3, 0.95, 3], [0.95, 0.05, 4]];
   const out: string[] = [];
   for (const [cx, cy, seed] of centers) {
     for (let r = 30; r < 700; r += 42) {
@@ -142,7 +142,7 @@ export function Photo({ s, style, ghost, noFx, scale = 1 }: { s: PosterState; st
 
 /* ---------- text bits ---------- */
 
-export function QuoteGlyph({ s, size, color, bg, mode }: { s: PosterState; size: number; color: string; bg?: string; mode?: "box" | "big" | "circle" }) {
+export function QuoteGlyph({ s, size, color, bg, mode }: { s: PosterState; size: number; color: string; bg?: string; mode?: "box" | "big" | "circle" | "none" }) {
   const m = mode ?? s.quoteMark;
   if (m === "none") return null;
   const glyph = s.dir === "rtl" ? "\u201D" : "\u201C";
