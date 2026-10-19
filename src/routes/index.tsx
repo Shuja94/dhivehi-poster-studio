@@ -408,10 +408,10 @@ function Studio() {
               </Section>
             </TabsContent>
 
-            <TabsContent value="news" className="mt-4">
+            <TabsContent value="news" forceMount className="mt-4 data-[state=inactive]:hidden">
               <NewsPanel names={presetNames} dir={s.dir} onApply={applyNews} />
             </TabsContent>
-            <TabsContent value="cutout" className="mt-4">
+            <TabsContent value="cutout" forceMount className="mt-4 data-[state=inactive]:hidden">
               <CutoutPanel onUse={(slot, url) => { set(slot, url); setTab("photo"); }} />
             </TabsContent>
 

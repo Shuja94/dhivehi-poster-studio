@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Loader2, Scissors, Wand2, Newspaper } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,64 @@ import { Slider } from "@/components/ui/slider";
 import { newsToPoster, type NewsVariant } from "@/lib/poster/news.functions";
 
 const readFile = (f: File) => new Promise<string>((r) => { const fr = new FileReader(); fr.onload = () => r(String(fr.result)); fr.readAsDataURL(f); });
+
+/** Brush editor: erase leftover background or paint back parts of the person from the original photo. */
+function Refine({ original, cut, onDone, onCancel }: { original: string; cut: string; onDone: (url: string) => void; onCancel: () => void }) {
+  const cv = useRef<HTMLCanvasElement>(null);
+  const orig = useRef<HTMLImageElement | null>(null);
+  const hist = useRef<ImageData[]>([]);
+  const [mode, setMode] = useState<"erase" | "restore">("erase");
+  const [size, setSize] = useState(30);
+  const [zoomed, setZoomed] = useState(false);
+  const drawing = useRef(false);
+  useEffect(() => {
+    (async () => {
+      const a = new Image(); a.src = original; await a.decode(); orig.current = a;
+      const b = new Image(); b.src = cut; await b.decode();
+      const c = cv.current!; c.width = b.width; c.height = b.height;
+      c.getContext("2d")!.drawImage(b, 0, 0);
+    })();
+  }, [original, cut]);
+  const pt = (e: React.PointerEvent) => {
+    const c = cv.current!; const r = c.getBoundingClientRect();
+    return { x: ((e.clientX - r.left) / r.width) * c.width, y: ((e.clientY - r.top) / r.height) * c.height, k: c.width / r.width };
+  };
+  const dab = (e: React.PointerEvent) => {
+    const c = cv.current!; const g = c.getContext("2d")!; const { x, y, k } = pt(e); const rad = (size / 2) * k;
+    g.save(); g.beginPath(); g.arc(x, y, rad, 0, Math.PI * 2);
+    if (mode === "erase") { g.globalCompositeOperation = "destination-out"; g.fill(); }
+    else if (orig.current) { g.clip(); g.drawImage(orig.current, 0, 0, c.width, c.height); }
+    g.restore();
+  };
+  const down = (e: React.PointerEvent) => {
+    const c = cv.current!; hist.current.push(c.getContext("2d")!.getImageData(0, 0, c.width, c.height));
+    if (hist.current.length > 20) hist.current.shift();
+    drawing.current = true; (e.target as Element).setPointerCapture(e.pointerId); dab(e);
+  };
+  const undo = () => { const d = hist.current.pop(); if (d) cv.current!.getContext("2d")!.putImageData(d, 0, 0); };
+  const checker = { backgroundImage: "repeating-conic-gradient(var(--muted) 0 25%, transparent 0 50%)", backgroundSize: "16px 16px" };
+  return (
+    <div className="space-y-3 rounded-lg border border-primary/50 p-3">
+      <p className="text-xs font-semibold">Refine cutout — paint over the photo</p>
+      <div className="grid grid-cols-2 gap-2">
+        <Button size="sm" variant={mode === "erase" ? "default" : "secondary"} onClick={() => setMode("erase")}>Erase background</Button>
+        <Button size="sm" variant={mode === "restore" ? "default" : "secondary"} onClick={() => setMode("restore")}>Restore person</Button>
+      </div>
+      <Label className="text-xs">Brush size · {size}px</Label>
+      <Slider min={4} max={120} step={1} value={[size]} onValueChange={([v]) => setSize(v ?? 30)} />
+      <div className={`overflow-auto rounded-md ${zoomed ? "max-h-[420px]" : ""}`} style={checker}>
+        <canvas ref={cv} className="block touch-none" style={{ width: zoomed ? "250%" : "100%", cursor: "crosshair" }}
+          onPointerDown={down} onPointerMove={(e) => drawing.current && dab(e)} onPointerUp={() => (drawing.current = false)} onPointerLeave={() => (drawing.current = false)} />
+      </div>
+      <div className="grid grid-cols-3 gap-2">
+        <Button size="sm" variant="secondary" onClick={undo}>Undo</Button>
+        <Button size="sm" variant="secondary" onClick={() => setZoomed((z) => !z)}>{zoomed ? "Fit" : "Zoom in"}</Button>
+        <Button size="sm" variant="ghost" onClick={onCancel}>Cancel</Button>
+      </div>
+      <Button size="sm" className="w-full" onClick={() => onDone(cv.current!.toDataURL("image/png"))}>Done refining</Button>
+    </div>
+  );
+}
 
 /** Adds an outline (sticker) + soft shadow around a transparent cutout. */
 async function decorate(src: string, outline: number, color: string, shadow: number) {
@@ -39,6 +97,7 @@ export function CutoutPanel({ onUse }: { onUse: (slot: "photo" | "photo2", url: 
   const [outline, setOutline] = useState(0);
   const [shadow, setShadow] = useState(0);
   const [color, setColor] = useState("#ffffff");
+  const [refining, setRefining] = useState(false);
 
   const run = async () => {
     if (!src) return;
@@ -76,8 +135,12 @@ export function CutoutPanel({ onUse }: { onUse: (slot: "photo" | "photo2", url: 
       {busy && <p className="text-xs text-primary">{busy}</p>}
       {err && <p className="text-xs text-destructive">{err}</p>}
       <Button className="w-full" disabled={!src || !!busy} onClick={run}><Scissors className="h-4 w-4" /> Remove background</Button>
-      {cut && (
+      {cut && src && refining && (
+        <Refine original={src} cut={cut} onCancel={() => setRefining(false)} onDone={async (u) => { setCut(u); setRefining(false); setOut(outline || shadow ? await decorate(u, outline, color, shadow) : u); }} />
+      )}
+      {cut && !refining && (
         <div className="space-y-3 rounded-lg border border-border p-3">
+          <Button size="sm" variant="secondary" className="w-full" onClick={() => setRefining(true)}>Refine edges (erase / restore brush)</Button>
           <Label className="text-xs">Sticker outline · {outline}px</Label>
           <Slider min={0} max={30} step={1} value={[outline]} onValueChange={([v]) => setOutline(v ?? 0)} onValueCommit={([v]) => restyle(v ?? 0, shadow, color)} />
           <div className="flex items-center gap-2"><Label className="text-xs">Outline colour</Label><input type="color" value={color} onChange={(e) => { setColor(e.target.value); restyle(outline, shadow, e.target.value); }} /></div>
