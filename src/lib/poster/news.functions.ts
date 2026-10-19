@@ -43,7 +43,7 @@ export const newsToPoster = createServerFn({ method: "POST" })
         providerOptions: {
           openai: { forceReasoning: true, reasoningEffort: "low", reasoningSummary: "auto", store: false, include: ["reasoning.encrypted_content"] },
         },
-      } as Parameters<typeof streamText>[0]);
+      });
       const text = await result.text;
       const m = text.match(/\{[\s\S]*\}/);
       if (!m) return { error: "The AI returned no poster text. Try again.", variants: [] };
