@@ -14,6 +14,13 @@ import {
 
 const abs = (o: CSSProperties): CSSProperties => ({ position: "absolute", ...o });
 
+/** Background decoration layer: user controls its strength and colour. */
+function Decor({ s, r }: { s: PosterState; r: (s: PosterState) => ReactNode }) {
+  const c = s.decorColor;
+  const t = c ? { ...s, accent: c, accent2: c, highlightColor: c, textColor: c } : s;
+  return <div style={abs({ inset: 0, opacity: s.decorOpacity, pointerEvents: "none" })}>{r(t)}</div>;
+}
+
 function Layer({ children, style }: { children: ReactNode; style: CSSProperties }) {
   return <div style={abs(style)}>{children}</div>;
 }
@@ -579,13 +586,44 @@ function body(s: PosterState, w: number, h: number): ReactNode {
   }
 }
 
+/** Layouts are designed on a 1080-wide canvas with a ratio between 9:16 and 1:1.
+ *  Other sizes scale that canvas to fit and extend the background, so nothing is clipped or overlaps. */
+export function designBox(w: number, h: number) {
+  const r = w / h;
+  if (r > 1) return { dw: 1080, dh: 1080, scale: h / 1080, wide: true };
+  const dr = Math.max(r, 9 / 16);
+  const dw = 1080, dh = Math.round(1080 / dr);
+  return { dw, dh, scale: Math.min(w / dw, h / dh), wide: false };
+}
+
 export const Poster = forwardRef<HTMLDivElement, { s: PosterState }>(function Poster({ s }, ref) {
   const { w, h } = sizeOf(s);
+  const { dw, dh, scale, wide } = designBox(w, h);
+  const fits = Math.abs(dw * scale - w) < 1 && Math.abs(dh * scale - h) < 1;
+  const sw = dw * scale, sh = dh * scale;
+  const left = wide ? (s.wideAlign === "start" ? 0 : s.wideAlign === "end" ? w - sw : (w - sw) / 2) : (w - sw) / 2;
+  const top = (h - sh) / 2;
+  const fadeX = wide ? "linear-gradient(to right, transparent, #000 6%, #000 94%, transparent)" : undefined;
+  const fadeY = !wide && !fits ? "linear-gradient(to bottom, transparent, #000 5%, #000 95%, transparent)" : undefined;
   return (
     <div ref={ref} lang={s.dir === "rtl" ? "dv" : "en"} style={{ width: w, height: h, position: "relative", overflow: "hidden", direction: s.dir, color: s.textColor }}>
       <Background s={s} w={w} h={h} />
-      {body(s, w, h)}
+      {fits ? (
+        body(s, w, h)
+      ) : (
+        <>
+          {wide && s.wideSide && (
+            <div style={abs({ top: 0, bottom: 0, ...(left > w / 2 - sw / 2 + 1 ? { left: 0, width: left } : { right: 0, width: w - left - sw }), display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 24, padding: 40 })}>
+              <Outlet s={s} color={s.textColor} size={46} />
+              {s.showCategory && <Category s={s} />}
+            </div>
+          )}
+          <div style={abs({ left, top, width: dw, height: dh, transform: `scale(${scale})`, transformOrigin: "top left", overflow: "hidden", maskImage: fadeX ?? fadeY, WebkitMaskImage: fadeX ?? fadeY })}>
+            <Background s={s} w={dw} h={dh} />
+            {body(s, dw, dh)}
+          </div>
+        </>
+      )}
     </div>
   );
 });
-
