@@ -209,7 +209,7 @@ export const Poster = forwardRef<HTMLDivElement, { s: PosterState }>(function Po
     return (
       <div ref={ref} style={root}>
         <Background s={s} />
-        <div style={{ position: "absolute", insetInlineStart: 0, bottom: 0, width: "62%", height: "72%" }}>
+        <div style={{ position: "absolute", insetInlineStart: 0, bottom: 0, width: "58%", height: "62%" }}>
           <Photo s={s} />
         </div>
         <div style={{ position: "absolute", inset: 0, padding: pad, display: "flex", flexDirection: "column" }}>
