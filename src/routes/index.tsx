@@ -316,7 +316,7 @@ function Studio() {
 
       <div className="flex min-h-0 flex-1">
         <aside ref={panelRef} className="w-[380px] shrink-0 overflow-y-auto border-e border-border">
-          <Tabs value={tab} onValueChange={setTab} className="p-4">
+          <Tabs value={tab} onValueChange={(v) => setTab(v as TabId)} className="p-4">
             <TabsList className="grid h-auto w-full grid-cols-6">
               {[["quick", Zap, "Quick"], ["presets", LayoutTemplate, "Styles"], ["text", Type, "Text"], ["photo", ImageIcon, "Images"], ["style", Palette, "Look"], ["brand", Share2, "Brand"]].map(([v, I, l]) => {
                 const Icon = I as typeof Zap;

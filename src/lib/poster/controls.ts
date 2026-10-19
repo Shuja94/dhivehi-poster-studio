@@ -93,5 +93,6 @@ function derived(p: Preset): Key[] {
 /** Where to land in the editor after picking a style. */
 export function presetFocus(p: Preset): { tab: TabId; keys: Key[] } {
   const keys = FOCUS[p.id] ?? derived(p);
-  return { tab: KEY_TAB[keys[0]] ?? "style", keys };
+  const first = keys[0] ?? "headline";
+  return { tab: KEY_TAB[first] ?? "style", keys };
 }
