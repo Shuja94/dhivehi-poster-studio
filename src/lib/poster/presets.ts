@@ -27,7 +27,7 @@ export const BASE: PosterState = {
   bgColor: "#d9d4cb",
   bgColor2: "#0e2a26",
   textureOpacity: 0.9,
-  showGrid: true,
+  showGrid: false,
   tornEdges: true,
   accent: "#2f5a7a",
   accent2: "#c9992f",
