@@ -599,12 +599,13 @@ export function designBox(w: number, h: number) {
 export const Poster = forwardRef<HTMLDivElement, { s: PosterState }>(function Poster({ s }, ref) {
   const { w, h } = sizeOf(s);
   const { dw, dh, scale, wide } = designBox(w, h);
-  const fits = Math.abs(dw * scale - w) < 1 && Math.abs(dh * scale - h) < 1;
+  const cover = Math.abs(dw * scale - w) < 1 && Math.abs(dh * scale - h) < 1;
+  const fits = cover && dw === w && dh === h;
   const sw = dw * scale, sh = dh * scale;
   const left = wide ? (s.wideAlign === "start" ? 0 : s.wideAlign === "end" ? w - sw : (w - sw) / 2) : (w - sw) / 2;
   const top = (h - sh) / 2;
   const fadeX = wide ? "linear-gradient(to right, transparent, #000 6%, #000 94%, transparent)" : undefined;
-  const fadeY = !wide && !fits ? "linear-gradient(to bottom, transparent, #000 5%, #000 95%, transparent)" : undefined;
+  const fadeY = !wide && !cover ? "linear-gradient(to bottom, transparent, #000 5%, #000 95%, transparent)" : undefined;
   return (
     <div ref={ref} lang={s.dir === "rtl" ? "dv" : "en"} style={{ width: w, height: h, position: "relative", overflow: "hidden", direction: s.dir, color: s.textColor }}>
       <Background s={s} w={w} h={h} />

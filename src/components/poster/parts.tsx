@@ -87,7 +87,7 @@ export function Background({ s, w, h }: { s: PosterState; w: number; h: number }
       {t === "paper" && <img src={paperTexture} alt="" style={{ ...base, width: "100%", height: "100%", objectFit: "cover", mixBlendMode: "multiply", opacity: s.textureOpacity }} />}
       {t === "noise" && <div style={{ ...base, backgroundImage: NOISE, opacity: s.textureOpacity * 0.45, mixBlendMode: "overlay" }} />}
       {t === "grid" && (
-        <div style={{ ...base, backgroundImage: `linear-gradient(${pc}14 2px, transparent 2px), linear-gradient(90deg, ${pc}14 2px, transparent 2px)`, backgroundSize: `${72 * ps}px ${72 * ps}px`, opacity: po }} />
+        <div style={{ ...base, backgroundImage: `linear-gradient(${pc}14 2px, transparent 2px), linear-gradient(90deg, ${pc}14 2px, transparent 2px)`, backgroundSize: `${72 * ps}px ${72 * ps}px`, opacity: Math.min(1, po) }} />
       )}
       {t === "topo" && (
         <svg width={w} height={h} viewBox={`0 0 ${w / ps} ${h / ps}`} preserveAspectRatio="none" style={base}>
@@ -116,7 +116,7 @@ export function Background({ s, w, h }: { s: PosterState; w: number; h: number }
         </>
       )}
       {s.showGrid && t !== "grid" && (
-        <div style={{ ...base, backgroundImage: "linear-gradient(rgba(0,0,0,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,.06) 1px, transparent 1px)", backgroundSize: `${36 * ps}px ${36 * ps}px`, opacity: po }} />
+        <div style={{ ...base, backgroundImage: "linear-gradient(rgba(0,0,0,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,.06) 1px, transparent 1px)", backgroundSize: `${36 * ps}px ${36 * ps}px`, opacity: Math.min(1, po) }} />
       )}
     </>
   );
