@@ -416,26 +416,26 @@ function Studio() {
 
             <TabsContent value="text" className="mt-4 space-y-4">
               <p className="rounded-md bg-muted p-2 text-xs text-muted-foreground">Wrap words in *asterisks* to highlight them. Phonetic keyboard: type "dhivehi" → ދހިވެހި.</p>
-              <Field label="Direction">
+              <Field label="Direction" ctl="dir">
                 <div className="grid grid-cols-2 gap-2">
                   <Button size="sm" variant={s.dir === "rtl" ? "default" : "secondary"} onClick={() => set("dir", "rtl")}>ދިވެހި RTL</Button>
                   <Button size="sm" variant={s.dir === "ltr" ? "default" : "secondary"} onClick={() => set("dir", "ltr")}>English LTR</Button>
                 </div>
               </Field>
               {toggle("Show headline", "showHeadline")}
-              <Field label="Headline (new line = new strip)">{txt("headline", true, 3)}</Field>
-              <Field label="English translation (under headline)">
+              <Field label="Headline (new line = new strip)" ctl="headline">{txt("headline", true, 3)}</Field>
+              <Field label="English translation (under headline)" ctl="translation">
                 <Textarea rows={2} dir="ltr" value={s.translation} onChange={(e) => set("translation", e.target.value)} />
               </Field>
               {toggle("Show translation", "showTranslation")}
-              <Field label="Headline style">
+              <Field label="Headline style" ctl="headlineStyle">
                 <Select value={s.headlineStyle} onValueChange={(v) => set("headlineStyle", v as PosterState["headlineStyle"])}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent><SelectItem value="strip">Torn paper strips</SelectItem><SelectItem value="plain">Plain</SelectItem><SelectItem value="block">Solid block</SelectItem></SelectContent>
                 </Select>
               </Field>
-              <Field label="Quote / body">{txt("quote", true, 6)}</Field>
-              <Field label="Quote container">
+              <Field label="Quote / body" ctl="quote">{txt("quote", true, 6)}</Field>
+              <Field label="Quote container" ctl="quoteBox">
                 <Select value={s.quoteBox} onValueChange={(v) => set("quoteBox", v as PosterState["quoteBox"])}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -448,22 +448,22 @@ function Studio() {
                   </SelectContent>
                 </Select>
               </Field>
-              <Field label="Speaker name">{txt("name")}</Field>
-              <Field label="Designation">{txt("designation")}</Field>
-              <Field label="Category / #tag badge">{txt("category", true, 2)}</Field>
+              <Field label="Speaker name" ctl="name">{txt("name")}</Field>
+              <Field label="Designation" ctl="designation">{txt("designation")}</Field>
+              <Field label="Category / #tag badge" ctl="category">{txt("category", true, 2)}</Field>
               {toggle("Show category", "showCategory")}
-              <Field label="Tagline (top of poster, some styles)">{txt("tagline")}</Field>
-              <Field label="Call to action (academy style)">{txt("cta", true, 2)}</Field>
-              <Field label="Big date (e.g. 23-25)"><Input dir="ltr" value={s.dateBig} onChange={(e) => set("dateBig", e.target.value)} /></Field>
-              <Field label="Date text">{txt("date")}</Field>
+              <Field label="Tagline (top of poster, some styles)" ctl="tagline">{txt("tagline")}</Field>
+              <Field label="Call to action (academy style)" ctl="cta">{txt("cta", true, 2)}</Field>
+              <Field label="Big date (e.g. 23-25)" ctl="dateBig"><Input dir="ltr" value={s.dateBig} onChange={(e) => set("dateBig", e.target.value)} /></Field>
+              <Field label="Date text" ctl="date">{txt("date")}</Field>
               {toggle("Show date", "showDate")}
-              <Field label="Quote alignment">
+              <Field label="Quote alignment" ctl="quoteAlign">
                 <Select value={s.quoteAlign} onValueChange={(v) => set("quoteAlign", v as PosterState["quoteAlign"])}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent><SelectItem value="start">Start</SelectItem><SelectItem value="center">Center</SelectItem><SelectItem value="justify">Justify</SelectItem></SelectContent>
                 </Select>
               </Field>
-              <Field label="Quote mark">
+              <Field label="Quote mark" ctl="quoteMark">
                 <Select value={s.quoteMark} onValueChange={(v) => set("quoteMark", v as PosterState["quoteMark"])}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent><SelectItem value="box">Boxed</SelectItem><SelectItem value="big">Large</SelectItem><SelectItem value="none">None</SelectItem></SelectContent>
@@ -479,7 +479,7 @@ function Studio() {
               {slider("Move sideways", "photoX", -600, 600)}
               {slider("Move up/down", "photoY", -600, 600)}
               {slider("White cutout outline", "photoOutline", 0, 20)}
-              <Field label="Photo tone">
+              <Field label="Photo tone" ctl="photoTone">
                 <Select value={s.photoTone} onValueChange={(v) => set("photoTone", v as PosterState["photoTone"])}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent><SelectItem value="color">Full colour</SelectItem><SelectItem value="gray">Black & white</SelectItem><SelectItem value="duotone">Duotone (accent tint)</SelectItem></SelectContent>
@@ -499,7 +499,7 @@ function Studio() {
                 {slider("Move sideways", "extraX", -600, 600)}
                 {slider("Move up/down", "extraY", -600, 600)}
                 {slider("Opacity", "extraOpacity", 0, 1, 0.05)}
-                <Field label="Tone">
+                <Field label="Tone" ctl="extraTone">
                   <Select value={s.extraTone} onValueChange={(v) => set("extraTone", v as PosterState["extraTone"])}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent><SelectItem value="color">Full colour</SelectItem><SelectItem value="gray">Black & white</SelectItem><SelectItem value="duotone">Tinted with accent</SelectItem></SelectContent>
@@ -511,7 +511,7 @@ function Studio() {
             </TabsContent>
 
             <TabsContent value="style" className="mt-4 space-y-4">
-              <Field label="Background">
+              <Field label="Background" ctl="bgType">
                 <Select value={s.bgType} onValueChange={(v) => set("bgType", v as PosterState["bgType"])}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -539,13 +539,13 @@ function Studio() {
                 {optColor("Pattern colour", "patternColor", s.accent)}
                 {s.showDecor && slider("Shapes strength", "decorOpacity", 0, 1, 0.05)}
                 {s.showDecor && optColor("Shapes colour", "decorColor", s.accent2)}
-                <Field label="Calligraphy / watermark text">{txt("watermark")}</Field>
+                <Field label="Calligraphy / watermark text" ctl="watermark">{txt("watermark")}</Field>
                 {slider("Watermark strength", "watermarkOpacity", 0, 6, 0.1)}
                 {slider("Watermark size %", "watermarkSize", 30, 200)}
                 {optColor("Watermark colour", "watermarkColor", s.accent)}
                 <Button size="sm" variant="secondary" onClick={() => setS((c) => ({ ...c, patternColor: "", patternOpacity: 1, patternScale: 1, decorOpacity: 1, decorColor: "", watermarkOpacity: 1, watermarkSize: 100, watermarkColor: "" }))}><RotateCcw className="h-4 w-4" /> Reset background details</Button>
               </Section>
-              <Field label="Keyword highlight colour">
+              <Field label="Keyword highlight colour" ctl="highlightColor">
                 <div className="flex flex-wrap gap-2">
                   {HIGHLIGHTS.map((c) => (
                     <button key={c.name} title={c.name} onClick={() => setS((p) => ({ ...p, highlightColor: c.bg, highlightText: c.fg }))} className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs ${s.highlightColor === c.bg ? "border-primary" : "border-border"}`}>
@@ -605,8 +605,8 @@ function Studio() {
               <Section title="Your social accounts">
                 <p className="text-xs text-muted-foreground">Switch on the ones to show in the footer. Leave a box empty to show only the icon.</p>
                 {toggle("Show social footer", "showFooter")}
-                <Field label="Main handle"><Input dir="ltr" placeholder="@youroutlet" value={s.handle} onChange={(e) => set("handle", e.target.value)} /></Field>
-                <div className="space-y-2">
+                <Field label="Main handle" ctl="handle"><Input dir="ltr" placeholder="@youroutlet" value={s.handle} onChange={(e) => set("handle", e.target.value)} /></Field>
+                <div className="space-y-2" data-ctl="footer">
                   {s.footer.map((f, i) => (
                     <div key={f.kind} className="flex items-center gap-2">
                       <Switch checked={f.on} onCheckedChange={(v) => set("footer", s.footer.map((x, j) => (j === i ? { ...x, on: v } : x)))} />
@@ -644,9 +644,9 @@ function Studio() {
                 </div>
               </div>
               {toggle("Show outlet branding", "showOutlet")}
-              <Field label="Outlet name">{txt("outlet")}</Field>
+              <Field label="Outlet name" ctl="outlet">{txt("outlet")}</Field>
               {fontSel("Outlet font", "outletFont", thaanaFonts)}
-              <Field label="Partner / sponsor logos (footer row)">
+              <Field label="Partner / sponsor logos (footer row)" ctl="partners">
                 <label className="flex cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-border px-3 py-2 text-sm hover:bg-accent">
                   <Upload className="h-4 w-4" /> Add partner logo
                   <input type="file" accept="image/*" className="hidden" onChange={async (e) => { const f = e.target.files?.[0]; if (f) { const u = await readFile(f); set("partners", [...s.partners, u]); } }} />
