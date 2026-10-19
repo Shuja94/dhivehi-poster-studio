@@ -610,7 +610,7 @@ export const Poster = forwardRef<HTMLDivElement, { s: PosterState }>(function Po
   const fadeX = wide ? "linear-gradient(to right, transparent, #000 6%, #000 94%, transparent)" : undefined;
   const fadeY = !wide && !cover ? "linear-gradient(to bottom, transparent, #000 5%, #000 95%, transparent)" : undefined;
   return (
-    <div ref={ref} lang={s.dir === "rtl" ? "dv" : "en"} style={{ width: w, height: h, position: "relative", overflow: "hidden", direction: s.dir, color: s.textColor }}>
+    <div ref={ref} data-poster="" lang={s.dir === "rtl" ? "dv" : "en"} style={{ width: w, height: h, position: "relative", overflow: "hidden", direction: s.dir, color: s.textColor }}>
       <Background s={s} w={w} h={h} />
       {fits ? (
         body(s, w, h)
