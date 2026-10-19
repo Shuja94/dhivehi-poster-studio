@@ -100,13 +100,13 @@ function body(s: PosterState, w: number, h: number): ReactNode {
     case "torngreen":
       return (
         <>
-          {s.showDecor && (
+          {s.showDecor && <Decor s={s} r={(s) => <>{(
             <>
               <div style={abs({ top: "11%", insetInlineEnd: "14%", fontFamily: '"Archivo Black", serif', fontSize: 260, lineHeight: 1, color: "#fff", opacity: 0.55, filter: "blur(4px)" })}>{s.dir === "rtl" ? "\u201D" : "\u201C"}</div>
               <div style={abs({ top: 30, insetInlineEnd: 30, width: 160, height: 200, backgroundImage: "radial-gradient(rgba(255,255,255,.35) 3px, transparent 3.5px)", backgroundSize: "22px 22px" })} />
               <div style={abs({ bottom: 40, insetInlineStart: 30, width: 200, height: 140, backgroundImage: "radial-gradient(rgba(255,255,255,.3) 3px, transparent 3.5px)", backgroundSize: "22px 22px" })} />
             </>
-          )}
+          )}</>} />}
           <div style={abs({ top: pad, insetInlineStart: pad })}><Outlet s={s} color={s.textColor} size={44} /></div>
           <Layer style={{ top: "14%", bottom: "46%", left: "30%", right: "30%" }}><Photo s={s} /></Layer>
           {s.designation && (
@@ -164,9 +164,9 @@ function body(s: PosterState, w: number, h: number): ReactNode {
         <>
           <div style={abs({ top: `${top}%`, height: `${ch}%`, left: "16%", right: "16%", borderRadius: 90, overflow: "hidden", boxShadow: "0 30px 60px rgba(0,0,0,.3)" })}>
             <div style={abs({ inset: 0, bottom: "55%", background: s.accent, overflow: "hidden" })}>
-              {s.showDecor && ([[10, 20, 260], [70, 60, 300], [40, 90, 200], [90, 0, 180]] as [number, number, number][]).map(([x, y, r], i) => (
+              {s.showDecor && <Decor s={s} r={(s) => <>{([[10, 20, 260], [70, 60, 300], [40, 90, 200], [90, 0, 180]] as [number, number, number][]).map(([x, y, r], i) => (
                 <div key={i} style={abs({ left: `${x}%`, top: `${y}%`, width: r, height: r * 1.4, borderRadius: "48% 52% 60% 40%", border: "34px solid rgba(255,255,255,.1)", transform: "translate(-50%,-50%) rotate(25deg)" })} />
-              ))}
+              ))}</>} />}
             </div>
             <div style={abs({ inset: 0, top: "45%", background: s.cardColor })} />
           </div>
@@ -281,7 +281,7 @@ function body(s: PosterState, w: number, h: number): ReactNode {
         <>
           <Layer style={{ top: "13%", bottom: 0, insetInlineEnd: "-14%", width: "66%" }}><Photo s={s} /></Layer>
           <div style={abs({ inset: 0, background: `linear-gradient(to top, ${s.bgColor} 3%, transparent 26%)` })} />
-          {s.showDecor && <div style={abs({ bottom: 0, left: 0, right: 0, height: "4.5%", backgroundImage: `linear-gradient(45deg, ${s.accent2}66 25%, transparent 25%, transparent 75%, ${s.accent2}66 75%), linear-gradient(45deg, ${s.accent2}66 25%, transparent 25%, transparent 75%, ${s.accent2}66 75%)`, backgroundSize: "44px 44px", backgroundPosition: "0 0, 22px 22px" })} />}
+          {s.showDecor && <Decor s={s} r={(s) => <>{<div style={abs({ bottom: 0, left: 0, right: 0, height: "4.5%", backgroundImage: `linear-gradient(45deg, ${s.accent2}66 25%, transparent 25%, transparent 75%, ${s.accent2}66 75%), linear-gradient(45deg, ${s.accent2}66 25%, transparent 25%, transparent 75%, ${s.accent2}66 75%)`, backgroundSize: "44px 44px", backgroundPosition: "0 0, 22px 22px" })} />}</>} />}
           <div style={abs({ top: "6%", left: "9%", right: "9%", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 20 })}>
             <Outlet s={s} color={s.highlightColor} size={44} />
             {s.tagline && <div style={{ flex: 1, ...nm, fontSize: 16, color: s.textColor, opacity: 0.35, textAlign: "center", overflow: "hidden", lineHeight: 1.3, maxHeight: 64 }}>{Array(6).fill(s.tagline).join(" · ")}</div>}
@@ -316,12 +316,12 @@ function body(s: PosterState, w: number, h: number): ReactNode {
               <Translation s={s} color={s.textColor} style={{ marginTop: 12 }} />
             </div>
           )}
-          {s.showDecor && (
+          {s.showDecor && <Decor s={s} r={(s) => <>{(
             <>
               <div style={abs({ top: "27%", bottom: "24%", insetInlineEnd: "30%", width: "22%", backgroundImage: `repeating-linear-gradient(90deg, ${s.accent2} 0 22px, transparent 22px 54px)`, opacity: 0.6 })} />
               <div style={abs({ top: "34%", bottom: "6%", insetInlineEnd: "35%", width: 34, background: s.highlightColor, opacity: 0.85 })} />
             </>
-          )}
+          )}</>} />}
           <Layer style={{ top: "30%", bottom: "8%", insetInlineEnd: "24%", width: "42%" }}><Photo s={{ ...s, photo: s.photo2 ?? s.photo, photoX: -s.photoX }} /></Layer>
           <Layer style={{ top: "38%", bottom: 0, insetInlineEnd: "-4%", width: "46%" }}><Photo s={s} /></Layer>
           <Extra s={s} fallback={dome} style={{ bottom: 0, insetInlineEnd: "30%", width: "34%" }} />
@@ -337,9 +337,9 @@ function body(s: PosterState, w: number, h: number): ReactNode {
     case "academy":
       return (
         <>
-          {s.showDecor && ([[78, 8, 520, 30], [62, 28, 380, 30], [8, 92, 360, 45]] as [number, number, number, number][]).map(([x, y, r, rot], i) => (
+          {s.showDecor && <Decor s={s} r={(s) => <>{([[78, 8, 520, 30], [62, 28, 380, 30], [8, 92, 360, 45]] as [number, number, number, number][]).map(([x, y, r, rot], i) => (
             <div key={i} style={abs({ left: `${x}%`, top: `${y}%`, width: r, height: r, marginLeft: -r / 2, marginTop: -r / 2, background: s.accent2, opacity: 0.35, filter: "blur(28px)", transform: `rotate(${rot}deg)`, clipPath: "polygon(50% 0,100% 100%,0 100%)" })} />
-          ))}
+          ))}</>} />}
           <div style={abs({ top: "5%", left: "7%", right: "7%", display: "flex", justifyContent: "space-between", alignItems: "center" })}>
             <Outlet s={s} color={s.textColor} size={40} />
             <span style={{ ...nm, fontSize: 26, color: s.textColor, fontWeight: 700 }}>{s.tagline}</span>
@@ -396,7 +396,7 @@ function body(s: PosterState, w: number, h: number): ReactNode {
       const side = s.layout === "circleside";
       return (
         <>
-          {s.showDecor && <Waves color={s.accent} style={side ? { bottom: "16%", insetInlineEnd: 0 } : { top: "10%", insetInlineEnd: 0 }} />}
+          {s.showDecor && <Decor s={s} r={(s) => <>{<Waves color={s.accent} style={side ? { bottom: "16%", insetInlineEnd: 0 } : { top: "10%", insetInlineEnd: 0 }} />}</>} />}
           <div style={abs({ top: pad * 0.8, insetInlineStart: pad })}><Outlet s={s} color={s.accent} size={42} /></div>
           {side ? (
             <>
@@ -431,9 +431,9 @@ function body(s: PosterState, w: number, h: number): ReactNode {
       return (
         <>
           <div style={abs({ top: "4.5%", left: "50%", transform: "translateX(-50%)" })}><Outlet s={s} color={s.accent} size={48} /></div>
-          {s.showDecor && [[8, 52, 18], [70, 50, 14], [6, 34, 10]].map(([x, y, w2], i) => (
+          {s.showDecor && <Decor s={s} r={(s) => <>{[[8, 52, 18], [70, 50, 14], [6, 34, 10]].map(([x, y, w2], i) => (
             <div key={i} style={abs({ left: `${x}%`, top: `${y}%`, width: `${w2}%`, height: 90, backgroundImage: `repeating-linear-gradient(${s.textColor}22 0 6px, transparent 6px 14px)`, filter: "blur(1.5px)" })} />
-          ))}
+          ))}</>} />}
           <Extra s={s} fallback={dome} style={{ top: "17%", insetInlineStart: "14%", width: "26%" }} />
           <Layer style={{ top: "19%", bottom: "39%", insetInlineEnd: "16%", width: "50%" }}><Photo s={s} /></Layer>
           <div style={abs({ top: "40%", insetInlineStart: "13%" })}>
@@ -477,12 +477,12 @@ function body(s: PosterState, w: number, h: number): ReactNode {
     case "vintage":
       return (
         <>
-          {s.showDecor && (
+          {s.showDecor && <Decor s={s} r={(s) => <>{(
             <>
               <div style={abs({ top: 30, insetInlineEnd: 50, width: 140, height: 160, borderInlineEnd: "3px solid #fff", borderBottom: "3px solid #fff", opacity: 0.85 })} />
               <div style={abs({ bottom: 30, insetInlineStart: 50, width: 140, height: 160, borderInlineStart: "3px solid #fff", borderTop: "3px solid #fff", opacity: 0.85 })} />
             </>
-          )}
+          )}</>} />}
           <div style={abs({ top: "7%", bottom: "8%", left: "11%", right: "11%", background: s.cardColor, boxShadow: "0 30px 60px rgba(0,0,0,.25)", transform: "rotate(-0.5deg)", overflow: "hidden" })}>
             <img src={paperTexture} alt="" style={abs({ inset: 0, width: "100%", height: "100%", objectFit: "cover", mixBlendMode: "multiply", opacity: s.textureOpacity })} />
             <div style={abs({ top: "20%", left: "50%", transform: "translateX(-50%)", width: "34%", aspectRatio: "1", borderRadius: "50%", background: s.accent, opacity: 0.75 })} />
