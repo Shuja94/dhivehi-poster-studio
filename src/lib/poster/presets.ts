@@ -32,6 +32,7 @@ export const BASE: PosterState = {
   watermarkColor: "",
   wideAlign: "start",
   wideSide: true,
+  finish: 0.6,
   dir: "rtl",
   bgType: "paper",
   bgColor: "#d9d4cb",

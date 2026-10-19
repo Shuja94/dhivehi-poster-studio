@@ -64,12 +64,21 @@ const PresetThumb = memo(function PresetThumb({ state, active, name, onPick }: {
   const { w, h } = sizeOf(state);
   const z = THUMB_W / w;
   return (
-    <button onClick={onPick} title={name} className={`group relative overflow-hidden rounded-lg border-2 text-start transition hover:border-primary ${active ? "border-primary" : "border-transparent"}`}>
-      <div style={{ width: THUMB_W, height: h * z }} className="pointer-events-none overflow-hidden">
-        <div style={{ width: w, height: h, transform: `scale(${z})`, transformOrigin: "top left" }}><Poster s={state} /></div>
+    <button
+      onClick={onPick}
+      title={name}
+      aria-pressed={active}
+      className={`group relative flex flex-col overflow-hidden rounded-xl bg-card text-start shadow-md ring-1 transition duration-200 hover:-translate-y-1 hover:shadow-xl hover:ring-primary/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${active ? "ring-2 ring-primary" : "ring-border"}`}
+    >
+      <div style={{ width: THUMB_W, height: h * z }} className="pointer-events-none relative overflow-hidden">
+        <div style={{ width: w, height: h, transform: `scale(${z})`, transformOrigin: "top left" }} className="transition duration-300 group-hover:scale-[1.0]"><Poster s={state} /></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-background/40 via-transparent to-transparent opacity-0 transition group-hover:opacity-100" />
       </div>
-      <span className="absolute inset-x-0 bottom-0 bg-background/85 px-2 py-1 text-[11px] font-medium leading-tight">{name}</span>
-      {active && <Check className="absolute end-1.5 top-1.5 h-5 w-5 rounded-full bg-primary p-0.5 text-primary-foreground" />}
+      <span className={`flex items-center gap-1.5 border-t px-2.5 py-2 text-[11px] font-semibold leading-tight ${active ? "text-primary" : "text-card-foreground"}`}>
+        <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${active ? "bg-primary" : "bg-muted-foreground/40"}`} />
+        <span className="truncate">{name}</span>
+      </span>
+      {active && <Check className="absolute end-1.5 top-1.5 h-5 w-5 rounded-full bg-primary p-0.5 text-primary-foreground shadow" />}
     </button>
   );
 });
@@ -250,7 +259,7 @@ function Studio() {
   const upload = (k: "photo" | "logo" | "bgImage" | "backPhoto" | "photo2" | "extraImage") => (
     <label className="flex cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-border px-3 py-2 text-sm hover:bg-accent" data-ctl={k}>
       <Upload className="h-4 w-4" /> Upload
-      <input type="file" accept="image/*" className="hidden" onChange={async (e) => { const f = e.target.files?.[0]; if (f) set(k, await readFile(f)); }} />
+      <input type="file" accept="image/*" className="hidden" onChange={async (e) => { const f = e.target.files?.[0]; e.target.value = ""; if (f) set(k, await readFile(f)); }} />
     </label>
   );
 
@@ -562,7 +571,8 @@ function Studio() {
                 {slider("Watermark strength", "watermarkOpacity", 0, 6, 0.1)}
                 {slider("Watermark size %", "watermarkSize", 30, 200)}
                 {optColor("Watermark colour", "watermarkColor", s.accent)}
-                <Button size="sm" variant="secondary" onClick={() => setS((c) => ({ ...c, patternColor: "", patternOpacity: 1, patternScale: 1, decorOpacity: 1, decorColor: "", watermarkOpacity: 1, watermarkSize: 100, watermarkColor: "" }))}><RotateCcw className="h-4 w-4" /> Reset background details</Button>
+                {slider("Pro finish (vignette + grain)", "finish", 0, 1, 0.05)}
+                <Button size="sm" variant="secondary" onClick={() => setS((c) => ({ ...c, finish: 0.6, patternColor: "", patternOpacity: 1, patternScale: 1, decorOpacity: 1, decorColor: "", watermarkOpacity: 1, watermarkSize: 100, watermarkColor: "" }))}><RotateCcw className="h-4 w-4" /> Reset background details</Button>
               </Section>
               <Field label="Keyword highlight colour" ctl="highlightColor">
                 <div className="flex flex-wrap gap-2">
@@ -591,7 +601,7 @@ function Studio() {
               <Field label="Add your own font (e.g. A-Kalaa .ttf/.otf)">
                 <label className="flex cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-border px-3 py-2 text-sm hover:bg-accent">
                   <Upload className="h-4 w-4" /> Upload font
-                  <input type="file" accept=".ttf,.otf,.woff,.woff2" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) addFont(f); }} />
+                  <input type="file" accept=".ttf,.otf,.woff,.woff2" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ""; if (f) addFont(f); }} />
                 </label>
               </Field>
               {slider("Headline size", "headlineSize", 24, 120)}
@@ -628,7 +638,7 @@ function Studio() {
                 <div className="space-y-2" data-ctl="footer">
                   {s.footer.map((f, i) => (
                     <div key={f.kind} className="flex items-center gap-2">
-                      <Switch checked={f.on} onCheckedChange={(v) => set("footer", s.footer.map((x, j) => (j === i ? { ...x, on: v } : x)))} />
+                      <Switch aria-label={`Show ${f.kind}`} checked={f.on} onCheckedChange={(v) => set("footer", s.footer.map((x, j) => (j === i ? { ...x, on: v } : x)))} />
                       <span className="w-20 text-xs text-muted-foreground">{FOOTER_LABELS[f.kind]}</span>
                       <Input className="h-8" dir="ltr" value={f.text} placeholder={FOOTER_PLACEHOLDERS[f.kind]} onChange={(e) => set("footer", s.footer.map((x, j) => (j === i ? { ...x, text: e.target.value, on: e.target.value ? true : x.on } : x)))} />
                     </div>
@@ -658,7 +668,7 @@ function Studio() {
                   <Button size="sm" variant="secondary" onClick={exportKit}>Download kit</Button>
                   <label className="inline-flex cursor-pointer items-center justify-center rounded-md bg-secondary px-3 text-sm hover:bg-accent">
                     Load kit file
-                    <input type="file" accept="application/json" className="hidden" onChange={async (e) => { const f = e.target.files?.[0]; if (!f) return; try { const k = JSON.parse(await f.text()) as BrandKit; if (k?.data) { applyKit(k); saveKits([...kits.filter((x) => x.name !== k.name), k]); } } catch { setKitMsg("That file is not a brand kit."); } }} />
+                    <input type="file" accept="application/json" className="hidden" onChange={async (e) => { const f = e.target.files?.[0]; e.target.value = ""; if (!f) return; try { const k = JSON.parse(await f.text()) as BrandKit; if (k?.data) { applyKit(k); saveKits([...kits.filter((x) => x.name !== k.name), k]); } } catch { setKitMsg("That file is not a brand kit."); } }} />
                   </label>
                 </div>
               </div>
@@ -668,7 +678,7 @@ function Studio() {
               <Field label="Partner / sponsor logos (footer row)" ctl="partners">
                 <label className="flex cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-border px-3 py-2 text-sm hover:bg-accent">
                   <Upload className="h-4 w-4" /> Add partner logo
-                  <input type="file" accept="image/*" className="hidden" onChange={async (e) => { const f = e.target.files?.[0]; if (f) { const u = await readFile(f); set("partners", [...s.partners, u]); } }} />
+                  <input type="file" accept="image/*" className="hidden" onChange={async (e) => { const f = e.target.files?.[0]; e.target.value = ""; if (f) { const u = await readFile(f); set("partners", [...s.partners, u]); } }} />
                 </label>
                 {s.partners.length > 0 && <Button size="sm" variant="secondary" onClick={() => set("partners", [])}>Clear {s.partners.length} partner logo(s)</Button>}
               </Field>

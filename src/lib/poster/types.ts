@@ -113,6 +113,8 @@ export interface PosterState {
   /* wide formats */
   wideAlign: "start" | "center" | "end";
   wideSide: boolean;
+  /* finishing layer: vignette + film grain (0 = off) */
+  finish: number;
 }
 
 export const ASPECTS: Record<Aspect, { w: number; h: number; label: string; group: string }> = {

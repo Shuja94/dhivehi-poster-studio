@@ -119,7 +119,7 @@ export function CutoutPanel({ onUse }: { onUse: (slot: "photo" | "photo2", url: 
     <div className="space-y-4">
       <p className="rounded-md bg-muted p-2 text-xs text-muted-foreground">Upload any photo — the AI cuts the person out right in your browser. Nothing is uploaded anywhere.</p>
       <label className="flex cursor-pointer items-center justify-center rounded-md border border-dashed border-border p-4 text-sm hover:border-primary">
-        <input type="file" accept="image/*" className="hidden" onChange={async (e) => { const f = e.target.files?.[0]; if (f) { setSrc(await readFile(f)); setCut(undefined); setOut(undefined); } }} />
+        <input type="file" accept="image/*" className="hidden" onChange={async (e) => { const f = e.target.files?.[0]; e.target.value = ""; if (f) { setSrc(await readFile(f)); setCut(undefined); setOut(undefined); } }} />
         {src ? "Choose another photo" : "Choose a photo"}
       </label>
       {src && (
