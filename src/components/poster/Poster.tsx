@@ -279,7 +279,7 @@ function body(s: PosterState, w: number, h: number): ReactNode {
     case "greencard":
       return (
         <>
-          <Layer style={{ top: "13%", bottom: 0, insetInlineEnd: "-8%", width: "74%" }}><Photo s={s} /></Layer>
+          <Layer style={{ top: "13%", bottom: 0, insetInlineEnd: "-14%", width: "66%" }}><Photo s={s} /></Layer>
           <div style={abs({ inset: 0, background: `linear-gradient(to top, ${s.bgColor} 3%, transparent 26%)` })} />
           {s.showDecor && <div style={abs({ bottom: 0, left: 0, right: 0, height: "4.5%", backgroundImage: `linear-gradient(45deg, ${s.accent2}66 25%, transparent 25%, transparent 75%, ${s.accent2}66 75%), linear-gradient(45deg, ${s.accent2}66 25%, transparent 25%, transparent 75%, ${s.accent2}66 75%)`, backgroundSize: "44px 44px", backgroundPosition: "0 0, 22px 22px" })} />}
           <div style={abs({ top: "6%", left: "9%", right: "9%", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 20 })}>
