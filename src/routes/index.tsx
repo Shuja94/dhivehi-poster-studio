@@ -4,7 +4,7 @@ import { toJpeg, toPng } from "html-to-image";
 import { Download, Keyboard, Upload, RotateCcw, Type, Image as ImageIcon, Palette, LayoutTemplate, Share2 } from "lucide-react";
 import { Poster } from "@/components/poster/Poster";
 import { BASE, PRESETS } from "@/lib/poster/presets";
-import { ASPECTS, LATIN_FONTS, THAANA_FONTS, type Aspect, type PosterState } from "@/lib/poster/types";
+import { ASPECTS, HIGHLIGHTS, LATIN_FONTS, THAANA_FONTS, type Aspect, type PosterState } from "@/lib/poster/types";
 import { thaanaKeyDown } from "@/lib/poster/thaana";
 import sampleSpeaker from "@/assets/sample-speaker.png";
 import { Button } from "@/components/ui/button";
@@ -196,7 +196,7 @@ function Studio() {
 
             <TabsContent value="presets" className="mt-4 space-y-3">
               {PRESETS.map((p) => (
-                <button key={p.id} onClick={() => setS((c) => ({ ...c, ...BASE, photo: c.photo, logo: c.logo, backPhoto: c.backPhoto, aspect: c.aspect, ...p.apply }))} className="w-full rounded-lg border border-border bg-card p-3 text-start transition hover:border-primary">
+                <button key={p.id} onClick={() => setS((c) => ({ ...c, ...BASE, photo: c.photo, logo: c.logo, backPhoto: c.backPhoto, partners: c.partners, aspect: c.aspect, ...p.apply }))} className={`w-full rounded-lg border bg-card p-3 text-start transition hover:border-primary ${s.layout === p.apply.layout ? "border-primary" : "border-border"}`}>
                   <div className="flex items-center justify-between">
                     <span className="font-semibold">{p.name}</span>
                     <span className="flex gap-1">{p.swatch.map((c) => <span key={c} className="h-4 w-4 rounded-full border border-border" style={{ background: c }} />)}</span>
@@ -208,10 +208,9 @@ function Studio() {
                 <Select value={s.layout} onValueChange={(v) => set("layout", v as PosterState["layout"])}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="paper">Paper statement</SelectItem>
-                    <SelectItem value="archive">Archive portrait</SelectItem>
-                    <SelectItem value="bubble">Speech bubble</SelectItem>
-                    <SelectItem value="headline">Breaking headline</SelectItem>
+                    {PRESETS.filter((p) => p.apply.layout && p.id !== "english").map((p) => (
+                      <SelectItem key={p.id} value={p.apply.layout as string}>{p.name}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </Field>
@@ -228,6 +227,10 @@ function Studio() {
               </Field>
               {toggle("Show headline", "showHeadline")}
               <Field label="Headline (new line = new strip)">{txt("headline", true, 3)}</Field>
+              <Field label="English translation (under headline)">
+                <Textarea rows={2} dir="ltr" value={s.translation} onChange={(e) => set("translation", e.target.value)} />
+              </Field>
+              {toggle("Show translation", "showTranslation")}
               <Field label="Headline style">
                 <Select value={s.headlineStyle} onValueChange={(v) => set("headlineStyle", v as PosterState["headlineStyle"])}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
@@ -235,11 +238,25 @@ function Studio() {
                 </Select>
               </Field>
               <Field label="Quote / body">{txt("quote", true, 6)}</Field>
+              <Field label="Quote container">
+                <Select value={s.quoteBox} onValueChange={(v) => set("quoteBox", v as PosterState["quoteBox"])}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="torn">Torn paper</SelectItem>
+                    <SelectItem value="frame">Framed box</SelectItem>
+                    <SelectItem value="glass">Frosted glass</SelectItem>
+                    <SelectItem value="speech">Clean speech bubble</SelectItem>
+                    <SelectItem value="arch">Solid arch</SelectItem>
+                    <SelectItem value="none">None</SelectItem>
+                  </SelectContent>
+                </Select>
+              </Field>
               <Field label="Speaker name">{txt("name")}</Field>
               <Field label="Designation">{txt("designation")}</Field>
-              <Field label="Category badge">{txt("category")}</Field>
+              <Field label="Category / #tag badge">{txt("category", true, 2)}</Field>
               {toggle("Show category", "showCategory")}
-              <Field label="Date">{txt("date")}</Field>
+              <Field label="Big date (e.g. 23-25)"><Input dir="ltr" value={s.dateBig} onChange={(e) => set("dateBig", e.target.value)} /></Field>
+              <Field label="Date text">{txt("date")}</Field>
               {toggle("Show date", "showDate")}
               <Field label="Quote alignment">
                 <Select value={s.quoteAlign} onValueChange={(v) => set("quoteAlign", v as PosterState["quoteAlign"])}>
@@ -263,7 +280,13 @@ function Studio() {
               {slider("Move sideways", "photoX", -600, 600)}
               {slider("Move up/down", "photoY", -600, 600)}
               {slider("White cutout outline", "photoOutline", 0, 20)}
-              {toggle("Black & white", "photoGray")}
+              <Field label="Photo tone">
+                <Select value={s.photoTone} onValueChange={(v) => set("photoTone", v as PosterState["photoTone"])}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent><SelectItem value="color">Full colour</SelectItem><SelectItem value="gray">Black & white</SelectItem><SelectItem value="duotone">Duotone (accent tint)</SelectItem></SelectContent>
+                </Select>
+              </Field>
+              {toggle("Ghost silhouette behind (topographic)", "photoGhost")}
               {toggle("Drop shadow", "photoShadow")}
               <Field label="Background collage photo (paper / archive)">{upload("backPhoto")}</Field>
               {s.backPhoto && <Button size="sm" variant="secondary" onClick={() => set("backPhoto", undefined)}>Remove collage photo</Button>}
@@ -273,17 +296,38 @@ function Studio() {
               <Field label="Background">
                 <Select value={s.bgType} onValueChange={(v) => set("bgType", v as PosterState["bgType"])}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent><SelectItem value="paper">Paper texture</SelectItem><SelectItem value="solid">Solid</SelectItem><SelectItem value="gradient">Gradient</SelectItem><SelectItem value="image">Image</SelectItem></SelectContent>
+                  <SelectContent>
+                    <SelectItem value="grid">Grid paper</SelectItem>
+                    <SelectItem value="paper">Parchment / newsprint</SelectItem>
+                    <SelectItem value="topo">Topographic contours</SelectItem>
+                    <SelectItem value="dark">Dark gradient</SelectItem>
+                    <SelectItem value="bokeh">Soft bokeh + light streaks</SelectItem>
+                    <SelectItem value="mesh">Mesh gradient</SelectItem>
+                    <SelectItem value="noise">Textured (grain)</SelectItem>
+                    <SelectItem value="solid">Solid</SelectItem>
+                    <SelectItem value="image">Image</SelectItem>
+                  </SelectContent>
                 </Select>
               </Field>
               {s.bgType === "image" && upload("bgImage")}
-              {s.bgType === "paper" && slider("Texture strength", "textureOpacity", 0, 1, 0.05)}
-              {toggle("Grid lines", "showGrid")}
+              {(s.bgType === "paper" || s.bgType === "noise") && slider("Texture strength", "textureOpacity", 0, 1, 0.05)}
+              {toggle("Extra grid overlay", "showGrid")}
               {toggle("Torn paper edges", "tornEdges")}
+              {toggle("Decorations (dome, streaks, dots)", "showDecor")}
+              <Field label="Keyword highlight colour">
+                <div className="flex flex-wrap gap-2">
+                  {HIGHLIGHTS.map((c) => (
+                    <button key={c.name} title={c.name} onClick={() => setS((p) => ({ ...p, highlightColor: c.bg, highlightText: c.fg }))} className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs ${s.highlightColor === c.bg ? "border-primary" : "border-border"}`}>
+                      <span className="h-3.5 w-3.5 rounded-full" style={{ background: c.bg }} /> {c.name}
+                    </button>
+                  ))}
+                </div>
+              </Field>
               <div className="grid grid-cols-2 gap-3">
                 {color("Background", "bgColor")}
-                {color("Gradient end", "bgColor2")}
+                {color("Background 2", "bgColor2")}
                 {color("Accent", "accent")}
+                {color("Accent 2", "accent2")}
                 {color("Text", "textColor")}
                 {color("Card", "cardColor")}
                 {color("Card text", "cardText")}
@@ -314,12 +358,23 @@ function Studio() {
               {fontSel("Outlet font", "outletFont", thaanaFonts)}
               <Field label="Outlet logo (replaces name)">{upload("logo")}</Field>
               {s.logo && <Button size="sm" variant="secondary" onClick={() => set("logo", undefined)}>Remove logo</Button>}
-              {toggle("Show social footer", "showFooter")}
-              <Field label="Social handle"><Input value={s.handle} onChange={(e) => set("handle", e.target.value)} /></Field>
-              <Field label="Social icons">
-                <div className="flex flex-wrap gap-2">
-                  {["x", "instagram", "facebook", "youtube", "tiktok", "telegram"].map((k) => (
-                    <Button key={k} size="sm" variant={s.socials.includes(k) ? "default" : "secondary"} onClick={() => set("socials", s.socials.includes(k) ? s.socials.filter((x) => x !== k) : [...s.socials, k])}>{k}</Button>
+              <Field label="Partner / sponsor logos (footer row)">
+                <label className="flex cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-border px-3 py-2 text-sm hover:bg-accent">
+                  <Upload className="h-4 w-4" /> Add partner logo
+                  <input type="file" accept="image/*" className="hidden" onChange={async (e) => { const f = e.target.files?.[0]; if (f) { const u = await readFile(f); set("partners", [...s.partners, u]); } }} />
+                </label>
+                {s.partners.length > 0 && <Button size="sm" variant="secondary" onClick={() => set("partners", [])}>Clear {s.partners.length} partner logo(s)</Button>}
+              </Field>
+              {toggle("Show footer bar", "showFooter")}
+              <Field label="Social handle (shown next to icons)"><Input value={s.handle} onChange={(e) => set("handle", e.target.value)} /></Field>
+              <Field label="Footer items — leave text empty for icon only">
+                <div className="space-y-2">
+                  {s.footer.map((f, i) => (
+                    <div key={f.kind} className="flex items-center gap-2">
+                      <Switch checked={f.on} onCheckedChange={(v) => set("footer", s.footer.map((x, j) => (j === i ? { ...x, on: v } : x)))} />
+                      <span className="w-20 text-xs capitalize text-muted-foreground">{f.kind === "x" ? "Twitter/X" : f.kind}</span>
+                      <Input className="h-8" value={f.text} placeholder="icon only" onChange={(e) => set("footer", s.footer.map((x, j) => (j === i ? { ...x, text: e.target.value } : x)))} />
+                    </div>
                   ))}
                 </div>
               </Field>

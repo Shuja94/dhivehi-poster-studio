@@ -1,6 +1,13 @@
-export type Layout = "paper" | "archive" | "bubble" | "headline";
+export type Layout =
+  | "paper" | "archive" | "torngreen" | "bubble" | "headline" | "banner" | "arch"
+  | "topo" | "capsule" | "glass" | "editorial" | "card";
 export type Aspect = "1:1" | "4:5" | "9:16";
-export type BgType = "paper" | "solid" | "gradient" | "image";
+export type BgType = "grid" | "paper" | "topo" | "dark" | "bokeh" | "solid" | "mesh" | "noise" | "image";
+export type QuoteBox = "torn" | "frame" | "glass" | "speech" | "arch" | "none";
+export type PhotoTone = "color" | "gray" | "duotone";
+export type FooterKind = "whatsapp" | "x" | "instagram" | "facebook" | "youtube" | "tiktok" | "website" | "phone" | "email";
+
+export interface FooterItem { kind: FooterKind; text: string; on: boolean }
 
 export interface PosterState {
   layout: Layout;
@@ -15,6 +22,7 @@ export interface PosterState {
   tornEdges: boolean;
 
   accent: string;
+  accent2: string;
   textColor: string;
   cardColor: string;
   cardText: string;
@@ -27,6 +35,8 @@ export interface PosterState {
   headlineFont: string;
   headlineStyle: "strip" | "plain" | "block";
   headlineOffset: number;
+  translation: string;
+  showTranslation: boolean;
 
   quote: string;
   quoteSize: number;
@@ -34,6 +44,7 @@ export interface PosterState {
   lineHeight: number;
   quoteAlign: "start" | "center" | "justify";
   quoteMark: "box" | "big" | "none";
+  quoteBox: QuoteBox;
   quoteOffset: number;
 
   name: string;
@@ -48,22 +59,26 @@ export interface PosterState {
   outletFont: string;
   logo?: string | undefined;
   showOutlet: boolean;
+  partners: string[];
 
   date: string;
+  dateBig: string;
   showDate: boolean;
 
   handle: string;
-  socials: string[];
+  footer: FooterItem[];
   showFooter: boolean;
 
   photo?: string | undefined;
   photoScale: number;
   photoX: number;
   photoY: number;
-  photoGray: boolean;
+  photoTone: PhotoTone;
   photoOutline: number;
   photoShadow: boolean;
+  photoGhost: boolean;
   backPhoto?: string | undefined;
+  showDecor: boolean;
 
   latinFont: string;
 }
@@ -82,6 +97,15 @@ export const THAANA_FONTS = [
 ];
 
 export const LATIN_FONTS = [
-  "Playfair Display", "Bebas Neue", "Oswald", "Roboto Slab", "Archivo Black", "Lora",
-  "Space Grotesk", "IBM Plex Sans",
+  "Plus Jakarta Sans", "Playfair Display", "Bebas Neue", "Oswald", "Roboto Slab", "Archivo Black", "Lora",
+  "Space Grotesk", "IBM Plex Sans", "Poppins",
+];
+
+export const HIGHLIGHTS = [
+  { name: "Amber", bg: "#f2a516", fg: "#1a1206" },
+  { name: "Red", bg: "#d8343a", fg: "#ffffff" },
+  { name: "Teal", bg: "#0f8b7d", fg: "#ffffff" },
+  { name: "Gold", bg: "#c9992f", fg: "#ffffff" },
+  { name: "Green", bg: "#1f6b45", fg: "#ffffff" },
+  { name: "Blue", bg: "#2d5f9a", fg: "#ffffff" },
 ];
