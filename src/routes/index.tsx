@@ -7,6 +7,7 @@ import { FOOTER_LABELS, FOOTER_PLACEHOLDERS } from "@/lib/poster/footer-labels";
 import { BASE, PRESETS } from "@/lib/poster/presets";
 import { ASPECTS, HIGHLIGHTS, LATIN_FONTS, THAANA_FONTS, sizeOf, type Aspect, type PosterState } from "@/lib/poster/types";
 import { brandOf, withPreset, type BrandKit, type BrandLocks } from "@/lib/poster/brand";
+import { KEY_LABEL, KEY_TAB, presetFocus, type Key as PosterKey, type TabId } from "@/lib/poster/controls";
 import { thaanaKeyDown } from "@/lib/poster/thaana";
 import sampleSpeaker from "@/assets/sample-speaker.png";
 import { Button } from "@/components/ui/button";
@@ -39,18 +40,18 @@ const readFile = (f: File) =>
     r.readAsDataURL(f);
   });
 
-function Field({ label, children }: { label: string; children: ReactNode }) {
+function Field({ label, children, ctl }: { label: string; children: ReactNode; ctl?: string }) {
   return (
-    <div className="space-y-1.5">
+    <div className="space-y-1.5" data-ctl={ctl}>
       <Label className="text-xs uppercase tracking-wider text-muted-foreground">{label}</Label>
       {children}
     </div>
   );
 }
 
-function Section({ title, children }: { title: string; children: ReactNode }) {
+function Section({ title, children, ctl }: { title: string; children: ReactNode; ctl?: string }) {
   return (
-    <div className="space-y-3 rounded-lg border border-border bg-card/40 p-3">
+    <div className="space-y-3 rounded-lg border border-border bg-card/40 p-3" data-ctl={ctl}>
       <p className="text-sm font-semibold">{title}</p>
       {children}
     </div>
@@ -168,27 +169,27 @@ function Studio() {
     );
 
   const slider = (label: string, k: keyof PosterState, min: number, max: number, step = 1) => (
-    <Field label={`${label} · ${s[k]}`}>
+    <Field label={`${label} · ${s[k]}`} ctl={k}>
       <Slider min={min} max={max} step={step} value={[s[k] as number]} onValueChange={([v]) => set(k, v as never)} />
     </Field>
   );
 
   const toggle = (label: string, k: keyof PosterState) => (
-    <label className="flex items-center justify-between gap-2 text-sm">
+    <label className="flex items-center justify-between gap-2 text-sm" data-ctl={k}>
       {label}
       <Switch checked={s[k] as boolean} onCheckedChange={(v) => set(k, v as never)} />
     </label>
   );
 
   const color = (label: string, k: keyof PosterState) => (
-    <label className="flex items-center gap-2 text-sm">
+    <label className="flex items-center gap-2 text-sm" data-ctl={k}>
       <input type="color" value={s[k] as string} onChange={(e) => set(k, e.target.value as never)} className="h-8 w-10 cursor-pointer rounded border border-border bg-transparent" />
       {label}
     </label>
   );
 
   const optColor = (label: string, k: "patternColor" | "decorColor" | "watermarkColor", fallback: string) => (
-    <div className="flex items-center gap-2 text-sm">
+    <div className="flex items-center gap-2 text-sm" data-ctl={k}>
       <input type="color" value={s[k] || fallback} onChange={(e) => set(k, e.target.value)} className="h-8 w-10 cursor-pointer rounded border border-border bg-transparent" />
       <span className="flex-1">{label}</span>
       {s[k] ? <Button size="sm" variant="ghost" onClick={() => set(k, "")}>Auto</Button> : <span className="text-xs text-muted-foreground">auto</span>}
@@ -196,7 +197,7 @@ function Studio() {
   );
 
   const fontSel = (label: string, k: keyof PosterState, list: string[]) => (
-    <Field label={label}>
+    <Field label={label} ctl={k}>
       <Select value={s[k] as string} onValueChange={(v) => set(k, v as never)}>
         <SelectTrigger><SelectValue /></SelectTrigger>
         <SelectContent>
@@ -209,7 +210,7 @@ function Studio() {
   );
 
   const upload = (k: "photo" | "logo" | "bgImage" | "backPhoto" | "photo2" | "extraImage") => (
-    <label className="flex cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-border px-3 py-2 text-sm hover:bg-accent">
+    <label className="flex cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-border px-3 py-2 text-sm hover:bg-accent" data-ctl={k}>
       <Upload className="h-4 w-4" /> Upload
       <input type="file" accept="image/*" className="hidden" onChange={async (e) => { const f = e.target.files?.[0]; if (f) set(k, await readFile(f)); }} />
     </label>
