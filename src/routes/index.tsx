@@ -259,7 +259,7 @@ function Studio() {
   const upload = (k: "photo" | "logo" | "bgImage" | "backPhoto" | "photo2" | "extraImage") => (
     <label className="flex cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-border px-3 py-2 text-sm hover:bg-accent" data-ctl={k}>
       <Upload className="h-4 w-4" /> Upload
-      <input type="file" accept="image/*" className="hidden" onChange={async (e) => { const f = e.target.files?.[0]; if (f) set(k, await readFile(f)); }} />
+      <input type="file" accept="image/*" className="hidden" onChange={async (e) => { const f = e.target.files?.[0]; e.target.value = ""; if (f) set(k, await readFile(f)); }} />
     </label>
   );
 
@@ -637,7 +637,7 @@ function Studio() {
                 <div className="space-y-2" data-ctl="footer">
                   {s.footer.map((f, i) => (
                     <div key={f.kind} className="flex items-center gap-2">
-                      <Switch checked={f.on} onCheckedChange={(v) => set("footer", s.footer.map((x, j) => (j === i ? { ...x, on: v } : x)))} />
+                      <Switch aria-label={`Show ${f.kind}`} checked={f.on} onCheckedChange={(v) => set("footer", s.footer.map((x, j) => (j === i ? { ...x, on: v } : x)))} />
                       <span className="w-20 text-xs text-muted-foreground">{FOOTER_LABELS[f.kind]}</span>
                       <Input className="h-8" dir="ltr" value={f.text} placeholder={FOOTER_PLACEHOLDERS[f.kind]} onChange={(e) => set("footer", s.footer.map((x, j) => (j === i ? { ...x, text: e.target.value, on: e.target.value ? true : x.on } : x)))} />
                     </div>
