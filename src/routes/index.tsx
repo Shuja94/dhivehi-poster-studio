@@ -315,7 +315,7 @@ function Studio() {
       </header>
 
       <div className="flex min-h-0 flex-1">
-        <aside className="w-[380px] shrink-0 overflow-y-auto border-e border-border">
+        <aside ref={panelRef} className="w-[380px] shrink-0 overflow-y-auto border-e border-border">
           <Tabs value={tab} onValueChange={setTab} className="p-4">
             <TabsList className="grid h-auto w-full grid-cols-6">
               {[["quick", Zap, "Quick"], ["presets", LayoutTemplate, "Styles"], ["text", Type, "Text"], ["photo", ImageIcon, "Images"], ["style", Palette, "Look"], ["brand", Share2, "Brand"]].map(([v, I, l]) => {
@@ -323,6 +323,29 @@ function Studio() {
                 return <TabsTrigger key={v as string} value={v as string} className="flex flex-col gap-0.5 px-1 py-1.5 text-[10px]"><Icon className="h-4 w-4" />{l as string}</TabsTrigger>;
               })}
             </TabsList>
+
+            {focus && tab !== "presets" && tab !== "quick" && (
+              <div className="mt-3 rounded-lg border border-primary/40 bg-primary/5 p-2.5">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 shrink-0 text-primary" />
+                  <p className="flex-1 text-xs font-semibold leading-tight">{focus.name} — its key controls</p>
+                  <Button size="sm" variant="ghost" className="h-7 shrink-0 px-2 text-xs" onClick={() => setTab("presets")}>
+                    <LayoutTemplate className="h-3.5 w-3.5" /> Styles
+                  </Button>
+                </div>
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {focus.keys.map((k) => (
+                    <button
+                      key={k}
+                      onClick={() => gotoKey(k)}
+                      className={`rounded-full border px-2.5 py-1 text-[11px] transition hover:border-primary ${flash?.k === k ? "border-primary bg-primary/15" : "border-border bg-background"}`}
+                    >
+                      {KEY_LABEL[k] ?? k}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <TabsContent value="quick" className="mt-4 space-y-4">
               {!hasBrand && (
