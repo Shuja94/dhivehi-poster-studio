@@ -72,6 +72,9 @@ const NOISE = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'
 export function Background({ s, w, h }: { s: PosterState; w: number; h: number }) {
   const base: CSSProperties = { position: "absolute", inset: 0 };
   const t = s.bgType;
+  const pc = s.patternColor || s.accent;
+  const po = s.patternOpacity ?? 1;
+  const ps = s.patternScale ?? 1;
   let bg = s.bgColor;
   if (t === "dark") bg = `radial-gradient(120% 90% at 70% 60%, ${s.bgColor}, ${s.bgColor2})`;
   if (t === "mesh") bg = `radial-gradient(60% 50% at 15% 10%, ${s.accent}88, transparent), radial-gradient(60% 60% at 90% 90%, ${s.bgColor2}aa, transparent), radial-gradient(50% 50% at 80% 20%, ${s.accent2}66, transparent), ${s.bgColor}`;
@@ -84,17 +87,17 @@ export function Background({ s, w, h }: { s: PosterState; w: number; h: number }
       {t === "paper" && <img src={paperTexture} alt="" style={{ ...base, width: "100%", height: "100%", objectFit: "cover", mixBlendMode: "multiply", opacity: s.textureOpacity }} />}
       {t === "noise" && <div style={{ ...base, backgroundImage: NOISE, opacity: s.textureOpacity * 0.45, mixBlendMode: "overlay" }} />}
       {t === "grid" && (
-        <div style={{ ...base, backgroundImage: `linear-gradient(${s.accent}14 2px, transparent 2px), linear-gradient(90deg, ${s.accent}14 2px, transparent 2px)`, backgroundSize: "72px 72px" }} />
+        <div style={{ ...base, backgroundImage: `linear-gradient(${pc}14 2px, transparent 2px), linear-gradient(90deg, ${pc}14 2px, transparent 2px)`, backgroundSize: `${72 * ps}px ${72 * ps}px`, opacity: Math.min(1, po) }} />
       )}
       {t === "topo" && (
-        <svg width={w} height={h} style={base}>
-          {topoPaths(w, h).map((d, i) => <path key={i} d={d} fill="none" stroke={s.accent} strokeOpacity={0.35} strokeWidth={2} />)}
+        <svg width={w} height={h} viewBox={`0 0 ${w / ps} ${h / ps}`} preserveAspectRatio="none" style={base}>
+          {topoPaths(w / ps, h / ps).map((d, i) => <path key={i} d={d} fill="none" stroke={pc} strokeOpacity={Math.min(1, 0.35 * po)} strokeWidth={2} />)}
         </svg>
       )}
       {t === "bokeh" && (
         <>
           {[[12, 18, 260, "#ffffff", 0.9], [80, 12, 220, "#ffffff", 0.7], [88, 80, 380, s.bgColor2, 0.35], [6, 88, 300, s.accent2, 0.25], [50, 45, 180, "#ffffff", 0.5], [30, 60, 120, "#ffffff", 0.6]].map(([x, y, r, c, o], i) => (
-            <div key={i} style={{ position: "absolute", left: `${x}%`, top: `${y}%`, width: r as number, height: r as number, marginLeft: -(r as number) / 2, marginTop: -(r as number) / 2, borderRadius: "50%", background: c as string, opacity: o as number, filter: "blur(50px)" }} />
+            <div key={i} style={{ position: "absolute", left: `${x}%`, top: `${y}%`, width: r as number, height: r as number, marginLeft: -(r as number) / 2, marginTop: -(r as number) / 2, borderRadius: "50%", background: c as string, opacity: Math.min(1, (o as number) * po), filter: "blur(50px)" }} />
           ))}
           {s.showDecor && (
             <svg width={w} height={h} style={base}>
@@ -106,14 +109,14 @@ export function Background({ s, w, h }: { s: PosterState; w: number; h: number }
                 </linearGradient>
               </defs>
               {[0, 1, 2, 3].map((i) => (
-                <path key={i} d={`M ${-100} ${h * 0.95 - i * 26} C ${w * 0.35} ${h * 0.9 - i * 30}, ${w * 0.7} ${h * 0.72 - i * 20}, ${w + 100} ${h * 0.55 - i * 40}`} fill="none" stroke="url(#streak)" strokeWidth={i === 1 ? 5 : 2} opacity={0.8 - i * 0.15} />
+                <path key={i} d={`M ${-100} ${h * 0.95 - i * 26} C ${w * 0.35} ${h * 0.9 - i * 30}, ${w * 0.7} ${h * 0.72 - i * 20}, ${w + 100} ${h * 0.55 - i * 40}`} fill="none" stroke="url(#streak)" strokeWidth={i === 1 ? 5 : 2} opacity={Math.min(1, (0.8 - i * 0.15) * po)} />
               ))}
             </svg>
           )}
         </>
       )}
       {s.showGrid && t !== "grid" && (
-        <div style={{ ...base, backgroundImage: "linear-gradient(rgba(0,0,0,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,.06) 1px, transparent 1px)", backgroundSize: "36px 36px" }} />
+        <div style={{ ...base, backgroundImage: "linear-gradient(rgba(0,0,0,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,.06) 1px, transparent 1px)", backgroundSize: `${36 * ps}px ${36 * ps}px`, opacity: Math.min(1, po) }} />
       )}
     </>
   );
@@ -276,7 +279,11 @@ export function Extra({ s, fallback, style, cover }: { s: PosterState; fallback?
 
 export function Watermark({ s, style }: { s: PosterState; style?: CSSProperties }) {
   if (!s.watermark || !s.showDecor) return null;
-  return <div style={{ position: "absolute", fontFamily: fam(s.latinFont, s.outletFont), whiteSpace: "nowrap", lineHeight: 1, pointerEvents: "none", ...style }}>{s.watermark}</div>;
+  const st = { ...style };
+  if (typeof st.fontSize === "number") st.fontSize = st.fontSize * (s.watermarkSize / 100);
+  st.opacity = Math.min(1, Number(st.opacity ?? 1) * s.watermarkOpacity);
+  if (s.watermarkColor) st.color = s.watermarkColor;
+  return <div style={{ position: "absolute", fontFamily: fam(s.latinFont, s.outletFont), whiteSpace: "nowrap", lineHeight: 1, pointerEvents: "none", ...st }}>{s.watermark}</div>;
 }
 
 export function Waves({ color, style, width = 260 }: { color: string; style?: CSSProperties; width?: number }) {

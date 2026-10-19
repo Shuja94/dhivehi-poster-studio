@@ -100,6 +100,19 @@ export interface PosterState {
   logoSize: number;
   customW: number;
   customH: number;
+
+  /* background pattern + decoration controls */
+  patternColor: string;
+  patternOpacity: number;
+  patternScale: number;
+  decorOpacity: number;
+  decorColor: string;
+  watermarkOpacity: number;
+  watermarkSize: number;
+  watermarkColor: string;
+  /* wide formats */
+  wideAlign: "start" | "center" | "end";
+  wideSide: boolean;
 }
 
 export const ASPECTS: Record<Aspect, { w: number; h: number; label: string; group: string }> = {

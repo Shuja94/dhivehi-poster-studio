@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { memo, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { toJpeg, toPng } from "html-to-image";
-import { Download, Keyboard, Upload, RotateCcw, Type, Image as ImageIcon, Palette, LayoutTemplate, Share2 } from "lucide-react";
+import { Download, Keyboard, Upload, RotateCcw, Type, Image as ImageIcon, Palette, LayoutTemplate, Share2, Zap, Sparkles, Shuffle, Check } from "lucide-react";
 import { Poster } from "@/components/poster/Poster";
+import { FOOTER_LABELS, FOOTER_PLACEHOLDERS } from "@/lib/poster/footer-labels";
 import { BASE, PRESETS } from "@/lib/poster/presets";
 import { ASPECTS, HIGHLIGHTS, LATIN_FONTS, THAANA_FONTS, sizeOf, type Aspect, type PosterState } from "@/lib/poster/types";
 import { brandOf, withPreset, type BrandKit, type BrandLocks } from "@/lib/poster/brand";
@@ -47,6 +48,33 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
+function Section({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <div className="space-y-3 rounded-lg border border-border bg-card/40 p-3">
+      <p className="text-sm font-semibold">{title}</p>
+      {children}
+    </div>
+  );
+}
+
+const THUMB_W = 160;
+const PresetThumb = memo(function PresetThumb({ state, active, name, onPick }: { state: PosterState; active: boolean; name: string; onPick: () => void }) {
+  const { w, h } = sizeOf(state);
+  const z = THUMB_W / w;
+  return (
+    <button onClick={onPick} title={name} className={`group relative overflow-hidden rounded-lg border-2 text-start transition hover:border-primary ${active ? "border-primary" : "border-transparent"}`}>
+      <div style={{ width: THUMB_W, height: h * z }} className="pointer-events-none overflow-hidden">
+        <div style={{ width: w, height: h, transform: `scale(${z})`, transformOrigin: "top left" }}><Poster s={state} /></div>
+      </div>
+      <span className="absolute inset-x-0 bottom-0 bg-background/85 px-2 py-1 text-[11px] font-medium leading-tight">{name}</span>
+      {active && <Check className="absolute end-1.5 top-1.5 h-5 w-5 rounded-full bg-primary p-0.5 text-primary-foreground" />}
+    </button>
+  );
+});
+
+const QUICK_SIZES: Aspect[] = ["4:5", "1:1", "9:16", "fb", "x", "yt"];
+const SIZE_NAMES: Partial<Record<Aspect, string>> = { "4:5": "Insta / FB post", "1:1": "Square post", "9:16": "Story / Status", fb: "Facebook wide", x: "X post", yt: "YouTube" };
+
 function Studio() {
   const [s, setS] = useState<PosterState>({ ...BASE, photo: sampleSpeaker });
   const [thaanaKb, setThaanaKb] = useState(true);
@@ -80,6 +108,30 @@ function Studio() {
     setLocks(n);
     try { localStorage.setItem("akuru-brand-locks", JSON.stringify(n)); } catch { /* ignore */ }
   };
+  const [brandReady, setBrandReady] = useState(false);
+  useEffect(() => {
+    try {
+      const b = localStorage.getItem("akuru-current-brand");
+      if (b) setS((c) => ({ ...c, ...JSON.parse(b) }));
+    } catch { /* ignore */ }
+    setBrandReady(true);
+  }, []);
+  const brandJson = JSON.stringify(brandOf(s));
+  const [brandSaveNote, setBrandSaveNote] = useState("");
+  useEffect(() => {
+    if (!brandReady) return;
+    try { localStorage.setItem("akuru-current-brand", brandJson); setBrandSaveNote(""); }
+    catch { setBrandSaveNote("Your logo is too large to remember automatically — use “Download kit” to keep it."); }
+  }, [brandJson, brandReady]);
+  const hasBrand = s.outlet !== BASE.outlet || !!s.logo;
+  const [tab, setTab] = useState("quick");
+  const thumbBase = useMemo(() => ({ photo: s.photo, logo: s.logo, outlet: s.outlet, partners: s.partners }), [s.photo, s.logo, s.outlet, s.partners]);
+  const thumbs = useMemo(() => PRESETS.map((p) => ({ p, state: { ...withPreset({ ...s, ...thumbBase }, BASE, p.apply, { colors: false, fonts: false, footer: true }), aspect: "4:5" as Aspect } })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [thumbBase]);
+  const pickPreset = (p: (typeof PRESETS)[number]) => setS((c) => withPreset(c, BASE, p.apply, locks));
+  const activeId = PRESETS.find((p) => p.apply.layout === s.layout && p.apply.bgColor === s.bgColor)?.id ?? PRESETS.find((p) => p.apply.layout === s.layout)?.id;
+  const shuffle = () => { const o = PRESETS.filter((p) => p.id !== activeId); const p = o[Math.floor(Math.random() * o.length)]; if (p) pickPreset(p); };
   const applyKit = (k: BrandKit) => setS((c) => ({ ...c, ...k.data }));
   const exportKit = () => {
     const blob = new Blob([JSON.stringify({ name: kitName || s.outlet, data: brandOf(s) })], { type: "application/json" });
@@ -133,6 +185,14 @@ function Studio() {
       <input type="color" value={s[k] as string} onChange={(e) => set(k, e.target.value as never)} className="h-8 w-10 cursor-pointer rounded border border-border bg-transparent" />
       {label}
     </label>
+  );
+
+  const optColor = (label: string, k: "patternColor" | "decorColor" | "watermarkColor", fallback: string) => (
+    <div className="flex items-center gap-2 text-sm">
+      <input type="color" value={s[k] || fallback} onChange={(e) => set(k, e.target.value)} className="h-8 w-10 cursor-pointer rounded border border-border bg-transparent" />
+      <span className="flex-1">{label}</span>
+      {s[k] ? <Button size="sm" variant="ghost" onClick={() => set(k, "")}>Auto</Button> : <span className="text-xs text-muted-foreground">auto</span>}
+    </div>
   );
 
   const fontSel = (label: string, k: keyof PosterState, list: string[]) => (
@@ -227,25 +287,68 @@ function Studio() {
 
       <div className="flex min-h-0 flex-1">
         <aside className="w-[380px] shrink-0 overflow-y-auto border-e border-border">
-          <Tabs defaultValue="presets" className="p-4">
-            <TabsList className="grid w-full grid-cols-5">
-              <TabsTrigger value="presets" title="Presets"><LayoutTemplate className="h-4 w-4" /></TabsTrigger>
-              <TabsTrigger value="text" title="Text"><Type className="h-4 w-4" /></TabsTrigger>
-              <TabsTrigger value="photo" title="Photo"><ImageIcon className="h-4 w-4" /></TabsTrigger>
-              <TabsTrigger value="style" title="Style"><Palette className="h-4 w-4" /></TabsTrigger>
-              <TabsTrigger value="brand" title="Branding"><Share2 className="h-4 w-4" /></TabsTrigger>
+          <Tabs value={tab} onValueChange={setTab} className="p-4">
+            <TabsList className="grid h-auto w-full grid-cols-6">
+              {[["quick", Zap, "Quick"], ["presets", LayoutTemplate, "Styles"], ["text", Type, "Text"], ["photo", ImageIcon, "Images"], ["style", Palette, "Look"], ["brand", Share2, "Brand"]].map(([v, I, l]) => {
+                const Icon = I as typeof Zap;
+                return <TabsTrigger key={v as string} value={v as string} className="flex flex-col gap-0.5 px-1 py-1.5 text-[10px]"><Icon className="h-4 w-4" />{l as string}</TabsTrigger>;
+              })}
             </TabsList>
 
-            <TabsContent value="presets" className="mt-4 space-y-3">
-              {PRESETS.map((p) => (
-                <button key={p.id} onClick={() => setS((c) => withPreset(c, BASE, p.apply, locks))} className={`w-full rounded-lg border bg-card p-3 text-start transition hover:border-primary ${s.layout === p.apply.layout ? "border-primary" : "border-border"}`}>
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold">{p.name}</span>
-                    <span className="flex gap-1">{p.swatch.map((c) => <span key={c} className="h-4 w-4 rounded-full border border-border" style={{ background: c }} />)}</span>
-                  </div>
-                  <p className="mt-1 text-xs text-muted-foreground">{p.description}</p>
+            <TabsContent value="quick" className="mt-4 space-y-4">
+              {!hasBrand && (
+                <button onClick={() => setTab("brand")} className="flex w-full items-center gap-3 rounded-lg border border-primary bg-primary/10 p-3 text-start text-sm">
+                  <Sparkles className="h-5 w-5 shrink-0 text-primary" />
+                  <span><b>Set up your outlet once.</b> Add your logo, name and social accounts — they appear on every poster.</span>
                 </button>
-              ))}
+              )}
+              <Section title="1 · Choose a style">
+                <div className="grid grid-cols-3 gap-1.5">
+                  {thumbs.slice(0, 6).map(({ p, state }) => (
+                    <button key={p.id} onClick={() => pickPreset(p)} className={`rounded-md border px-1.5 py-2 text-[11px] leading-tight ${activeId === p.id ? "border-primary bg-primary/10" : "border-border hover:border-primary"}`}>
+                      <span className="mb-1 flex justify-center gap-0.5">{p.swatch.map((c) => <span key={c} className="h-2.5 w-2.5 rounded-full" style={{ background: c }} />)}</span>
+                      {p.name}
+                    </button>
+                  ))}
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button size="sm" variant="secondary" onClick={() => setTab("presets")}><LayoutTemplate className="h-4 w-4" /> All {PRESETS.length} styles</Button>
+                  <Button size="sm" variant="secondary" onClick={shuffle}><Shuffle className="h-4 w-4" /> Surprise me</Button>
+                </div>
+              </Section>
+              <Section title="2 · Write">
+                <Field label="Headline">{txt("headline", true, 2)}</Field>
+                <Field label="Quote">{txt("quote", true, 4)}</Field>
+                <div className="grid grid-cols-2 gap-2">
+                  <Field label="Name">{txt("name")}</Field>
+                  <Field label="Title / role">{txt("designation")}</Field>
+                </div>
+                <p className="text-xs text-muted-foreground">Tip: put *stars* around words to colour them.</p>
+              </Section>
+              <Section title="3 · Speaker photo">
+                <div className="flex items-center gap-3">
+                  {s.photo && <img src={s.photo} alt="" className="h-14 w-14 rounded-md bg-muted object-contain" />}
+                  <div className="flex-1">{upload("photo")}</div>
+                </div>
+                {slider("Photo size", "photoScale", 30, 200)}
+              </Section>
+              <Section title="4 · Size & download">
+                <div className="grid grid-cols-3 gap-1.5">
+                  {QUICK_SIZES.map((a) => (
+                    <button key={a} onClick={() => set("aspect", a)} className={`rounded-md border px-1.5 py-1.5 text-[11px] leading-tight ${s.aspect === a ? "border-primary bg-primary/10" : "border-border hover:border-primary"}`}>
+                      {SIZE_NAMES[a]}<br /><span className="text-muted-foreground">{ASPECTS[a].w}×{ASPECTS[a].h}</span>
+                    </button>
+                  ))}
+                </div>
+                <Button className="w-full" onClick={exportImg} disabled={busy}><Download className="h-4 w-4" /> {busy ? "Preparing…" : `Download ${format.toUpperCase()} · ${w * exportScale}×${h * exportScale}`}</Button>
+              </Section>
+            </TabsContent>
+
+            <TabsContent value="presets" className="mt-4 space-y-3">
+              <p className="text-xs text-muted-foreground">Tap a style. Your text, photos and brand stay the same.</p>
+              <div className="grid grid-cols-2 gap-2">
+                {thumbs.map(({ p, state }) => <PresetThumb key={p.id} state={state} name={p.name} active={activeId === p.id} onPick={() => pickPreset(p)} />)}
+              </div>
               <Field label="Layout">
                 <Select value={s.layout} onValueChange={(v) => set("layout", v as PosterState["layout"])}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
@@ -299,7 +402,6 @@ function Studio() {
               {toggle("Show category", "showCategory")}
               <Field label="Tagline (top of poster, some styles)">{txt("tagline")}</Field>
               <Field label="Call to action (academy style)">{txt("cta", true, 2)}</Field>
-              <Field label="Calligraphy watermark text">{txt("watermark")}</Field>
               <Field label="Big date (e.g. 23-25)"><Input dir="ltr" value={s.dateBig} onChange={(e) => set("dateBig", e.target.value)} /></Field>
               <Field label="Date text">{txt("date")}</Field>
               {toggle("Show date", "showDate")}
@@ -377,7 +479,20 @@ function Studio() {
               {(s.bgType === "paper" || s.bgType === "noise") && slider("Texture strength", "textureOpacity", 0, 1, 0.05)}
               {toggle("Extra grid overlay", "showGrid")}
               {toggle("Torn paper edges", "tornEdges")}
-              {toggle("Decorations (dome, streaks, dots)", "showDecor")}
+              {toggle("Decorations (shapes, streaks, stripes)", "showDecor")}
+              <Section title="Background pattern & faint shapes">
+                <p className="text-xs text-muted-foreground">Change the light lines, grid, glows, shapes and calligraphy behind the poster.</p>
+                {slider("Pattern strength", "patternOpacity", 0, 2, 0.05)}
+                {slider("Pattern size", "patternScale", 0.5, 2.5, 0.05)}
+                {optColor("Pattern colour", "patternColor", s.accent)}
+                {s.showDecor && slider("Shapes strength", "decorOpacity", 0, 1, 0.05)}
+                {s.showDecor && optColor("Shapes colour", "decorColor", s.accent2)}
+                <Field label="Calligraphy / watermark text">{txt("watermark")}</Field>
+                {slider("Watermark strength", "watermarkOpacity", 0, 6, 0.1)}
+                {slider("Watermark size %", "watermarkSize", 30, 200)}
+                {optColor("Watermark colour", "watermarkColor", s.accent)}
+                <Button size="sm" variant="secondary" onClick={() => setS((c) => ({ ...c, patternColor: "", patternOpacity: 1, patternScale: 1, decorOpacity: 1, decorColor: "", watermarkOpacity: 1, watermarkSize: 100, watermarkColor: "" }))}><RotateCcw className="h-4 w-4" /> Reset background details</Button>
+              </Section>
               <Field label="Keyword highlight colour">
                 <div className="flex flex-wrap gap-2">
                   {HIGHLIGHTS.map((c) => (
@@ -417,8 +532,40 @@ function Studio() {
             </TabsContent>
 
             <TabsContent value="brand" className="mt-4 space-y-4">
+              <Section title="Your outlet">
+                <p className="text-xs text-muted-foreground">Set this once — it's remembered on this device and kept on every style.</p>
+                <div className="flex items-center gap-3">
+                  <div className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-md border border-border bg-muted">
+                    {s.logo ? <img src={s.logo} alt="Logo" className="max-h-full max-w-full object-contain" /> : <span className="text-[10px] text-muted-foreground">No logo</span>}
+                  </div>
+                  <div className="flex-1 space-y-2">
+                    {upload("logo")}
+                    {s.logo && <Button size="sm" variant="ghost" className="w-full" onClick={() => set("logo", undefined)}>Remove logo</Button>}
+                  </div>
+                </div>
+                  {slider("Logo / name size %", "logoSize", 40, 250)}
+                <div className="grid grid-cols-2 gap-3">
+                  {color("Brand colour", "accent")}
+                  {color("Brand colour 2", "accent2")}
+                </div>
+                {brandSaveNote && <p className="text-xs text-destructive">{brandSaveNote}</p>}
+              </Section>
+              <Section title="Your social accounts">
+                <p className="text-xs text-muted-foreground">Switch on the ones to show in the footer. Leave a box empty to show only the icon.</p>
+                {toggle("Show social footer", "showFooter")}
+                <Field label="Main handle"><Input dir="ltr" placeholder="@youroutlet" value={s.handle} onChange={(e) => set("handle", e.target.value)} /></Field>
+                <div className="space-y-2">
+                  {s.footer.map((f, i) => (
+                    <div key={f.kind} className="flex items-center gap-2">
+                      <Switch checked={f.on} onCheckedChange={(v) => set("footer", s.footer.map((x, j) => (j === i ? { ...x, on: v } : x)))} />
+                      <span className="w-20 text-xs text-muted-foreground">{FOOTER_LABELS[f.kind]}</span>
+                      <Input className="h-8" dir="ltr" value={f.text} placeholder={FOOTER_PLACEHOLDERS[f.kind]} onChange={(e) => set("footer", s.footer.map((x, j) => (j === i ? { ...x, text: e.target.value, on: e.target.value ? true : x.on } : x)))} />
+                    </div>
+                  ))}
+                </div>
+              </Section>
               <div className="space-y-3 rounded-lg border border-primary/40 bg-card p-3">
-                <p className="text-sm font-semibold">Your brand kit</p>
+                <p className="text-sm font-semibold">Saved brand kits (for several outlets)</p>
                 <p className="text-xs text-muted-foreground">Your logo, name, handle and contact details stay on every style. Choose what else to keep when switching styles.</p>
                 <label className="flex items-center justify-between text-sm">Keep my brand colours<Switch checked={locks.colors} onCheckedChange={(v) => setLock("colors", v)} /></label>
                 <label className="flex items-center justify-between text-sm">Keep my fonts<Switch checked={locks.fonts} onCheckedChange={(v) => setLock("fonts", v)} /></label>
@@ -444,37 +591,15 @@ function Studio() {
                   </label>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                {color("Brand colour", "accent")}
-                {color("Brand colour 2", "accent2")}
-                {color("Highlight", "highlightColor")}
-                {color("Highlight text", "highlightText")}
-              </div>
               {toggle("Show outlet branding", "showOutlet")}
               <Field label="Outlet name">{txt("outlet")}</Field>
               {fontSel("Outlet font", "outletFont", thaanaFonts)}
-              <Field label="Outlet logo (replaces name)">{upload("logo")}</Field>
-              {s.logo && <Button size="sm" variant="secondary" onClick={() => set("logo", undefined)}>Remove logo</Button>}
-              {slider("Logo / name size %", "logoSize", 40, 250)}
               <Field label="Partner / sponsor logos (footer row)">
                 <label className="flex cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-border px-3 py-2 text-sm hover:bg-accent">
                   <Upload className="h-4 w-4" /> Add partner logo
                   <input type="file" accept="image/*" className="hidden" onChange={async (e) => { const f = e.target.files?.[0]; if (f) { const u = await readFile(f); set("partners", [...s.partners, u]); } }} />
                 </label>
                 {s.partners.length > 0 && <Button size="sm" variant="secondary" onClick={() => set("partners", [])}>Clear {s.partners.length} partner logo(s)</Button>}
-              </Field>
-              {toggle("Show footer bar", "showFooter")}
-              <Field label="Social handle (shown next to icons)"><Input value={s.handle} onChange={(e) => set("handle", e.target.value)} /></Field>
-              <Field label="Footer items — leave text empty for icon only">
-                <div className="space-y-2">
-                  {s.footer.map((f, i) => (
-                    <div key={f.kind} className="flex items-center gap-2">
-                      <Switch checked={f.on} onCheckedChange={(v) => set("footer", s.footer.map((x, j) => (j === i ? { ...x, on: v } : x)))} />
-                      <span className="w-20 text-xs capitalize text-muted-foreground">{f.kind === "x" ? "Twitter/X" : f.kind}</span>
-                      <Input className="h-8" value={f.text} placeholder="icon only" onChange={(e) => set("footer", s.footer.map((x, j) => (j === i ? { ...x, text: e.target.value } : x)))} />
-                    </div>
-                  ))}
-                </div>
               </Field>
             </TabsContent>
           </Tabs>
@@ -486,6 +611,15 @@ function Studio() {
               <Poster ref={posterRef} s={s} />
             </div>
           </div>
+          {w / h > 1 && (
+            <div className="absolute start-4 top-3 flex items-center gap-2 rounded-md border border-border bg-background/90 p-1.5 text-xs">
+              <span className="px-1 text-muted-foreground">Wide layout:</span>
+              {(["start", "center", "end"] as const).map((v) => (
+                <Button key={v} size="sm" variant={s.wideAlign === v ? "default" : "ghost"} className="h-7 px-2" onClick={() => set("wideAlign", v)}>{v === "start" ? "Design first" : v === "center" ? "Centre" : "Design last"}</Button>
+              ))}
+              <label className="flex items-center gap-1.5 px-1">Brand panel <Switch checked={s.wideSide} onCheckedChange={(v) => set("wideSide", v)} /></label>
+            </div>
+          )}
           <span className="absolute bottom-3 end-4 text-xs text-muted-foreground">{w}×{h} · {Math.round(zoom * 100)}%</span>
         </main>
       </div>
