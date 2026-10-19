@@ -629,6 +629,19 @@ export const Poster = forwardRef<HTMLDivElement, { s: PosterState }>(function Po
           </div>
         </>
       )}
+      <Finish k={s.finish} />
     </div>
   );
 });
+
+/** Agency-style finishing: soft vignette pulls focus inward, fine grain removes the flat "digital" look. */
+const GRAIN = "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>\")";
+function Finish({ k }: { k: number }) {
+  if (!k) return null;
+  return (
+    <>
+      <div style={abs({ inset: 0, pointerEvents: "none", background: `radial-gradient(ellipse 120% 95% at 50% 45%, transparent 55%, rgba(0,0,0,${0.32 * k}) 100%)` })} />
+      <div style={abs({ inset: 0, pointerEvents: "none", backgroundImage: GRAIN, opacity: 0.16 * k, mixBlendMode: "overlay" })} />
+    </>
+  );
+}

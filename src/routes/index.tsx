@@ -571,7 +571,8 @@ function Studio() {
                 {slider("Watermark strength", "watermarkOpacity", 0, 6, 0.1)}
                 {slider("Watermark size %", "watermarkSize", 30, 200)}
                 {optColor("Watermark colour", "watermarkColor", s.accent)}
-                <Button size="sm" variant="secondary" onClick={() => setS((c) => ({ ...c, patternColor: "", patternOpacity: 1, patternScale: 1, decorOpacity: 1, decorColor: "", watermarkOpacity: 1, watermarkSize: 100, watermarkColor: "" }))}><RotateCcw className="h-4 w-4" /> Reset background details</Button>
+                {slider("Pro finish (vignette + grain)", "finish", 0, 1, 0.05)}
+                <Button size="sm" variant="secondary" onClick={() => setS((c) => ({ ...c, finish: 0.6, patternColor: "", patternOpacity: 1, patternScale: 1, decorOpacity: 1, decorColor: "", watermarkOpacity: 1, watermarkSize: 100, watermarkColor: "" }))}><RotateCcw className="h-4 w-4" /> Reset background details</Button>
               </Section>
               <Field label="Keyword highlight colour" ctl="highlightColor">
                 <div className="flex flex-wrap gap-2">
