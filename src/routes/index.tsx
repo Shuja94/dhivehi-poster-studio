@@ -125,12 +125,26 @@ function Studio() {
     catch { setBrandSaveNote("Your logo is too large to remember automatically — use “Download kit” to keep it."); }
   }, [brandJson, brandReady]);
   const hasBrand = s.outlet !== BASE.outlet || !!s.logo;
-  const [tab, setTab] = useState("quick");
+  const [tab, setTab] = useState<TabId>("quick");
+  const [focus, setFocus] = useState<{ id: string; name: string; tab: TabId; keys: PosterKey[] } | null>(null);
+  const [flash, setFlash] = useState<{ k: string; n: number } | null>(null);
+  const panelRef = useRef<HTMLElement>(null);
   const thumbBase = useMemo(() => ({ photo: s.photo, logo: s.logo, outlet: s.outlet, partners: s.partners }), [s.photo, s.logo, s.outlet, s.partners]);
   const thumbs = useMemo(() => PRESETS.map((p) => ({ p, state: { ...withPreset({ ...s, ...thumbBase }, BASE, p.apply, { colors: false, fonts: false, footer: true }), aspect: "4:5" as Aspect } })),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [thumbBase]);
-  const pickPreset = (p: (typeof PRESETS)[number]) => setS((c) => withPreset(c, BASE, p.apply, locks));
+  const pickPreset = (p: (typeof PRESETS)[number]) => {
+    setS((c) => withPreset(c, BASE, p.apply, locks));
+    const f = presetFocus(p);
+    setFocus({ id: p.id, name: p.name, tab: f.tab, keys: f.keys });
+    setTab(f.tab);
+    setFlash((x) => ({ k: String(f.keys[0]), n: (x?.n ?? 0) + 1 }));
+  };
+  const gotoKey = (k: PosterKey) => {
+    const t = KEY_TAB[k];
+    if (t) setTab(t);
+    setFlash((x) => ({ k: String(k), n: (x?.n ?? 0) + 1 }));
+  };
   const activeId = PRESETS.find((p) => p.apply.layout === s.layout && p.apply.bgColor === s.bgColor)?.id ?? PRESETS.find((p) => p.apply.layout === s.layout)?.id;
   const shuffle = () => { const o = PRESETS.filter((p) => p.id !== activeId); const p = o[Math.floor(Math.random() * o.length)]; if (p) pickPreset(p); };
   const applyKit = (k: BrandKit) => setS((c) => ({ ...c, ...k.data }));
@@ -153,6 +167,20 @@ function Studio() {
     window.addEventListener("resize", fit);
     return () => window.removeEventListener("resize", fit);
   }, [w, h]);
+
+  // After picking a style: scroll its key control into view and flash it.
+  useEffect(() => {
+    if (!flash) return;
+    let el: HTMLElement | null = null;
+    const show = window.setTimeout(() => {
+      el = panelRef.current?.querySelector<HTMLElement>(`[data-ctl="${flash.k}"]`) ?? null;
+      if (!el) return;
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      el.classList.add("ctl-flash");
+      window.setTimeout(() => el?.classList.remove("ctl-flash"), 1800);
+    }, 90);
+    return () => { window.clearTimeout(show); el?.classList.remove("ctl-flash"); };
+  }, [flash]);
 
   const kb = (k: keyof PosterState) => ({
     onKeyDown: (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) =>
