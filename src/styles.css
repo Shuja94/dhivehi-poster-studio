@@ -4,6 +4,28 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@font-face { font-family: "Faruma"; src: url("/fonts/Faruma.ttf"); font-display: swap; }
+@font-face { font-family: "MV Waheed"; src: url("/fonts/MV_Waheed.otf"); font-display: swap; }
+@font-face { font-family: "MV A Waheed"; src: url("/fonts/MV_A_Waheed_Bold.ttf"); font-display: swap; }
+@font-face { font-family: "MV Eamaan XP"; src: url("/fonts/Mv_Eamaan_XP.otf"); font-display: swap; }
+@font-face { font-family: "MV Amaan XP"; src: url("/fonts/Mv_Amaan_XP.otf"); font-display: swap; }
+@font-face { font-family: "MV Faseyha"; src: url("/fonts/MV_Faseyha_Regular.ttf"); font-display: swap; }
+@font-face { font-family: "MV Faseyha Bold"; src: url("/fonts/MV_Faseyha_Bold.ttf"); font-display: swap; }
+@font-face { font-family: "MV Boli"; src: url("/fonts/MV_Boli.otf"); font-display: swap; }
+@font-face { font-family: "MV Iyyu Formal"; src: url("/fonts/Mv_Iyyu_Formal.otf"); font-display: swap; }
+@font-face { font-family: "MV Iyyu Normal"; src: url("/fonts/Mv_Iyyu_Normal.otf"); font-display: swap; }
+@font-face { font-family: "MV Utheemu"; src: url("/fonts/MV_Utheemu_Bold.ttf"); font-display: swap; }
+@font-face { font-family: "MV Typewriter"; src: url("/fonts/MV_Typewriter_Bold.ttf"); font-display: swap; }
+@font-face { font-family: "MV Thakurufaanu"; src: url("/fonts/Mv_Thakurufaanu.ttf"); font-display: swap; }
+@font-face { font-family: "MV Ilham"; src: url("/fonts/MV_Ilham_Bold.ttf"); font-display: swap; }
+@font-face { font-family: "MV Aammu FK"; src: url("/fonts/MV_AammuFK_Regular.ttf"); font-display: swap; }
+@font-face { font-family: "MV Elaaf"; src: url("/fonts/Mv_Elaaf_Normal.otf"); font-display: swap; }
+@font-face { font-family: "MV Sehga Old"; src: url("/fonts/Mv_Sehga_Old.otf"); font-display: swap; }
+@font-face { font-family: "MV Oswald"; src: url("/fonts/MV_Oswald_Regular.ttf"); font-display: swap; }
+@font-face { font-family: "MV Kelaa"; src: url("/fonts/MV_Kelaa_Bold.ttf"); font-display: swap; }
+@font-face { font-family: "MV Izyan Bodu Akuru"; src: url("/fonts/Mv_Izyan_bodu_akuru.ttf"); font-display: swap; }
+
+
 /*
  * Design system definition.
  *
@@ -46,6 +68,8 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-ring-offset-background: var(--background);
+  --color-canvas: var(--canvas);
+  --font-sans: var(--font-ui);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
@@ -62,26 +86,28 @@
 }
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.129 0.042 264.695);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.129 0.042 264.695);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.208 0.042 265.755);
-  --primary-foreground: oklch(0.984 0.003 247.858);
-  --secondary: oklch(0.968 0.007 247.896);
-  --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.968 0.007 247.896);
-  --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.968 0.007 247.896);
-  --accent-foreground: oklch(0.208 0.042 265.755);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(0.929 0.013 255.508);
-  --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.704 0.04 256.788);
+  --radius: 0.5rem;
+  --background: oklch(0.17 0.01 60);
+  --foreground: oklch(0.94 0.012 80);
+  --card: oklch(0.21 0.012 60);
+  --card-foreground: oklch(0.94 0.012 80);
+  --popover: oklch(0.22 0.012 60);
+  --popover-foreground: oklch(0.94 0.012 80);
+  --primary: oklch(0.64 0.2 27);
+  --primary-foreground: oklch(0.98 0.01 80);
+  --secondary: oklch(0.26 0.012 60);
+  --secondary-foreground: oklch(0.94 0.012 80);
+  --muted: oklch(0.25 0.01 60);
+  --muted-foreground: oklch(0.68 0.015 70);
+  --accent: oklch(0.3 0.015 60);
+  --accent-foreground: oklch(0.96 0.01 80);
+  --destructive: oklch(0.6 0.22 27);
+  --destructive-foreground: oklch(0.98 0 0);
+  --border: oklch(0.32 0.012 60);
+  --input: oklch(0.32 0.012 60);
+  --ring: oklch(0.64 0.2 27);
+  --canvas: oklch(0.12 0.008 60);
+  --font-ui: "Space Grotesk", "Faruma", sans-serif;
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
