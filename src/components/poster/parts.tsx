@@ -38,7 +38,8 @@ export function torn(seed: number, amp = 1.2) {
   const pts: string[] = [];
   const r = (n: number) => {
     const x = Math.sin(seed * 999 + n * 12.9898) * 43758.5453;
-    return x - Math.floor(x);
+    // rounded so server and browser produce the identical string (no hydration mismatch)
+    return Math.round((x - Math.floor(x)) * 1000) / 1000;
   };
   const steps = 48;
   for (let i = 0; i <= steps; i++) pts.push(`${(i / steps) * 100}% ${r(i) * amp}%`);
