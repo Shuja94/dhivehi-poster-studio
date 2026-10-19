@@ -64,12 +64,21 @@ const PresetThumb = memo(function PresetThumb({ state, active, name, onPick }: {
   const { w, h } = sizeOf(state);
   const z = THUMB_W / w;
   return (
-    <button onClick={onPick} title={name} className={`group relative overflow-hidden rounded-lg border-2 text-start transition hover:border-primary ${active ? "border-primary" : "border-transparent"}`}>
-      <div style={{ width: THUMB_W, height: h * z }} className="pointer-events-none overflow-hidden">
-        <div style={{ width: w, height: h, transform: `scale(${z})`, transformOrigin: "top left" }}><Poster s={state} /></div>
+    <button
+      onClick={onPick}
+      title={name}
+      aria-pressed={active}
+      className={`group relative flex flex-col overflow-hidden rounded-xl bg-card text-start shadow-md ring-1 transition duration-200 hover:-translate-y-1 hover:shadow-xl hover:ring-primary/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${active ? "ring-2 ring-primary" : "ring-border"}`}
+    >
+      <div style={{ width: THUMB_W, height: h * z }} className="pointer-events-none relative overflow-hidden">
+        <div style={{ width: w, height: h, transform: `scale(${z})`, transformOrigin: "top left" }} className="transition duration-300 group-hover:scale-[1.0]"><Poster s={state} /></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-background/40 via-transparent to-transparent opacity-0 transition group-hover:opacity-100" />
       </div>
-      <span className="absolute inset-x-0 bottom-0 bg-background/85 px-2 py-1 text-[11px] font-medium leading-tight">{name}</span>
-      {active && <Check className="absolute end-1.5 top-1.5 h-5 w-5 rounded-full bg-primary p-0.5 text-primary-foreground" />}
+      <span className={`flex items-center gap-1.5 border-t px-2.5 py-2 text-[11px] font-semibold leading-tight ${active ? "text-primary" : "text-card-foreground"}`}>
+        <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${active ? "bg-primary" : "bg-muted-foreground/40"}`} />
+        <span className="truncate">{name}</span>
+      </span>
+      {active && <Check className="absolute end-1.5 top-1.5 h-5 w-5 rounded-full bg-primary p-0.5 text-primary-foreground shadow" />}
     </button>
   );
 });
