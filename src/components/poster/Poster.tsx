@@ -602,7 +602,10 @@ export const Poster = forwardRef<HTMLDivElement, { s: PosterState }>(function Po
   const cover = Math.abs(dw * scale - w) < 1 && Math.abs(dh * scale - h) < 1;
   const fits = cover && dw === w && dh === h;
   const sw = dw * scale, sh = dh * scale;
-  const left = wide ? (s.wideAlign === "start" ? 0 : s.wideAlign === "end" ? w - sw : (w - sw) / 2) : (w - sw) / 2;
+  // "start" = reading start: right side for Dhivehi, left for English
+  const startIsRight = s.dir === "rtl";
+  const atRight = s.wideAlign === "center" ? null : (s.wideAlign === "start") === startIsRight;
+  const left = !wide || atRight === null ? (w - sw) / 2 : atRight ? w - sw : 0;
   const top = (h - sh) / 2;
   const fadeX = wide ? "linear-gradient(to right, transparent, #000 6%, #000 94%, transparent)" : undefined;
   const fadeY = !wide && !cover ? "linear-gradient(to bottom, transparent, #000 5%, #000 95%, transparent)" : undefined;
@@ -613,8 +616,8 @@ export const Poster = forwardRef<HTMLDivElement, { s: PosterState }>(function Po
         body(s, w, h)
       ) : (
         <>
-          {wide && s.wideSide && (
-            <div style={abs({ top: 0, bottom: 0, ...(left > w / 2 - sw / 2 + 1 ? { left: 0, width: left } : { right: 0, width: w - left - sw }), display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 24, padding: 40 })}>
+          {wide && s.wideSide && atRight !== null && (
+            <div style={abs({ top: 0, bottom: 0, ...(atRight ? { left: 0, width: w - sw } : { right: 0, width: w - sw }), display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 24, padding: 40 })}>
               <Outlet s={s} color={s.textColor} size={46} />
               {s.showCategory && <Category s={s} />}
             </div>
