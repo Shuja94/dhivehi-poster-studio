@@ -87,7 +87,13 @@ const QUICK_SIZES: Aspect[] = ["4:5", "1:1", "9:16", "fb", "x", "yt"];
 const SIZE_NAMES: Partial<Record<Aspect, string>> = { "4:5": "Insta / FB post", "1:1": "Square post", "9:16": "Story / Status", fb: "Facebook wide", x: "X post", yt: "YouTube" };
 
 function Studio() {
-  const [s, setS] = useState<PosterState>({ ...BASE, photo: sampleSpeaker });
+  const [raw, setS] = useState<PosterState>({ ...BASE, photo: sampleSpeaker });
+  // Fill any setting missing from older saved/loaded state with its default, so sliders never show "undefined".
+  const s = useMemo(() => {
+    const out = { ...raw } as Record<string, unknown>;
+    for (const [k, v] of Object.entries(BASE)) if (out[k] === undefined && v !== undefined) out[k] = v;
+    return out as unknown as PosterState;
+  }, [raw]);
   const [thaanaKb, setThaanaKb] = useState(true);
   const [exportScale, setExportScale] = useState(2);
   const [format, setFormat] = useState<"png" | "jpg">("png");
