@@ -9,3 +9,14 @@ export function secondSpeaker(s: PosterState): PosterState {
     photoShadow: s.photo2Shadow, photoGhost: false,
   };
 }
+
+/** Ghost silhouette: same photo, but its own size/position — never tied to the main speaker sliders. */
+export function ghostSpeaker(s: PosterState): PosterState {
+  return { ...s, photoScale: s.ghostScale * 1.35, photoX: s.ghostX, photoY: s.ghostY, photoOutline: 0, photoShadow: false };
+}
+
+/** Background collage photo box (paper/archive), positioned independently of the speaker. */
+export function backPhotoBox(s: PosterState) {
+  const k = s.backPhotoScale / 100;
+  return { width: `${72 * k}%`, height: `${72 * k}%`, transform: `translate(${s.backPhotoX}px, ${s.backPhotoY}px) rotate(-2deg)`, opacity: s.backPhotoOpacity };
+}
