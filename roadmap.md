@@ -1,1 +1,1 @@
-- [ ] Give both collage speakers independent size, position, tone, outline and shadow controls; verify changes do not affect the other speaker.
+- [x] Give both collage speakers independent size, position, tone, outline and shadow controls; verify changes do not affect the other speaker.
