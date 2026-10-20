@@ -92,7 +92,7 @@ function Studio() {
   const s = useMemo(() => {
     const out = { ...raw } as Record<string, unknown>;
     for (const [k, v] of Object.entries(BASE)) if (out[k] === undefined && v !== undefined) out[k] = v;
-    return out as PosterState;
+    return out as unknown as PosterState;
   }, [raw]);
   const [thaanaKb, setThaanaKb] = useState(true);
   const [exportScale, setExportScale] = useState(2);
