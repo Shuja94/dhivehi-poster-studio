@@ -5,6 +5,7 @@ import minaret from "@/assets/minaret.jpg";
 import paperTexture from "@/assets/paper-texture.jpg";
 import type { PosterState } from "@/lib/poster/types";
 import { sizeOf } from "@/lib/poster/types";
+import { secondSpeaker } from "@/lib/poster/speakers";
 import {
   Background, Category, Extra, Footer, Headline, Outlet, Partners, Photo, QuoteBox, QuoteGlyph, QuoteText,
   Rich, THAANA_TYPO, Translation, Watermark, Waves, fam, torn,
@@ -310,33 +311,33 @@ function body(s: PosterState, w: number, h: number): ReactNode {
         </>
       );
 
-    /* Editorial collage: images and story occupy separate, bounded columns. */
+    /* Two-speaker collage with independent portrait settings. */
     case "collage":
       return (
         <>
           <div style={abs({ top: pad, insetInlineEnd: pad })}><Outlet s={s} color={s.textColor} size={46} /></div>
           {s.showHeadline && (
-            <div style={abs({ top: "13%", left: "6%", right: "6%", transform: `translateY(${s.headlineOffset}px)` })}>
-              <Headline s={s} color={s.textColor} />
+            <div style={abs({ top: "13%", insetInlineStart: "18%", transform: `translateY(${s.headlineOffset}px)` })}>
+              <span style={{ display: "inline-block", background: s.highlightColor, color: s.highlightText, fontFamily: fam(s.latinFont, s.headlineFont), fontSize: s.headlineSize, padding: "6px 34px", borderRadius: 8, lineHeight: 1.5, whiteSpace: "pre-wrap", ...THAANA_TYPO }}>
+                <Rich text={s.headline} s={s} bg={s.accent2} fg="#fff" />
+              </span>
               <Translation s={s} color={s.textColor} style={{ marginTop: 12 }} />
             </div>
           )}
           {s.showDecor && <Decor s={s} r={(s) => <>{(
             <>
-              <div style={abs({ top: "31%", bottom: "15%", insetInlineEnd: "6%", width: "40%", borderInlineStart: `3px solid ${s.accent}`, opacity: 0.5 })} />
-              <div style={abs({ top: "9%", insetInlineStart: "6%", width: 64, height: 5, background: s.accent })} />
+              <div style={abs({ top: "27%", bottom: "24%", insetInlineEnd: "30%", width: "22%", backgroundImage: `repeating-linear-gradient(90deg, ${s.accent2} 0 22px, transparent 22px 54px)`, opacity: 0.6 })} />
+              <div style={abs({ top: "34%", bottom: "6%", insetInlineEnd: "35%", width: 34, background: s.highlightColor, opacity: 0.85 })} />
             </>
           )}</>} />}
-          <Layer style={{ top: "31%", bottom: "15%", insetInlineEnd: "6%", width: "40%", overflow: "hidden" }}>
-            {s.photo2 && <Layer style={{ inset: 0, right: "45%" }}><Photo s={{ ...s, photo: s.photo2, photoX: -s.photoX }} contained /></Layer>}
-            <Layer style={{ inset: 0, left: s.photo2 ? "40%" : 0 }}><Photo s={s} contained /></Layer>
-            {s.extraImage && <Extra s={s} style={{ bottom: 0, left: "20%", width: "60%" }} />}
-          </Layer>
-          <div style={abs({ top: "33%", insetInlineStart: "6%", width: "46%", transform: `translateY(${s.quoteOffset}px)` })}>
+          <Layer style={{ top: "30%", bottom: "8%", insetInlineEnd: "24%", width: "42%" }}><Photo s={secondSpeaker(s)} /></Layer>
+          <Layer style={{ top: "38%", bottom: 0, insetInlineEnd: "-4%", width: "46%" }}><Photo s={s} /></Layer>
+          <Extra s={s} fallback={dome} style={{ bottom: 0, insetInlineEnd: "30%", width: "34%" }} />
+          <div style={abs({ top: "34%", insetInlineStart: "6%", width: "42%", transform: `translateY(${s.quoteOffset}px)` })}>
             <QuoteText s={s} color={s.textColor} />
             {s.name && <div style={{ ...nm, fontSize: s.nameSize * 0.8, color: s.highlightColor, marginTop: 20 }}>— {s.name}{s.designation ? ` · ${s.designation}` : ""}</div>}
           </div>
-          <div style={abs({ bottom: "5%", left: "6%", right: "6%", borderTop: `1px solid ${s.textColor}33`, paddingTop: 24 })}><Footer s={s} variant="icons" color={s.textColor} bg={s.bgColor} /></div>
+          <div style={abs({ bottom: "4%", insetInlineStart: "6%" })}><Footer s={s} variant="circles" color={s.textColor} bg={s.bgColor} /></div>
         </>
       );
 

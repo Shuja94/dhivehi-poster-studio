@@ -86,6 +86,12 @@ export interface PosterState {
 
   /* second speaker + secondary image (dome, books, building, emblem) */
   photo2?: string | undefined;
+  photo2Scale: number;
+  photo2X: number;
+  photo2Y: number;
+  photo2Tone: PhotoTone;
+  photo2Outline: number;
+  photo2Shadow: boolean;
   extraImage?: string | undefined;
   showExtra: boolean;
   extraScale: number;
