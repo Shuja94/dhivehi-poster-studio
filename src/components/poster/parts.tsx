@@ -126,7 +126,7 @@ export function Background({ s, w, h }: { s: PosterState; w: number; h: number }
 
 /* ---------- photo ---------- */
 
-export function Photo({ s, style, ghost, noFx, scale = 1 }: { s: PosterState; style?: CSSProperties; ghost?: boolean; noFx?: boolean; scale?: number }) {
+export function Photo({ s, style, ghost, noFx, scale = 1, contained = false }: { s: PosterState; style?: CSSProperties; ghost?: boolean; noFx?: boolean; scale?: number; contained?: boolean }) {
   if (!s.photo) return null;
   const o = noFx || ghost ? 0 : s.photoOutline;
   const filters = [
@@ -136,8 +136,8 @@ export function Photo({ s, style, ghost, noFx, scale = 1 }: { s: PosterState; st
     ghost ? "blur(1px)" : "",
   ].join(" ");
   return (
-    <div style={{ position: "absolute", bottom: 0, left: "50%", height: `${s.photoScale * scale}%`, transform: `translate(calc(-50% + ${s.photoX}px), ${s.photoY}px)`, opacity: ghost ? 0.22 : 1, ...style }}>
-      <img src={s.photo} alt="" style={{ height: "100%", width: "auto", maxWidth: "none", display: "block", filter: filters }} />
+    <div style={{ position: "absolute", bottom: 0, left: "50%", height: `${s.photoScale * scale}%`, width: contained ? "100%" : undefined, transform: `translate(calc(-50% + ${s.photoX}px), ${s.photoY}px)`, opacity: ghost ? 0.22 : 1, ...style }}>
+      <img src={s.photo} alt="" style={{ height: "100%", width: contained ? "100%" : "auto", maxWidth: contained ? "100%" : "none", objectFit: contained ? "contain" : undefined, objectPosition: "bottom", display: "block", filter: filters }} />
       {s.photoTone === "duotone" && (
         <div style={{ position: "absolute", inset: 0, background: s.accent, mixBlendMode: "color", maskImage: `url(${s.photo})`, maskSize: "100% 100%" }} />
       )}
