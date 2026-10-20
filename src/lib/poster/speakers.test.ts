@@ -14,3 +14,10 @@ describe("independent speaker controls", () => {
     expect([state.photoScale, state.photoX, state.photoY, state.photoTone, state.photoOutline, state.photoShadow]).toEqual([100, 0, 0, "color", 10, true]);
   });
 });
+import { ghostSpeaker } from "./speakers";
+describe("ghost silhouette controls", () => {
+  it("ghost ignores the main speaker's size and position", () => {
+    const g = ghostSpeaker({ ...BASE, photoScale: 180, photoX: 400, photoY: 300, ghostScale: 100, ghostX: -50, ghostY: 20 });
+    expect([g.photoScale, g.photoX, g.photoY]).toEqual([135, -50, 20]);
+  });
+});

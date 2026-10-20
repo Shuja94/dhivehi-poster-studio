@@ -514,6 +514,15 @@ function Studio() {
                 </Select>
               </Field>
               {toggle("Ghost silhouette behind (topographic)", "photoGhost")}
+              {s.photoGhost && (
+                <div className="space-y-4 rounded-lg border border-border p-3">
+                  <p className="text-sm font-semibold">Ghost silhouette (moves on its own)</p>
+                  {slider("Ghost size %", "ghostScale", 30, 200)}
+                  {slider("Ghost sideways", "ghostX", -600, 600)}
+                  {slider("Ghost up/down", "ghostY", -600, 600)}
+                  {slider("Ghost strength", "ghostOpacity", 0, 1, 0.05)}
+                </div>
+              )}
               {toggle("Drop shadow", "photoShadow")}
               <Field label="Second speaker photo (collage style)">{upload("photo2")}</Field>
               {s.photo2 && <Button size="sm" variant="secondary" onClick={() => set("photo2", undefined)}>Remove second photo</Button>}
@@ -545,8 +554,20 @@ function Studio() {
                   </Select>
                 </Field>
               </div>
-              <Field label="Background collage photo (paper / archive)">{upload("backPhoto")}</Field>
-              {s.backPhoto && <Button size="sm" variant="secondary" onClick={() => set("backPhoto", undefined)}>Remove collage photo</Button>}
+              <div className="space-y-4 rounded-lg border border-border p-3">
+                <p className="text-sm font-semibold">Background collage photo (paper / archive)</p>
+                <p className="text-xs text-muted-foreground">The photo behind the speaker. It has its own controls.</p>
+                {upload("backPhoto")}
+                {s.backPhoto && (
+                  <>
+                    <Button size="sm" variant="secondary" onClick={() => set("backPhoto", undefined)}>Remove collage photo</Button>
+                    {slider("Collage photo size %", "backPhotoScale", 30, 200)}
+                    {slider("Collage photo sideways", "backPhotoX", -600, 600)}
+                    {slider("Collage photo up/down", "backPhotoY", -600, 600)}
+                    {slider("Collage photo strength", "backPhotoOpacity", 0, 1, 0.05)}
+                  </>
+                )}
+              </div>
             </TabsContent>
 
             <TabsContent value="style" className="mt-4 space-y-4">

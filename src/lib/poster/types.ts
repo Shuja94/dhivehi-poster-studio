@@ -79,7 +79,16 @@ export interface PosterState {
   photoOutline: number;
   photoShadow: boolean;
   photoGhost: boolean;
+  /* ghost silhouette has its own placement so it never follows the main speaker */
+  ghostScale: number;
+  ghostX: number;
+  ghostY: number;
+  ghostOpacity: number;
   backPhoto?: string | undefined;
+  backPhotoScale: number;
+  backPhotoX: number;
+  backPhotoY: number;
+  backPhotoOpacity: number;
   showDecor: boolean;
 
   latinFont: string;

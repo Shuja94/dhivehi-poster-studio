@@ -1,1 +1,1 @@
-- [x] Give both collage speakers independent size, position, tone, outline and shadow controls; verify changes do not affect the other speaker.
+- [x] Give both collage speakers independent size, position, tone, outline and shadow controls; verify changes do not affect the other speaker.- [x] Give the ghost silhouette and the collage back photo their own controls, separate from the main speaker.

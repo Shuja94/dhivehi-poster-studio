@@ -5,7 +5,7 @@ import minaret from "@/assets/minaret.jpg";
 import paperTexture from "@/assets/paper-texture.jpg";
 import type { PosterState } from "@/lib/poster/types";
 import { sizeOf } from "@/lib/poster/types";
-import { secondSpeaker } from "@/lib/poster/speakers";
+import { secondSpeaker, ghostSpeaker, backPhotoBox } from "@/lib/poster/speakers";
 import {
   Background, Category, Extra, Footer, Headline, Outlet, Partners, Photo, QuoteBox, QuoteGlyph, QuoteText,
   Rich, THAANA_TYPO, Translation, Watermark, Waves, fam, torn,
@@ -88,7 +88,7 @@ function body(s: PosterState, w: number, h: number): ReactNode {
       return (
         <>
           <div style={abs({ top: "6%", bottom: "11%", left: "7%", right: "7%", background: s.accent, borderRadius: 44, overflow: "hidden", boxShadow: "0 30px 60px rgba(20,40,70,.25)", clipPath: "polygon(0 0, 100% 0, 100% 70%, 94% 74%, 94% 100%, 0 100%)" })}>
-            {s.photoGhost && <Layer style={{ inset: 0 }}><Photo s={{ ...s, photoX: s.photoX - 120, photoY: s.photoY - 60 }} ghost scale={1.35} style={{ bottom: "8%" }} /></Layer>}
+            {s.photoGhost && <Layer style={{ inset: 0 }}><Photo s={ghostSpeaker(s)} ghost style={{ bottom: "8%", opacity: s.ghostOpacity }} /></Layer>}
             <Layer style={{ bottom: 0, insetInlineEnd: 0, width: "62%", height: "72%" }}><Photo s={s} /></Layer>
             <div style={abs({ top: "30%", insetInlineStart: "7%", width: "50%", display: "flex", flexDirection: "column", gap: 18 })}>
               <QuoteGlyph s={s} size={80} color={s.accent} bg="#fff" />
@@ -548,14 +548,14 @@ function body(s: PosterState, w: number, h: number): ReactNode {
             <div style={{ flex: 1, position: "relative", minHeight: 200 }}>
               {archive ? (
                 <div style={abs({ inset: "0 12%", background: "#ece6da", padding: 14, boxShadow: "0 14px 30px rgba(0,0,0,.3)", transform: "rotate(-1.2deg)", overflow: "hidden" })}>
-                  {s.backPhoto && <img src={s.backPhoto} alt="" style={abs({ inset: 0, width: "100%", height: "100%", objectFit: "cover", filter: "grayscale(1) sepia(.3)", opacity: 0.6 })} />}
+                  {s.backPhoto && <img src={s.backPhoto} alt="" style={abs({ inset: 0, width: "100%", height: "100%", objectFit: "cover", filter: "grayscale(1) sepia(.3)", opacity: s.backPhotoOpacity, transform: `translate(${s.backPhotoX}px, ${s.backPhotoY}px) scale(${s.backPhotoScale / 100})` })} />}
                   <div style={abs({ inset: 14, overflow: "hidden", background: s.backPhoto ? "transparent" : "#d8d2c6" })}>
                     <Photo s={s} noFx />
                   </div>
                 </div>
               ) : (
                 <>
-                  {s.backPhoto && <img src={s.backPhoto} alt="" style={abs({ top: "8%", left: "14%", width: "72%", height: "72%", objectFit: "cover", clipPath: torn(9, 3), filter: "contrast(1.1)", transform: "rotate(-2deg)" })} />}
+                  {s.backPhoto && <img src={s.backPhoto} alt="" style={abs({ top: "8%", left: "14%", objectFit: "cover", clipPath: torn(9, 3), filter: "contrast(1.1)", ...backPhotoBox(s) })} />}
                   <Photo s={s} />
                   <div style={abs({ bottom: 4, left: "-4%", right: "-4%", height: 6, background: s.highlightColor, transform: "rotate(-0.8deg)" })} />
                   <div style={abs({ bottom: 18, left: "8%", right: "8%", height: 3, background: s.highlightColor, transform: "rotate(0.6deg)" })} />

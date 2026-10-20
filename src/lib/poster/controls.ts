@@ -17,6 +17,8 @@ export const KEY_TAB: Partial<Record<Key, TabId>> = {
   photo2Scale: "photo", photo2X: "photo", photo2Y: "photo", photo2Tone: "photo", photo2Outline: "photo", photo2Shadow: "photo",
   extraImage: "photo", showExtra: "photo", extraScale: "photo", extraX: "photo", extraY: "photo",
   extraOpacity: "photo", extraTone: "photo",
+  ghostScale: "photo", ghostX: "photo", ghostY: "photo", ghostOpacity: "photo",
+  backPhotoScale: "photo", backPhotoX: "photo", backPhotoY: "photo", backPhotoOpacity: "photo",
   // Look
   bgType: "style", bgImage: "style", bgColor: "style", bgColor2: "style", textureOpacity: "style",
   showGrid: "style", tornEdges: "style", showDecor: "style", patternColor: "style", patternOpacity: "style",
