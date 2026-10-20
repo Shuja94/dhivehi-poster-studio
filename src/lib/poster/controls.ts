@@ -14,6 +14,7 @@ export const KEY_TAB: Partial<Record<Key, TabId>> = {
   // Images
   photo: "photo", photoScale: "photo", photoX: "photo", photoY: "photo", photoTone: "photo",
   photoOutline: "photo", photoShadow: "photo", photoGhost: "photo", photo2: "photo", backPhoto: "photo",
+  photo2Scale: "photo", photo2X: "photo", photo2Y: "photo", photo2Tone: "photo", photo2Outline: "photo", photo2Shadow: "photo",
   extraImage: "photo", showExtra: "photo", extraScale: "photo", extraX: "photo", extraY: "photo",
   extraOpacity: "photo", extraTone: "photo",
   // Look
@@ -39,6 +40,8 @@ export const KEY_LABEL: Partial<Record<Key, string>> = {
   date: "Date", dateBig: "Big date", showDate: "Show date",
   photo: "Speaker photo", photoTone: "Photo tone", photoGhost: "Ghost silhouette", photoOutline: "Cutout outline",
   photoShadow: "Photo shadow", photoScale: "Photo size", photo2: "Second speaker", backPhoto: "Collage photo",
+  photo2Scale: "Second speaker size", photo2X: "Second speaker sideways", photo2Y: "Second speaker up/down",
+  photo2Tone: "Second speaker tone", photo2Outline: "Second speaker outline", photo2Shadow: "Second speaker shadow",
   extraImage: "Second image", showExtra: "Show second image", extraScale: "Second image size",
   extraOpacity: "Second image opacity", extraTone: "Second image tone",
   bgType: "Background", bgColor: "Background colour", bgColor2: "Background colour 2", bgImage: "Background image",

@@ -5,6 +5,7 @@ import minaret from "@/assets/minaret.jpg";
 import paperTexture from "@/assets/paper-texture.jpg";
 import type { PosterState } from "@/lib/poster/types";
 import { sizeOf } from "@/lib/poster/types";
+import { secondSpeaker } from "@/lib/poster/speakers";
 import {
   Background, Category, Extra, Footer, Headline, Outlet, Partners, Photo, QuoteBox, QuoteGlyph, QuoteText,
   Rich, THAANA_TYPO, Translation, Watermark, Waves, fam, torn,
@@ -310,7 +311,7 @@ function body(s: PosterState, w: number, h: number): ReactNode {
         </>
       );
 
-    /* Two-speaker collage with stripes + landmark */
+    /* Two-speaker collage with independent portrait settings. */
     case "collage":
       return (
         <>
@@ -329,7 +330,7 @@ function body(s: PosterState, w: number, h: number): ReactNode {
               <div style={abs({ top: "34%", bottom: "6%", insetInlineEnd: "35%", width: 34, background: s.highlightColor, opacity: 0.85 })} />
             </>
           )}</>} />}
-          <Layer style={{ top: "30%", bottom: "8%", insetInlineEnd: "24%", width: "42%" }}><Photo s={{ ...s, photo: s.photo2 ?? s.photo, photoX: -s.photoX }} /></Layer>
+          <Layer style={{ top: "30%", bottom: "8%", insetInlineEnd: "24%", width: "42%" }}><Photo s={secondSpeaker(s)} /></Layer>
           <Layer style={{ top: "38%", bottom: 0, insetInlineEnd: "-4%", width: "46%" }}><Photo s={s} /></Layer>
           <Extra s={s} fallback={dome} style={{ bottom: 0, insetInlineEnd: "30%", width: "34%" }} />
           <div style={abs({ top: "34%", insetInlineStart: "6%", width: "42%", transform: `translateY(${s.quoteOffset}px)` })}>

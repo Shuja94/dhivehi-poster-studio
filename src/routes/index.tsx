@@ -517,6 +517,17 @@ function Studio() {
               {toggle("Drop shadow", "photoShadow")}
               <Field label="Second speaker photo (collage style)">{upload("photo2")}</Field>
               {s.photo2 && <Button size="sm" variant="secondary" onClick={() => set("photo2", undefined)}>Remove second photo</Button>}
+              {slider("Second speaker size %", "photo2Scale", 30, 200)}
+              {slider("Second speaker sideways", "photo2X", -600, 600)}
+              {slider("Second speaker up/down", "photo2Y", -600, 600)}
+              {slider("Second speaker outline", "photo2Outline", 0, 20)}
+              <Field label="Second speaker tone" ctl="photo2Tone">
+                <Select value={s.photo2Tone} onValueChange={(v) => set("photo2Tone", v as PosterState["photo2Tone"])}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent><SelectItem value="color">Full colour</SelectItem><SelectItem value="gray">Black &amp; white</SelectItem><SelectItem value="duotone">Duotone (accent tint)</SelectItem></SelectContent>
+                </Select>
+              </Field>
+              {toggle("Second speaker shadow", "photo2Shadow")}
               <div className="space-y-4 rounded-lg border border-border p-3">
                 <p className="text-sm font-semibold">Secondary image</p>
                 <p className="text-xs text-muted-foreground">The dome, books, building or emblem in a style. Upload your own to replace it.</p>
