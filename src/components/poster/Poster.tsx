@@ -4,6 +4,7 @@ import books from "@/assets/books.png";
 import minaret from "@/assets/minaret.jpg";
 import paperTexture from "@/assets/paper-texture.jpg";
 import type { PosterState } from "@/lib/poster/types";
+import { over } from "@/lib/poster/track";
 import { sizeOf } from "@/lib/poster/types";
 import { secondSpeaker, ghostSpeaker, backPhotoBox } from "@/lib/poster/speakers";
 import {
@@ -19,7 +20,7 @@ const abs = (o: CSSProperties): CSSProperties => ({ position: "absolute", ...o }
 /** Background decoration layer: user controls its strength and colour. */
 function Decor({ s, r }: { s: PosterState; r: (s: PosterState) => ReactNode }) {
   const c = s.decorColor;
-  const t = c ? { ...s, accent: c, accent2: c, highlightColor: c, textColor: c } : s;
+  const t = c ? over(s, { accent: c, accent2: c, highlightColor: c, textColor: c }) : s;
   return <div style={abs({ inset: 0, opacity: s.decorOpacity, pointerEvents: "none" })}>{r(t)}</div>;
 }
 
@@ -115,7 +116,7 @@ function body(s: PosterState, w: number, h: number): ReactNode {
           )} />
           <div style={abs({ top: "22%", left: 0, right: 0, display: "flex", justifyContent: "center" })}>
             <div style={{ position: "relative", background: `linear-gradient(135deg, ${s.highlightColor}, ${s.accent})`, borderRadius: 22, padding: "26px 56px", boxShadow: `0 24px 50px ${s.accent}55`, maxWidth: "72%" }}>
-              <Headline s={{ ...s, headlineStyle: "plain", showTranslation: false }} color="#ffffff" style={{ textAlign: "center" }} />
+              <Headline s={over(s, { headlineStyle: "plain", showTranslation: false })} color="#ffffff" style={{ textAlign: "center" }} />
               <div style={abs({ bottom: -46, insetInlineEnd: -30, fontFamily: '"Archivo Black", sans-serif', fontSize: 170, color: s.accent2, lineHeight: 1, textShadow: "0 8px 18px rgba(0,0,0,.25)" })}>?</div>
             </div>
           </div>
@@ -140,7 +141,7 @@ function body(s: PosterState, w: number, h: number): ReactNode {
             {s.showCategory && (
               <div style={abs({ top: -38, left: "50%", transform: "translateX(-50%)", background: s.highlightColor, color: s.highlightText, borderRadius: 999, padding: "10px 44px", ...nm, fontSize: 36, whiteSpace: "nowrap", boxShadow: "0 10px 24px rgba(0,0,0,.2)" })}>{s.category}</div>
             )}
-            <Headline s={{ ...s, headlineStyle: "plain" }} color={s.cardText} style={{ textAlign: "center" }} />
+            <Headline s={over(s, { headlineStyle: "plain" })} color={s.cardText} style={{ textAlign: "center" }} />
             <QuoteText s={s} color={s.cardText} align="center" />
             <div style={{ width: "86%", height: 2, background: s.cardText, opacity: 0.4 }} />
             <Footer s={s} variant="icons" color={s.cardText} bg={s.cardColor} />
@@ -157,7 +158,7 @@ function body(s: PosterState, w: number, h: number): ReactNode {
           <div style={abs({ top: pad * 0.7, insetInlineStart: pad * 0.7, background: s.highlightColor, color: s.highlightText, padding: "6px 18px", transform: "skewX(-8deg)" })}><Outlet s={s} color={s.highlightText} size={28} /></div>
           <div style={abs({ top: "44%", left: pad, right: pad, display: "flex", flexDirection: "column", gap: 22, alignItems: "flex-start" })}>
             {s.showCategory && <div style={{ background: s.accent2, color: "#111", borderRadius: 8, padding: "6px 22px", ...nm, fontSize: 28, lineHeight: 1.5 }}>{s.category}</div>}
-            <Headline s={{ ...s, headlineStyle: "plain" }} color={s.textColor} />
+            <Headline s={over(s, { headlineStyle: "plain" })} color={s.textColor} />
             <QuoteText s={s} color={s.textColor} size={s.quoteSize * 0.85} style={{ opacity: 0.9 }} />
           </div>
           <div style={abs({ bottom: pad * 0.8, left: pad, right: pad, display: "flex", justifyContent: "space-between", alignItems: "center" })}>
@@ -171,7 +172,7 @@ function body(s: PosterState, w: number, h: number): ReactNode {
     case "mono":
       return (
         <>
-          <Cover s={{ ...s, photoTone: "gray" }} style={{ inset: 0 }} />
+          <Cover s={over(s, { photoTone: "gray" })} style={{ inset: 0 }} />
           <div style={abs({ inset: 0, background: `linear-gradient(to bottom, ${s.bgColor}aa 0%, transparent 25%, transparent 38%, ${s.bgColor}cc 62%, ${s.bgColor} 85%)` })} />
           <div style={abs({ top: pad, left: pad, right: pad })}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: 14, borderBottom: `3px solid ${s.accent}` }}>
@@ -182,7 +183,7 @@ function body(s: PosterState, w: number, h: number): ReactNode {
           </div>
           <div style={abs({ bottom: "16%", left: pad, right: pad, display: "flex", flexDirection: "column", gap: 24, alignItems: "flex-start" })}>
             {s.showCategory && <div style={{ background: s.accent, color: s.bgColor, padding: "8px 22px", ...latin("Space Grotesk"), fontSize: 26, fontWeight: 700, letterSpacing: 3 }}>{s.category}</div>}
-            <Headline s={{ ...s, headlineStyle: "plain", highlightColor: "transparent", highlightText: s.accent }} color={s.textColor} style={{ lineHeight: 1 }} />
+            <Headline s={over(s, { headlineStyle: "plain", highlightColor: "transparent", highlightText: s.accent })} color={s.textColor} style={{ lineHeight: 1 }} />
             <QuoteText s={s} color={s.textColor} size={s.quoteSize * 0.85} />
           </div>
           <div style={abs({ bottom: pad, left: pad, right: pad, display: "flex", alignItems: "center", gap: 20 })}>
@@ -212,7 +213,7 @@ function body(s: PosterState, w: number, h: number): ReactNode {
           </div>
           <div style={abs({ top: "50%", insetInlineStart: "8%", width: "64%", background: s.bgColor2, padding: "34px 40px 40px", display: "flex", flexDirection: "column", gap: 20, alignItems: "flex-start" })}>
             {s.showCategory && <div style={{ ...nm, fontSize: 26, color: "#fff", fontWeight: 700 }}>{s.category}</div>}
-            <Headline s={{ ...s, headlineStyle: "plain" }} color="#ffffff" />
+            <Headline s={over(s, { headlineStyle: "plain" })} color="#ffffff" />
             <div style={{ width: 140, height: 6, background: "#fff" }} />
             <QuoteText s={s} color="#ffffffcc" size={s.quoteSize * 0.7} />
           </div>
@@ -234,7 +235,7 @@ function body(s: PosterState, w: number, h: number): ReactNode {
           <div style={abs({ top: "52%", bottom: 0, left: 0, right: 0, background: s.accent, clipPath: s.dir === "rtl" ? "polygon(0 6%, 100% 0, 100% 100%, 0 100%)" : "polygon(0 0, 100% 6%, 100% 100%, 0 100%)" })} />
           <div style={abs({ top: "57%", left: pad, right: pad, display: "flex", flexDirection: "column", gap: 22, alignItems: "flex-start" })}>
             {s.showCategory && <div style={{ ...nm, fontSize: 28, color: "#fff", fontWeight: 800 }}>{s.category}</div>}
-            <Headline s={{ ...s, headlineStyle: "plain" }} color="#ffffff" />
+            <Headline s={over(s, { headlineStyle: "plain" })} color="#ffffff" />
             {s.showDate && <div style={{ ...nm, fontSize: 26, color: "#ffffffdd" }}>{s.date}</div>}
           </div>
           <div style={abs({ bottom: pad, left: pad, right: pad, borderTop: "2px solid #ffffff55", paddingTop: 22, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 20 })}>
@@ -280,7 +281,7 @@ function body(s: PosterState, w: number, h: number): ReactNode {
           <div style={abs({ top: pad, insetInlineStart: "6%" })}><Outlet s={s} color={s.textColor} size={52} /></div>
           <div style={abs({ top: "35%", insetInlineEnd: "5%", width: "46%", aspectRatio: "1", borderRadius: "50%", background: s.accent2, boxShadow: `0 0 120px ${s.accent2}88` })} />
           <Layer style={{ top: "22%", bottom: "16%", insetInlineEnd: "2%", width: "52%" }}><Photo s={s} /></Layer>
-          <QuoteBox s={{ ...s, quoteBox: s.quoteBox === "none" ? "arch" : s.quoteBox }} tail={false} pad="0" style={abs({ top: "17%", bottom: "16%", insetInlineStart: "6%", width: "54%" })}>
+          <QuoteBox s={over(s, { quoteBox: s.quoteBox === "none" ? "arch" : s.quoteBox })} tail={false} pad="0" style={abs({ top: "17%", bottom: "16%", insetInlineStart: "6%", width: "54%" })}>
             <div style={{ height: "100%", display: "flex", flexDirection: "column", justifyContent: "center", gap: 26, padding: "60px 64px" }}>
               <QuoteGlyph s={s} size={80} color="#fff" bg={s.accent2} />
               <QuoteText s={s} color={s.cardText} />
@@ -359,7 +360,7 @@ function body(s: PosterState, w: number, h: number): ReactNode {
                 </div>
               )}
             </div>
-            <QuoteBox s={{ ...s, quoteBox: s.quoteBox === "none" ? "glass" : s.quoteBox }} style={{ marginTop: 70 }} pad="80px 56px 56px">
+            <QuoteBox s={over(s, { quoteBox: s.quoteBox === "none" ? "glass" : s.quoteBox })} style={{ marginTop: 70 }} pad="80px 56px 56px">
               <div style={abs({ top: -54, left: "50%", transform: "translateX(-50%)" })}><QuoteGlyph s={s} size={90} color={s.textColor} /></div>
               {s.showCategory && <div style={{ marginBottom: 20 }}><Category s={s} /></div>}
               <QuoteText s={s} color={s.quoteBox === "torn" || s.quoteBox === "speech" || s.quoteBox === "arch" ? "#111" : s.cardText} />
@@ -410,7 +411,7 @@ function body(s: PosterState, w: number, h: number): ReactNode {
       return (
         <>
           <div style={abs({ top: "3.5%", left: "50%", transform: "translateX(-50%)" })}><Outlet s={s} color={s.textColor} size={48} /></div>
-          <QuoteBox s={{ ...s, quoteBox: s.quoteBox === "none" ? "glass" : s.quoteBox }} tail={false} style={abs({ top: "14%", bottom: "33%", left: "22%", right: "22%", background: s.quoteBox === "glass" || s.quoteBox === "none" ? "rgba(255,255,255,.55)" : undefined })} pad="60px 64px">
+          <QuoteBox s={over(s, { quoteBox: s.quoteBox === "none" ? "glass" : s.quoteBox })} tail={false} style={abs({ top: "14%", bottom: "33%", left: "22%", right: "22%", background: s.quoteBox === "glass" || s.quoteBox === "none" ? "rgba(255,255,255,.55)" : undefined })} pad="60px 64px">
             <QuoteText s={s} color={s.cardText} />
             <div style={{ marginTop: 20 }}><QuoteGlyph s={s} size={90} color="#fff" bg={s.accent} /></div>
           </QuoteBox>
@@ -471,7 +472,7 @@ function body(s: PosterState, w: number, h: number): ReactNode {
     case "headline":
       return (
         <>
-          <Layer style={{ inset: 0 }}><Photo s={{ ...s, photoOutline: 0, photoShadow: false }} /></Layer>
+          <Layer style={{ inset: 0 }}><Photo s={over(s, { photoOutline: 0, photoShadow: false })} /></Layer>
           <div style={abs({ inset: 0, background: `linear-gradient(to bottom, transparent 30%, ${s.bgColor}ee 66%, ${s.bgColor})` })} />
           <div style={abs({ inset: 0, padding: pad, display: "flex", flexDirection: "column" })}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -583,7 +584,7 @@ function body(s: PosterState, w: number, h: number): ReactNode {
             {s.handle && <div dir="ltr" style={{ ...nm, fontSize: 26, color: s.textColor, fontWeight: 700, marginTop: 14 }}>{s.handle}</div>}
           </div>
           <div style={abs({ bottom: "5%", insetInlineEnd: "7%", textAlign: "end", display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 12, maxWidth: "45%" })}>
-            <Footer s={{ ...s, handle: "" }} variant="circles" color={s.accent2} bg={s.bgColor} />
+            <Footer s={over(s, { handle: "" })} variant="circles" color={s.accent2} bg={s.bgColor} />
             {s.cta && <div style={{ ...nm, fontSize: 26, color: s.textColor, fontWeight: 700, whiteSpace: "pre-wrap", lineHeight: 1.4 }}><Rich text={s.cta} s={s} bg="transparent" fg={s.accent2} /></div>}
           </div>
         </>
@@ -706,7 +707,7 @@ function body(s: PosterState, w: number, h: number): ReactNode {
           <div style={abs({ top: "7%", bottom: "8%", left: "11%", right: "11%", background: s.cardColor, boxShadow: "0 30px 60px rgba(0,0,0,.25)", transform: "rotate(-0.5deg)", overflow: "hidden" })}>
             <img src={paperTexture} alt="" style={abs({ inset: 0, width: "100%", height: "100%", objectFit: "cover", mixBlendMode: "multiply", opacity: s.textureOpacity })} />
             <div style={abs({ top: "20%", left: "50%", transform: "translateX(-50%)", width: "34%", aspectRatio: "1", borderRadius: "50%", background: s.accent, opacity: 0.75 })} />
-            <Layer style={{ top: "2%", bottom: "40%", left: "8%", right: "8%", maskImage: "linear-gradient(to bottom, #000 70%, transparent 100%)" }}><Photo s={{ ...s, photoOutline: 0 }} /></Layer>
+            <Layer style={{ top: "2%", bottom: "40%", left: "8%", right: "8%", maskImage: "linear-gradient(to bottom, #000 70%, transparent 100%)" }}><Photo s={over(s, { photoOutline: 0 })} /></Layer>
             <div style={abs({ top: "9%", insetInlineStart: "12%" })}><QuoteGlyph s={s} size={70} color={s.cardText} bg={s.cardText} /></div>
             <div style={abs({ top: "62%", left: "9%", right: "9%", transform: `translateY(${s.quoteOffset}px)` })}><QuoteText s={s} color={s.cardText} /></div>
             <div style={abs({ bottom: "6%", insetInlineEnd: "9%", width: "34%" })}>
@@ -724,7 +725,7 @@ function body(s: PosterState, w: number, h: number): ReactNode {
     case "tweet":
       return (
         <>
-          <Extra s={{ ...s, extraScale: s.extraScale }} fallback={minaret} cover style={{ top: 0, left: 0, right: 0, height: "50%" }} />
+          <Extra s={over(s, { extraScale: s.extraScale })} fallback={minaret} cover style={{ top: 0, left: 0, right: 0, height: "50%" }} />
           <div style={abs({ top: 0, left: 0, right: 0, height: "50%", background: `linear-gradient(to bottom, transparent 40%, ${s.bgColor}aa)` })} />
           <div style={abs({ top: "6%", insetInlineEnd: "7%" })}><Outlet s={s} color="#fff" size={44} /></div>
           <div style={abs({ top: "44%", bottom: 0, left: 0, right: 0, background: s.cardColor, clipPath: s.tornEdges ? torn(41, 1.6) : undefined, overflow: "hidden" })}>
