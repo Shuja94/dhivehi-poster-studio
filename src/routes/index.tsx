@@ -156,7 +156,7 @@ function Studio() {
     catch { setBrandSaveNote("Your logo is too large to remember automatically — use “Download kit” to keep it."); }
   }, [brandJson, brandReady]);
   const hasBrand = s.outlet !== BASE.outlet || !!s.logo;
-  const [tab, setTab] = useState<TabId>("quick");
+  const [tab, setTab] = useState<TabId>("presets");
   const [focus, setFocus] = useState<{ id: string; name: string; tab: TabId; keys: PosterKey[] } | null>(null);
   const [flash, setFlash] = useState<{ k: string; n: number } | null>(null);
   const panelRef = useRef<HTMLElement>(null);
