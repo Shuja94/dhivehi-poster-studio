@@ -157,6 +157,7 @@ function Studio() {
   }, [brandJson, brandReady]);
   const hasBrand = s.outlet !== BASE.outlet || !!s.logo;
   const [tab, setTab] = useState<TabId>("presets");
+  const [panelOpen, setPanelOpen] = useState(true);
   const [focus, setFocus] = useState<{ id: string; name: string; tab: TabId; keys: PosterKey[] } | null>(null);
   const [flash, setFlash] = useState<{ k: string; n: number } | null>(null);
   const panelRef = useRef<HTMLElement>(null);
@@ -316,7 +317,6 @@ function Studio() {
   const [hand, setHand] = useState(false);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [exportOpen, setExportOpen] = useState(false);
-  const [panelOpen, setPanelOpen] = useState(true);
   const [q, setQ] = useState("");
   const [cat, setCat] = useState<string>("All");
   const [box, setBox] = useState<{ x: number; y: number; w: number; h: number } | null>(null);
