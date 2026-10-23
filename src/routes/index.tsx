@@ -5,7 +5,6 @@ import { Download, Keyboard, Upload, RotateCcw, Type, Image as ImageIcon, Palett
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Poster } from "@/components/poster/Poster";
 import { tracked } from "@/lib/poster/track";
-import { KEY_TAB } from "@/lib/poster/controls";
 import { FOOTER_LABELS, FOOTER_PLACEHOLDERS } from "@/lib/poster/footer-labels";
 import { BASE, PRESETS } from "@/lib/poster/presets";
 import { ASPECTS, HIGHLIGHTS, LATIN_FONTS, THAANA_FONTS, sizeOf, type Aspect, type PosterState } from "@/lib/poster/types";
