@@ -1,13 +1,14 @@
 import type { CSSProperties, ReactNode } from "react";
 import minaret from "@/assets/minaret.jpg";
 import type { PosterState } from "@/lib/poster/types";
+import { over } from "@/lib/poster/track";
 import { Category, Footer, Headline, Outlet, Photo, QuoteGlyph, QuoteText, Rich, THAANA_TYPO, fam } from "./parts";
 
 /* Second batch of news / quote layouts, researched from wire-service, broadcaster and magazine social templates.
  * Designed on a 1080-wide canvas (height 1080–1920). Poster artwork is user-coloured: inline colour values are intentional. */
 
 const abs = (o: CSSProperties): CSSProperties => ({ position: "absolute", ...o });
-const plain = (s: PosterState, extra: Partial<PosterState> = {}): PosterState => ({ ...s, headlineStyle: "plain", ...extra });
+const plain = (s: PosterState, extra: Partial<PosterState> = {}): PosterState => (over(s, { headlineStyle: "plain", ...extra }));
 
 function Cover({ s, style, tone }: { s: PosterState; style: CSSProperties; tone?: PosterState["photoTone"] }) {
   const t = tone ?? s.photoTone;
@@ -386,7 +387,7 @@ export function body2(s: PosterState, w: number, h: number): ReactNode | null {
           <div style={abs({ inset: pad * 1.2, ...col({ alignItems: "center", justifyContent: "center", gap: 28, textAlign: "center" }) })}>
             <Headline s={plain(s, { highlightColor: "transparent", highlightText: s.accent2 })} color={s.textColor} style={{ textAlign: "center" }} />
             <div style={{ width: 300, height: 300, borderRadius: "50%", overflow: "hidden", position: "relative", border: `6px solid ${s.accent2}`, background: "#222", flexShrink: 0 }}>
-              <Photo s={{ ...s, photoTone: "gray" }} noFx />
+              <Photo s={over(s, { photoTone: "gray" })} noFx />
             </div>
             <Name color={s.accent2} size={1.3} style={{ alignItems: "center" }} />
             <QuoteText s={s} color={s.textColor} align="center" size={s.quoteSize * 0.85} style={{ opacity: 0.85 }} />

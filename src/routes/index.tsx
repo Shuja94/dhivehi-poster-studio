@@ -1,10 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { memo, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { toJpeg, toPng } from "html-to-image";
-import { Download, Keyboard, Upload, RotateCcw, Type, Image as ImageIcon, Palette, LayoutTemplate, Share2, Zap, Sparkles, Shuffle, Check, Scissors, Newspaper, Undo2, Redo2, Cloud, Loader2, Hand, MousePointer2, Minus, Plus, Maximize, X, Search } from "lucide-react";
+import { Download, Keyboard, Upload, RotateCcw, Type, Image as ImageIcon, Palette, LayoutTemplate, Share2, Zap, Sparkles, Shuffle, Check, Undo2, Redo2, Cloud, Loader2, Hand, MousePointer2, Minus, Plus, Maximize, X, Search } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Poster } from "@/components/poster/Poster";
-import { CutoutPanel, NewsPanel } from "@/components/poster/Tools";
+import { tracked } from "@/lib/poster/track";
+import { KEY_TAB } from "@/lib/poster/controls";
 import { FOOTER_LABELS, FOOTER_PLACEHOLDERS } from "@/lib/poster/footer-labels";
 import { BASE, PRESETS } from "@/lib/poster/presets";
 import { ASPECTS, HIGHLIGHTS, LATIN_FONTS, THAANA_FONTS, sizeOf, type Aspect, type PosterState } from "@/lib/poster/types";
@@ -99,6 +100,9 @@ const PresetThumb = memo(function PresetThumb({ state, active, name, onPick }: {
 const QUICK_SIZES: Aspect[] = ["4:5", "1:1", "9:16", "fb", "x", "yt"];
 const SIZE_NAMES: Partial<Record<Aspect, string>> = { "4:5": "Insta / FB post", "1:1": "Square post", "9:16": "Story / Status", fb: "Facebook wide", x: "X post", yt: "YouTube" };
 
+/** Controls every template keeps, even when its layout doesn't read them directly. */
+const UNIVERSAL = new Set(["dir", "headline", "quote", "name", "photo", "headlineFont", "bodyFont", "nameFont", "latinFont", "accent", "textColor", "finish", "bgType", "bgColor", "bgImage", "outlet", "outletFont", "logo", "logoSize", "showOutlet", "footer", "showFooter", "handle", "headlineSize", "quoteSize", "nameSize"]);
+
 function Studio() {
   const [raw, setS] = useState<PosterState>({ ...BASE, photo: sampleSpeaker });
   // Fill any setting missing from older saved/loaded state with its default, so sliders never show "undefined".
@@ -107,6 +111,18 @@ function Studio() {
     for (const [k, v] of Object.entries(BASE)) if (out[k] === undefined && v !== undefined) out[k] = v;
     return out as unknown as PosterState;
   }, [raw]);
+  const [used, setUsed] = useState<Record<string, string[]>>({});
+  const readRef = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    const now = readRef.current, prev = used[s.layout] ?? [];
+    const all = new Set([...prev, ...now]);
+    if (all.size > prev.length) setUsed((u) => ({ ...u, [s.layout]: [...all] }));
+  });
+  const hideCss = useMemo(() => {
+    const seen = new Set(used[s.layout] ?? []);
+    if (!seen.size) return "";
+    return Object.keys(KEY_TAB).filter((k) => !UNIVERSAL.has(k) && !seen.has(k)).map((k) => `#ctl-panel [data-ctl="${k}"]`).join(",") + (seen.size ? "{display:none}" : "");
+  }, [used, s.layout]);
   const [thaanaKb, setThaanaKb] = useState(true);
   const [exportScale, setExportScale] = useState(2);
   const [format, setFormat] = useState<"png" | "jpg">("png");
@@ -171,15 +187,6 @@ function Studio() {
     setFocus({ id: p.id, name: p.name, tab: f.tab, keys: f.keys });
     setTab(f.tab);
     setFlash((x) => ({ k: String(f.keys[0]), n: (x?.n ?? 0) + 1 }));
-  };
-  const presetNames = useMemo(() => Object.fromEntries(PRESETS.map((p) => [p.id, p.name])), []);
-  const applyNews = (v: { headline: string; quote: string; name: string; designation: string; category: string; translation: string }, id: string) => {
-    const p = PRESETS.find((x) => x.id === id);
-    setS((c) => {
-      const n = p ? withPreset(c, BASE, p.apply, locks) : c;
-      return { ...n, headline: v.headline, quote: v.quote, name: v.name, designation: v.designation, category: v.category, translation: v.translation, showTranslation: !!v.translation && n.showTranslation, showCategory: !!v.category || n.showCategory };
-    });
-    setFocus(null); setTab("text");
   };
   const gotoKey = (k: PosterKey) => {
     const t = KEY_TAB[k];
@@ -377,9 +384,11 @@ function Studio() {
   };
   const shown = thumbs.filter(({ p }) => (cat === "All" || catsOf(p).includes(cat)) && p.name.toLowerCase().includes(q.trim().toLowerCase()));
 
+  const readNow = new Set<string>();
+  readRef.current = readNow;
   const RAIL: [TabId, typeof Zap, string][] = [
     ["presets", LayoutTemplate, "Templates"], ["quick", Zap, "Quick"], ["text", Type, "Text"], ["photo", ImageIcon, "Images"],
-    ["style", Palette, "Styles"], ["brand", Share2, "Brand"], ["news", Newspaper, "News"], ["cutout", Scissors, "Cutout"],
+    ["style", Palette, "Styles"], ["brand", Share2, "Brand"],
   ];
   const isText = sel === "headline" || sel === "quote" || sel === "translation" || sel === "name" || sel === "category" || sel === "outlet";
   const textKey: Partial<Record<NonNullable<El>, keyof PosterState>> = { headline: "headline", quote: "quote", translation: "translation", name: "name", category: "category", outlet: "outlet" };
@@ -433,7 +442,8 @@ function Studio() {
           ))}
         </nav>
 
-        <aside ref={panelRef} className={`w-[300px] shrink-0 overflow-y-auto border-e border-border ${panelOpen ? "" : "hidden"}`}>
+        <style>{hideCss}</style>
+        <aside id="ctl-panel" ref={panelRef} className={`w-[300px] shrink-0 overflow-y-auto border-e border-border ${panelOpen ? "" : "hidden"}`}>
           <Tabs value={tab} onValueChange={(v) => setTab(v as TabId)} className="p-4">
             <div className="sticky top-0 z-30 -mx-4 -mt-4 border-b border-border/60 bg-background/95 px-4 pb-2 pt-3 backdrop-blur">
               <div className="flex items-center justify-between"><p className="text-sm font-semibold">{RAIL.find(([v]) => v === tab)?.[2]}</p><Button size="icon" variant="ghost" className="h-7 w-7" aria-label="Hide panel" onClick={() => setPanelOpen(false)}><X className="h-4 w-4" /></Button></div>
@@ -506,12 +516,6 @@ function Studio() {
               </Section>
             </TabsContent>
 
-            <TabsContent value="news" forceMount className="mt-4 data-[state=inactive]:hidden">
-              <NewsPanel names={presetNames} dir={s.dir} onApply={applyNews} />
-            </TabsContent>
-            <TabsContent value="cutout" forceMount className="mt-4 data-[state=inactive]:hidden">
-              <CutoutPanel onUse={(slot, url) => { set(slot, url); setTab("photo"); }} />
-            </TabsContent>
 
             <TabsContent value="presets" className="mt-4 space-y-3">
               <div className="relative"><Search className="pointer-events-none absolute start-2.5 top-2.5 h-4 w-4 text-muted-foreground" /><Input className="ps-8" placeholder="Search templates" value={q} onChange={(e) => setQ(e.target.value)} /></div>
@@ -593,7 +597,6 @@ function Studio() {
             </TabsContent>
 
             <TabsContent value="photo" className="mt-4 space-y-4">
-              <button onClick={() => setTab("cutout")} className="w-full rounded-md bg-primary/10 p-2 text-start text-xs text-primary">✂ Photo has a background? Open <b>Cutout</b> to remove it automatically.</button>
               <Field label="Speaker photo">{upload("photo")}</Field>
               {s.photo && <Button size="sm" variant="secondary" onClick={() => set("photo", undefined)}>Remove photo</Button>}
               {slider("Size %", "photoScale", 30, 200)}
@@ -821,7 +824,7 @@ function Studio() {
           <div className="absolute inset-0 bottom-12 flex items-center justify-center" onClick={(e) => { if (!hand && e.target === e.currentTarget) setSel(null); }}>
             <div style={{ width: w * zoom, height: h * zoom, transform: `translate(${pan.x}px, ${pan.y}px)` }} className={`shadow-[0_8px_40px_rgba(0,0,0,.12)] ${hand ? "pointer-events-none" : "cursor-pointer"}`} onClick={onPosterClick}>
               <div style={{ width: w, height: h, transform: `scale(${zoom})`, transformOrigin: "top left" }}>
-                <Poster ref={posterRef} s={s} />
+                <Poster ref={posterRef} s={tracked(s, readNow)} />
               </div>
             </div>
           </div>
@@ -838,7 +841,6 @@ function Studio() {
                   <Button size="icon" variant="ghost" className="h-7 w-7" aria-label="Bigger" onClick={() => set(k, Math.min(mx, v + 2) as never)}><Plus className="h-3.5 w-3.5" /></Button>
                 </>); })()}
                 {isText && <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => set("dir", s.dir === "rtl" ? "ltr" : "rtl")}>{s.dir === "rtl" ? "RTL" : "LTR"}</Button>}
-                {sel === "photo" && <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => setTab("cutout")}><Scissors className="h-3.5 w-3.5" /> Remove bg</Button>}
                 <Button size="icon" variant="ghost" className="h-7 w-7" aria-label="Deselect" onClick={() => setSel(null)}><X className="h-3.5 w-3.5" /></Button>
               </div>
               {sel && textKey[sel] && (
@@ -922,7 +924,6 @@ function Studio() {
                 {s.photo && <img src={s.photo} alt="" className="h-14 w-14 rounded-md bg-muted object-contain" />}
                 <div className="flex-1">{upload("photo")}</div>
               </div>
-              <Button size="sm" variant="secondary" className="w-full" onClick={() => setTab("cutout")}><Scissors className="h-4 w-4" /> Remove background</Button>
               {slider("Size %", "photoScale", 30, 200)}
               {slider("Move sideways", "photoX", -600, 600)}
               {slider("Move up/down", "photoY", -600, 600)}
