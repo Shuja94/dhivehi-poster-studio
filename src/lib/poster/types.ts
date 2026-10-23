@@ -2,7 +2,8 @@ export type Layout =
   | "paper" | "archive" | "torngreen" | "bubble" | "headline" | "banner" | "arch"
   | "topo" | "capsule" | "glass" | "editorial" | "card"
   | "greencard" | "collage" | "academy" | "midan" | "circletop" | "circleside"
-  | "statement" | "tanween" | "vintage" | "tweet";
+  | "statement" | "tanween" | "vintage" | "tweet"
+  | "photonews" | "cutblue" | "didyouknow" | "breakcard" | "tabloid" | "mono" | "montage" | "redstory";
 export type Aspect = "1:1" | "4:5" | "9:16" | "fb" | "x" | "yt" | "pin" | "li" | "custom";
 export type BgType = "grid" | "paper" | "topo" | "dark" | "bokeh" | "solid" | "mesh" | "noise" | "image";
 export type QuoteBox = "torn" | "frame" | "glass" | "speech" | "arch" | "none";

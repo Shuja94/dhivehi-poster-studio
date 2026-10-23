@@ -236,6 +236,46 @@ export const PRESETS: Preset[] = [
     apply: { layout: "tweet", bgType: "solid", bgColor: "#22384f", accent: "#1f9c8f", cardColor: "#efefed", cardText: "#203040", extraTone: "duotone", textureOpacity: 0.6, highlightColor: "transparent", highlightText: "#1f9c8f", quoteSize: 32, quoteAlign: "justify", quoteMark: "big", quoteBox: "none", showDate: true, date: "ހޯމަ · 19 އޮކްޓޫބަރު 2026", handle: "@khabaru", showHeadline: false, footer: foot(["youtube", "x", "facebook", "tiktok"]) },
   },
   {
+    id: "photonews", name: "Tinted Photo Story", description: "Full-bleed photo with colour tint, yellow kicker headline, giant outline number, handle corner",
+    swatch: ["#24484a", "#f6e27a", "#ffffff"],
+    apply: { layout: "photonews", bgType: "solid", bgColor: "#1d3a3c", accent: "#3f8f8a", accent2: "#f6e27a", textColor: "#ffffff", highlightColor: "transparent", highlightText: "#f6e27a", headlineStyle: "plain", headlineSize: 64, quoteSize: 34, quoteAlign: "start", quoteBox: "none", quoteMark: "none", showHeadline: true, headline: "*ހުއްޓުމެއް ނެތް!*", quote: "ސާފުކުރާ މުވައްޒަފުން ކޮންމެ ދުވަހަކު 6 އިން 12 ކިލޯމީޓަރު ހިނގާ، ދުވާލަކު *800* ފަހަރު ބޯލަނބާ!", dateBig: "800", showCategory: false, showDecor: true, finish: 0.5, footer: foot([]) },
+  },
+  {
+    id: "cutblue", name: "Blue Cut-out Collage", description: "Flat blue grain, bold lead text, B&W cut-out over yellow block, grid lines, doodles and !!",
+    swatch: ["#2c6db5", "#f2d23b", "#f26b2a"],
+    apply: { layout: "cutblue", bgType: "noise", bgColor: "#2f6fb6", textureOpacity: 0.7, accent: "#2f6fb6", accent2: "#f2d23b", highlightColor: "#f26b2a", highlightText: "#ffffff", textColor: "#ffffff", headlineStyle: "plain", headlineSize: 46, quoteSize: 34, quoteAlign: "start", quoteBox: "none", quoteMark: "none", photoTone: "gray", photoOutline: 0, photoShadow: false, photoScale: 90, showCategory: false, footer: foot(["tiktok", "instagram", "facebook"]) },
+  },
+  {
+    id: "didyouknow", name: "Did You Know?", description: "Warm cream, glossy red label with yellow question mark, highlighted fact text, white social chip",
+    swatch: ["#f8ecd6", "#c2361b", "#f2b417"],
+    apply: { layout: "didyouknow", bgType: "bokeh", bgColor: "#f8eedc", bgColor2: "#f3c76b", accent: "#a8241a", accent2: "#f2b417", highlightColor: "transparent", highlightText: "#a8241a", textColor: "#6b4a1e", headlineSize: 72, headline: "ތިޔަބޭފުޅާ\nދަންނަވާތަ", quote: "ޓެކް ހުނަރެއް ދަސްކުރަން ރަނގަޅު ގޮތަކީ *ތިބާގެ ވަރުގަދަ ކަންކަމާ* ގުޅޭ ހުނަރެއް ހޮވުން. އޭރުން އަބަދުވެސް ކުރާ ކަމެއް *އާ ވަސީލަތްތަކާއެކު* ކުރާހެން ހީވާނެ.", quoteSize: 38, quoteAlign: "start", quoteBox: "none", quoteMark: "none", showCategory: false, footer: foot(["x", "instagram", "facebook", "youtube", "website"]) },
+  },
+  {
+    id: "breakcard", name: "Breaking Card on Photo", description: "Photo background, white rounded card with red pill badge, centred story, rule and website",
+    swatch: ["#7fa7d4", "#ffffff", "#c4161c"],
+    apply: { layout: "breakcard", bgType: "solid", bgColor: "#1b3350", cardColor: "#ffffff", cardText: "#1a1a1a", highlightColor: "#c4161c", highlightText: "#ffffff", textColor: "#ffffff", headlineSize: 44, quoteSize: 32, quoteBox: "none", quoteMark: "none", showHeadline: false, category: "ބްރޭކިންގް ނިއުސް", showCategory: true, photoOutline: 0, photoShadow: false, footer: foot(["website"]) },
+  },
+  {
+    id: "tabloid", name: "Black Tabloid", description: "Photo top fading to black, yellow topic pill, condensed headline with yellow highlight, Read-more button, source",
+    swatch: ["#0a0a0a", "#ffe500", "#e11d2a"],
+    apply: { layout: "tabloid", bgType: "solid", bgColor: "#0a0a0a", accent: "#e11d2a", accent2: "#ffe500", highlightColor: "#ffe500", highlightText: "#0a0a0a", textColor: "#ffffff", headlineStyle: "plain", headlineSize: 64, quoteSize: 32, quoteBox: "none", quoteMark: "none", category: "ސިޔާސީ", showCategory: true, cta: "ތަފްސީލު", photoOutline: 0, photoShadow: false, latinFont: "Bebas Neue", footer: foot([]) },
+  },
+  {
+    id: "mono", name: "Mono Feature", description: "Black-and-white photo, mint masthead rule, spaced tagline, kicker label, giant two-tone headline, swipe line",
+    swatch: ["#151817", "#98d4b9", "#ffffff"],
+    apply: { layout: "mono", bgType: "solid", bgColor: "#121514", accent: "#98d4b9", textColor: "#ffffff", headlineSize: 96, headline: "އޭނާ ކިޔަވައިދިނީ\n*މެޝިނަށް ފެނުން*", quoteSize: 32, quoteAlign: "start", quoteBox: "none", quoteMark: "none", category: "ފަރާތްތައް", showCategory: true, showDate: true, date: "No. 043", tagline: "މާދަމާ ބިނާކުރާ މީހުންގެ ވާހަކަ", cta: "ކިޔުމަށް ސްވައިޕް ކުރޭ", photoTone: "gray", footer: foot([]) },
+  },
+  {
+    id: "montage", name: "Investigation Montage", description: "Cream page, black centre with yellow + blue blocks, three portraits, black serif headline box",
+    swatch: ["#fff1e5", "#0d0d0d", "#f2c200"],
+    apply: { layout: "montage", bgType: "solid", bgColor: "#fff1e5", bgColor2: "#0d0d0d", cardColor: "#0d0d0d", accent: "#1f3f9a", accent2: "#f2c200", textColor: "#1a1a1a", highlightColor: "transparent", highlightText: "#f2c200", headlineSize: 52, quoteSize: 34, quoteBox: "none", quoteMark: "none", photoTone: "gray", photo2Tone: "gray", photoOutline: 0, photoShadow: false, extraTone: "duotone", category: "ކޮރަޕްޝަން", showCategory: true, latinFont: "Playfair Display", footer: foot(["x", "facebook"]) },
+  },
+  {
+    id: "redstory", name: "Red Story Panel", description: "Story format: photo on top with 'Breaking' label, slanted red panel with topic, headline, date, swipe-up",
+    swatch: ["#d11a1a", "#ffffff", "#1c1c1c"],
+    apply: { layout: "redstory", aspect: "9:16", bgType: "solid", bgColor: "#d11a1a", accent: "#d11a1a", textColor: "#ffffff", highlightColor: "#ffffff", highlightText: "#d11a1a", headlineStyle: "plain", headlineSize: 64, tagline: "ބްރޭކިންގް\nނިއުސް", category: "ސިޔާސީ", showCategory: true, showDate: true, cta: "ތަފްސީލަށް މައްޗަށް", photoOutline: 0, photoShadow: false, footer: foot([]) },
+  },
+  {
     id: "english", name: "English Editorial", description: "Left-to-right paper quote card for English posts",
     swatch: ["#e6e1d6", "#1d4ed8", "#111111"],
     apply: {
