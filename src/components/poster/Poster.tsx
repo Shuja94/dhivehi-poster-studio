@@ -227,7 +227,7 @@ function body(s: PosterState, w: number, h: number): ReactNode {
           <Cover s={s} style={{ top: 0, left: 0, right: 0, height: "56%" }} />
           <div style={abs({ top: "26%", left: 0, right: 0, height: "26%", background: "linear-gradient(to bottom, transparent, rgba(0,0,0,.6))" })} />
           <div style={abs({ top: pad, insetInlineEnd: pad })}><Outlet s={s} color="#fff" size={38} /></div>
-          {s.tagline && <div style={abs({ top: "40%", insetInlineStart: pad, width: "60%", ...nm, fontSize: 64, lineHeight: 1.3, color: "#fff", fontWeight: 800 })}>{s.tagline}</div>}
+          {s.tagline && <div style={abs({ top: "40%", insetInlineStart: pad, width: "60%", ...nm, fontSize: 64, lineHeight: 1.3, color: "#fff", fontWeight: 800, whiteSpace: "pre-wrap" })}>{s.tagline}</div>}
           <div style={abs({ top: "52%", bottom: 0, left: 0, right: 0, background: s.accent, clipPath: s.dir === "rtl" ? "polygon(0 6%, 100% 0, 100% 100%, 0 100%)" : "polygon(0 0, 100% 6%, 100% 100%, 0 100%)" })} />
           <div style={abs({ top: "57%", left: pad, right: pad, display: "flex", flexDirection: "column", gap: 22, alignItems: "flex-start" })}>
             {s.showCategory && <div style={{ ...nm, fontSize: 28, color: "#fff", fontWeight: 800 }}>{s.category}</div>}
