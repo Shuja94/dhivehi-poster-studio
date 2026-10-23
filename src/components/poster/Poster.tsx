@@ -26,12 +26,221 @@ function Layer({ children, style }: { children: ReactNode; style: CSSProperties 
   return <div style={abs(style)}>{children}</div>;
 }
 
+/** Full-bleed news photo (cover crop) driven by the main speaker's size/position/tone sliders. */
+function Cover({ s, style }: { s: PosterState; style: CSSProperties }) {
+  const src = s.photo ?? minaret;
+  return (
+    <div style={abs({ overflow: "hidden", ...style })}>
+      <img src={src} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "50% 30%", transform: `translate(${s.photoX}px, ${s.photoY}px) scale(${s.photoScale / 100})`, transformOrigin: "center", filter: s.photoTone !== "color" ? "grayscale(1) contrast(1.1)" : undefined, display: "block" }} />
+      {s.photoTone === "duotone" && <div style={abs({ inset: 0, background: s.accent, mixBlendMode: "color" })} />}
+    </div>
+  );
+}
+
 function body(s: PosterState, w: number, h: number): ReactNode {
   const nameFont = fam(s.latinFont, s.nameFont);
   const pad = h > 1500 ? 80 : 64;
   const nm: CSSProperties = { fontFamily: nameFont, ...THAANA_TYPO };
 
+  const latin = (f = s.latinFont): CSSProperties => ({ fontFamily: fam(f, s.nameFont), ...THAANA_TYPO });
   switch (s.layout) {
+    /* Full-bleed tinted photo, yellow kicker, giant outline number */
+    case "photonews":
+      return (
+        <>
+          <Cover s={s} style={{ inset: 0 }} />
+          <div style={abs({ inset: 0, background: s.accent, mixBlendMode: "color", opacity: 0.75 })} />
+          <div style={abs({ inset: 0, background: `linear-gradient(to bottom, ${s.bgColor}f0 0%, ${s.bgColor}aa 36%, transparent 58%, ${s.bgColor}55 100%)` })} />
+          <div style={abs({ top: pad, insetInlineStart: pad })}><Outlet s={s} color={s.textColor} size={44} /></div>
+          {s.showCategory && <div style={abs({ top: pad + 6, insetInlineEnd: pad, ...nm, fontSize: 34, color: s.textColor, fontWeight: 800 })}>{s.category}</div>}
+          <div style={abs({ top: "17%", left: pad, right: pad, display: "flex", flexDirection: "column", gap: 18 })}>
+            <Headline s={s} color={s.accent2} />
+            <QuoteText s={s} color={s.textColor} />
+          </div>
+          {s.showDecor && s.dateBig && (
+            <div dir="ltr" style={abs({ bottom: "12%", left: 0, right: 0, textAlign: "center", fontFamily: '"Plus Jakarta Sans", sans-serif', fontWeight: 300, fontSize: 400 * (s.watermarkSize / 100), lineHeight: 1, color: "transparent", WebkitTextStroke: `4px ${s.watermarkColor || "#ffffff"}`, opacity: 0.6 * s.watermarkOpacity, pointerEvents: "none" })}>{s.dateBig}</div>
+          )}
+          <div dir="ltr" style={abs({ bottom: pad * 0.8, insetInlineEnd: pad, fontFamily: `"${s.latinFont}", sans-serif`, fontSize: 30, fontWeight: 700, color: s.textColor, opacity: 0.85 })}>{s.handle}</div>
+          <div style={abs({ bottom: pad * 0.8, insetInlineStart: pad })}><Footer s={s} variant="icons" color={s.textColor} bg="transparent" /></div>
+        </>
+      );
+
+    /* Flat blue grain, text on top, cut-out collage with yellow block + grid + doodles */
+    case "cutblue":
+      return (
+        <>
+          <div style={abs({ top: pad * 0.8, left: 0, right: 0, display: "flex", justifyContent: "center", alignItems: "center", gap: 18 })}>
+            <Outlet s={s} color={s.textColor} size={30} />
+            <Footer s={s} variant="icons" color={s.textColor} bg="transparent" />
+          </div>
+          <div style={abs({ top: "22%", left: "14%", right: "14%", display: "flex", flexDirection: "column", gap: 12 })}>
+            <Headline s={s} color={s.textColor} />
+            <QuoteText s={s} color={s.textColor} />
+          </div>
+          <Decor s={s} r={(t) => (
+            <>
+              <div style={abs({ bottom: "13%", left: "26%", right: "26%", height: "22%", background: t.accent2 })} />
+              <svg style={abs({ bottom: 0, left: "12%", width: "80%", height: "40%" })} preserveAspectRatio="none" viewBox="0 0 100 100">
+                {Array.from({ length: 9 }, (_, i) => <line key={`v${i}`} x1={i * 12.5} y1="0" x2={i * 12.5} y2="100" stroke={t.textColor} strokeOpacity=".35" strokeWidth=".3" />)}
+                {Array.from({ length: 7 }, (_, i) => <line key={`h${i}`} x1="0" y1={i * 16.6} x2="100" y2={i * 16.6} stroke={t.textColor} strokeOpacity=".35" strokeWidth=".3" />)}
+              </svg>
+              <Waves color={t.textColor} width={130} style={{ bottom: "36%", left: "10%", opacity: 0.7 }} />
+              <div style={abs({ bottom: "28%", right: "12%", width: 90, height: 90, borderRadius: "50%", border: `5px solid ${t.textColor}`, opacity: 0.6 })} />
+              <div style={abs({ bottom: "34%", right: "30%", fontFamily: '"Archivo Black", sans-serif', fontSize: 170, lineHeight: 1, color: t.highlightColor, transform: "rotate(8deg)" })}>!!</div>
+            </>
+          )} />
+          <Layer style={{ top: "44%", bottom: 0, left: 0, right: 0 }}><Photo s={s} /></Layer>
+          {(s.name || s.designation) && (
+            <div style={abs({ bottom: pad * 0.6, insetInlineStart: pad, background: s.textColor, color: s.bgColor, padding: "6px 20px", ...nm, fontSize: s.nameSize * 0.8, lineHeight: 1.6 })}>{s.name}{s.designation && ` · ${s.designation}`}</div>
+          )}
+        </>
+      );
+
+    /* Cream "Did you know?" — red rounded label + yellow question mark */
+    case "didyouknow":
+      return (
+        <>
+          <div style={abs({ top: pad, insetInlineStart: pad })}><Outlet s={s} color={s.accent} size={40} /></div>
+          {s.footer.find((f) => f.kind === "website" && f.on) && (
+            <div dir="ltr" style={abs({ top: pad + 10, insetInlineEnd: pad, fontFamily: `"${s.latinFont}"`, fontSize: 22, color: s.accent })}>{s.footer.find((f) => f.kind === "website")?.text}</div>
+          )}
+          <Decor s={s} r={(t) => (
+            <>
+              <div style={abs({ top: "40%", insetInlineEnd: "-8%", width: 260, height: 260, borderRadius: 50, background: `linear-gradient(135deg, ${t.accent2}, ${t.accent2}55)`, filter: "blur(14px)", transform: "rotate(20deg)", opacity: 0.7 })} />
+              <div style={abs({ bottom: "8%", insetInlineStart: "-6%", width: 200, height: 200, borderRadius: 40, background: t.accent2, filter: "blur(18px)", transform: "rotate(-15deg)", opacity: 0.55 })} />
+            </>
+          )} />
+          <div style={abs({ top: "22%", left: 0, right: 0, display: "flex", justifyContent: "center" })}>
+            <div style={{ position: "relative", background: `linear-gradient(135deg, ${s.highlightColor}, ${s.accent})`, borderRadius: 22, padding: "26px 56px", boxShadow: `0 24px 50px ${s.accent}55`, maxWidth: "72%" }}>
+              <Headline s={{ ...s, headlineStyle: "plain", showTranslation: false }} color="#ffffff" style={{ textAlign: "center" }} />
+              <div style={abs({ bottom: -46, insetInlineEnd: -30, fontFamily: '"Archivo Black", sans-serif', fontSize: 170, color: s.accent2, lineHeight: 1, textShadow: "0 8px 18px rgba(0,0,0,.25)" })}>?</div>
+            </div>
+          </div>
+          <div style={abs({ top: "50%", left: "16%", right: "16%", display: "flex", flexDirection: "column", gap: 20 })}>
+            <QuoteText s={s} color={s.textColor} />
+            <Translation s={s} color={s.textColor} />
+          </div>
+          <div style={abs({ bottom: pad, left: 0, right: 0, display: "flex", justifyContent: "center" })}>
+            <div style={{ background: "#fff", padding: "14px 28px", boxShadow: "0 8px 24px rgba(0,0,0,.08)" }}><Footer s={s} variant="icons" color="#111" bg="#fff" /></div>
+          </div>
+        </>
+      );
+
+    /* Photo background with white rounded breaking-news card */
+    case "breakcard":
+      return (
+        <>
+          <Cover s={s} style={{ inset: 0 }} />
+          <div style={abs({ inset: 0, background: `linear-gradient(to bottom, ${s.bgColor}22, ${s.bgColor}66)` })} />
+          <div style={abs({ top: "11%", left: 0, right: 0, display: "flex", justifyContent: "center" })}><Outlet s={s} color={s.cardText} size={40} /></div>
+          <div style={abs({ top: "33%", left: "10%", right: "10%", background: s.cardColor, borderRadius: 34, padding: "86px 60px 40px", boxShadow: "0 30px 70px rgba(0,0,0,.25)", display: "flex", flexDirection: "column", alignItems: "center", gap: 22, textAlign: "center" })}>
+            {s.showCategory && (
+              <div style={abs({ top: -38, left: "50%", transform: "translateX(-50%)", background: s.highlightColor, color: s.highlightText, borderRadius: 999, padding: "10px 44px", ...nm, fontSize: 36, whiteSpace: "nowrap", boxShadow: "0 10px 24px rgba(0,0,0,.2)" })}>{s.category}</div>
+            )}
+            <Headline s={{ ...s, headlineStyle: "plain" }} color={s.cardText} style={{ textAlign: "center" }} />
+            <QuoteText s={s} color={s.cardText} align="center" />
+            <div style={{ width: "86%", height: 2, background: s.cardText, opacity: 0.4 }} />
+            <Footer s={s} variant="icons" color={s.cardText} bg={s.cardColor} />
+          </div>
+        </>
+      );
+
+    /* Black tabloid: photo top, yellow pill + highlighted condensed headline, Read-more button */
+    case "tabloid":
+      return (
+        <>
+          <Cover s={s} style={{ top: 0, left: 0, right: 0, height: "58%" }} />
+          <div style={abs({ top: "28%", left: 0, right: 0, height: "31%", background: `linear-gradient(to bottom, transparent, ${s.bgColor})` })} />
+          <div style={abs({ top: pad * 0.7, insetInlineStart: pad * 0.7, background: s.highlightColor, color: s.highlightText, padding: "6px 18px", transform: "skewX(-8deg)" })}><Outlet s={s} color={s.highlightText} size={28} /></div>
+          <div style={abs({ top: "44%", left: pad, right: pad, display: "flex", flexDirection: "column", gap: 22, alignItems: "flex-start" })}>
+            {s.showCategory && <div style={{ background: s.accent2, color: "#111", borderRadius: 8, padding: "6px 22px", ...nm, fontSize: 28, lineHeight: 1.5 }}>{s.category}</div>}
+            <Headline s={{ ...s, headlineStyle: "plain" }} color={s.textColor} />
+            <QuoteText s={s} color={s.textColor} size={s.quoteSize * 0.85} style={{ opacity: 0.9 }} />
+          </div>
+          <div style={abs({ bottom: pad * 0.8, left: pad, right: pad, display: "flex", justifyContent: "space-between", alignItems: "center" })}>
+            {s.cta && <div style={{ background: s.accent2, color: "#111", borderRadius: 6, padding: "10px 26px", ...latin(), fontSize: 26, fontWeight: 800 }}>{s.cta} {s.dir === "rtl" ? "←" : "→"}</div>}
+            <div style={{ ...latin(), fontSize: 24, color: s.textColor, opacity: 0.85 }}>{s.handle}</div>
+          </div>
+        </>
+      );
+
+    /* Monochrome photo, mint masthead, giant two-tone headline */
+    case "mono":
+      return (
+        <>
+          <Cover s={{ ...s, photoTone: "gray" }} style={{ inset: 0 }} />
+          <div style={abs({ inset: 0, background: `linear-gradient(to bottom, ${s.bgColor}aa 0%, transparent 25%, transparent 38%, ${s.bgColor}cc 62%, ${s.bgColor} 85%)` })} />
+          <div style={abs({ top: pad, left: pad, right: pad })}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: 14, borderBottom: `3px solid ${s.accent}` }}>
+              <Outlet s={s} color={s.accent} size={52} />
+              {s.showDate && <div style={{ ...latin("Space Grotesk"), fontSize: 26, letterSpacing: 4, color: s.accent }}>{s.date}</div>}
+            </div>
+            {s.tagline && <div style={{ ...latin("Space Grotesk"), fontSize: 22, letterSpacing: 6, color: s.textColor, opacity: 0.85, marginTop: 16 }}>{s.tagline}</div>}
+          </div>
+          <div style={abs({ bottom: "16%", left: pad, right: pad, display: "flex", flexDirection: "column", gap: 24, alignItems: "flex-start" })}>
+            {s.showCategory && <div style={{ background: s.accent, color: s.bgColor, padding: "8px 22px", ...latin("Space Grotesk"), fontSize: 26, fontWeight: 700, letterSpacing: 3 }}>{s.category}</div>}
+            <Headline s={{ ...s, headlineStyle: "plain", highlightColor: "transparent", highlightText: s.accent }} color={s.textColor} style={{ lineHeight: 1 }} />
+            <QuoteText s={s} color={s.textColor} size={s.quoteSize * 0.85} />
+          </div>
+          <div style={abs({ bottom: pad, left: pad, right: pad, display: "flex", alignItems: "center", gap: 20 })}>
+            <div style={{ width: 90, height: 3, background: s.accent }} />
+            <div style={{ ...latin("Space Grotesk"), fontSize: 26, letterSpacing: 5, color: s.accent }}>{s.cta || s.handle}</div>
+          </div>
+        </>
+      );
+
+    /* Investigative montage: black centre + yellow side blocks, three portraits, black headline box */
+    case "montage":
+      return (
+        <>
+          <div style={abs({ top: 0, left: 0, right: 0, height: 110, display: "flex", alignItems: "center", justifyContent: "center", borderBottom: `2px solid ${s.textColor}22` })}><Outlet s={s} color={s.textColor} size={46} /></div>
+          <div style={abs({ top: 110, left: 0, right: 0, height: "52%", background: s.cardColor, overflow: "hidden" })}>
+            <Decor s={s} r={(t) => (
+              <>
+                <div style={abs({ top: "30%", bottom: 0, left: 0, width: "30%", background: t.accent2 })} />
+                <div style={abs({ top: "30%", bottom: 0, right: 0, width: "30%", background: t.accent2 })} />
+                <div style={abs({ top: 0, left: 0, width: "30%", height: "30%", background: t.accent, opacity: 0.85 })} />
+                <div style={abs({ top: 0, right: 0, width: "30%", height: "30%", background: t.accent, opacity: 0.85 })} />
+              </>
+            )} />
+            {s.photo2 && <Layer style={{ top: "30%", bottom: 0, left: 0, width: "30%", overflow: "hidden" }}><Photo s={{ ...secondSpeaker(s), photoTone: s.photo2Tone }} /></Layer>}
+            <Extra s={s} style={{ top: "30%", bottom: 0, right: 0, width: "30%", overflow: "hidden" }} cover />
+            <Layer style={{ inset: 0 }}><Photo s={s} /></Layer>
+          </div>
+          <div style={abs({ top: "50%", insetInlineStart: "8%", width: "64%", background: s.bgColor2, padding: "34px 40px 40px", display: "flex", flexDirection: "column", gap: 20, alignItems: "flex-start" })}>
+            {s.showCategory && <div style={{ ...nm, fontSize: 26, color: "#fff", fontWeight: 700 }}>{s.category}</div>}
+            <Headline s={{ ...s, headlineStyle: "plain" }} color="#ffffff" />
+            <div style={{ width: 140, height: 6, background: "#fff" }} />
+            <QuoteText s={s} color="#ffffffcc" size={s.quoteSize * 0.7} />
+          </div>
+          {(s.name || s.designation) && (
+            <div style={abs({ top: "56%", insetInlineEnd: "5%", width: "22%", ...nm, fontSize: s.nameSize * 0.6, color: s.textColor, opacity: 0.6, lineHeight: 1.6 })}>{s.name}{s.designation && <><br />{s.designation}</>}</div>
+          )}
+          <div style={abs({ bottom: pad * 0.7, insetInlineEnd: pad })}><Footer s={s} variant="icons" color={s.textColor} bg={s.bgColor} /></div>
+        </>
+      );
+
+    /* Story: photo on top, red panel with category, headline, date, swipe-up */
+    case "redstory":
+      return (
+        <>
+          <Cover s={s} style={{ top: 0, left: 0, right: 0, height: "56%" }} />
+          <div style={abs({ top: "26%", left: 0, right: 0, height: "26%", background: "linear-gradient(to bottom, transparent, rgba(0,0,0,.6))" })} />
+          <div style={abs({ top: pad, insetInlineEnd: pad })}><Outlet s={s} color="#fff" size={38} /></div>
+          {s.tagline && <div style={abs({ top: "40%", insetInlineStart: pad, width: "60%", ...nm, fontSize: 64, lineHeight: 1.3, color: "#fff", fontWeight: 800, whiteSpace: "pre-wrap" })}>{s.tagline}</div>}
+          <div style={abs({ top: "52%", bottom: 0, left: 0, right: 0, background: s.accent, clipPath: s.dir === "rtl" ? "polygon(0 6%, 100% 0, 100% 100%, 0 100%)" : "polygon(0 0, 100% 6%, 100% 100%, 0 100%)" })} />
+          <div style={abs({ top: "57%", left: pad, right: pad, display: "flex", flexDirection: "column", gap: 22, alignItems: "flex-start" })}>
+            {s.showCategory && <div style={{ ...nm, fontSize: 28, color: "#fff", fontWeight: 800 }}>{s.category}</div>}
+            <Headline s={{ ...s, headlineStyle: "plain" }} color="#ffffff" />
+            {s.showDate && <div style={{ ...nm, fontSize: 26, color: "#ffffffdd" }}>{s.date}</div>}
+          </div>
+          <div style={abs({ bottom: pad, left: pad, right: pad, borderTop: "2px solid #ffffff55", paddingTop: 22, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 20 })}>
+            <div style={{ ...nm, fontSize: 26, color: "#fff", fontWeight: 700 }}>▲ {s.cta}</div>
+            <Footer s={s} variant="icons" color="#fff" bg={s.accent} />
+          </div>
+        </>
+      );
+
     /* 1. Grid & vertical banner */
     case "banner":
       return (
