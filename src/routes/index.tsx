@@ -4,7 +4,7 @@ import { toJpeg, toPng } from "html-to-image";
 import { Download, Keyboard, Upload, RotateCcw, Type, Image as ImageIcon, Palette, LayoutTemplate, Share2, Zap, Sparkles, Shuffle, Check, Undo2, Redo2, Cloud, Loader2, Hand, MousePointer2, Minus, Plus, Maximize, X, Search } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Poster } from "@/components/poster/Poster";
-import { tracked } from "@/lib/poster/track";
+import { tracked } from "@/lib/poster/track"; // records which settings the shown template reads
 import { FOOTER_LABELS, FOOTER_PLACEHOLDERS } from "@/lib/poster/footer-labels";
 import { BASE, PRESETS } from "@/lib/poster/presets";
 import { ASPECTS, HIGHLIGHTS, LATIN_FONTS, THAANA_FONTS, sizeOf, type Aspect, type PosterState } from "@/lib/poster/types";
