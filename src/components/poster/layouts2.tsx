@@ -78,7 +78,7 @@ export function body2(s: PosterState, w: number, h: number): ReactNode | null {
             <Headline s={plain(s)} color={s.textColor} />
             <QuoteText s={s} color={s.textColor} size={s.quoteSize * 0.85} style={{ opacity: 0.85 }} />
             <div style={{ flex: 1 }} />
-            <Footer s={s} variant="split" color={s.textColor} bg={s.bgColor2} />
+            <Footer s={s} variant="icons" color={s.textColor} bg={s.bgColor2} />
           </div>
         </>
       );
