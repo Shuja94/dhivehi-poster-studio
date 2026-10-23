@@ -157,6 +157,7 @@ function Studio() {
   }, [brandJson, brandReady]);
   const hasBrand = s.outlet !== BASE.outlet || !!s.logo;
   const [tab, setTab] = useState<TabId>("presets");
+  const [panelOpen, setPanelOpen] = useState(true);
   const [focus, setFocus] = useState<{ id: string; name: string; tab: TabId; keys: PosterKey[] } | null>(null);
   const [flash, setFlash] = useState<{ k: string; n: number } | null>(null);
   const panelRef = useRef<HTMLElement>(null);
@@ -206,7 +207,7 @@ function Studio() {
     fit();
     window.addEventListener("resize", fit);
     return () => window.removeEventListener("resize", fit);
-  }, [w, h]);
+  }, [w, h, panelOpen]);
 
   // After picking a style: scroll its key control into view and flash it.
   useEffect(() => {
@@ -386,8 +387,8 @@ function Studio() {
 
   return (
     <div className="flex h-screen flex-col bg-background text-foreground">
-      <header className="flex h-14 shrink-0 items-center gap-3 border-b border-border px-3">
-        <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-primary text-lg font-bold text-primary-foreground" style={{ fontFamily: '"MV A Waheed"' }}>އ</div>
+      <header className="flex h-12 shrink-0 items-center gap-2 border-b border-border px-3">
+        <div className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-foreground text-base font-bold text-primary-foreground" style={{ fontFamily: '"MV A Waheed"' }}>އ</div>
         <div className="hidden min-w-0 flex-col md:flex">
           <input aria-label="Poster name" value={docName} onChange={(e) => setDocName(e.target.value)} className="w-48 truncate rounded bg-transparent px-1 text-sm font-semibold outline-none hover:bg-accent focus:bg-accent" />
           <span className="flex items-center gap-1 px-1 text-[11px] text-muted-foreground">
@@ -399,11 +400,11 @@ function Studio() {
           <Button size="icon" variant="ghost" aria-label="Redo" title="Redo (Ctrl+Shift+Z)" disabled={!hist.current.future.length} onClick={redo}><Redo2 className="h-4 w-4" /></Button>
         </div>
         <div className="flex-1" />
-        <Button variant={thaanaKb ? "default" : "secondary"} size="sm" onClick={() => setThaanaKb((v) => !v)} title="Phonetic Thaana keyboard">
+        <Button variant={thaanaKb ? "secondary" : "ghost"} size="sm" onClick={() => setThaanaKb((v) => !v)} title="Phonetic Thaana keyboard">
           <Keyboard className="h-4 w-4" /> <span className="hidden lg:inline">{thaanaKb ? "ތާނަ ON" : "English"}</span>
         </Button>
         <Select value={s.aspect} onValueChange={(v) => set("aspect", v as Aspect)}>
-          <SelectTrigger className="h-9 w-[210px]"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="h-8 w-[200px] border-transparent bg-secondary shadow-none"><SelectValue /></SelectTrigger>
           <SelectContent>
             {(Object.keys(ASPECTS) as Aspect[]).map((a) => (
               <SelectItem key={a} value={a}>
@@ -419,23 +420,23 @@ function Studio() {
             <Input className="h-9 w-20" type="number" min={400} max={4000} value={s.customH} onChange={(e) => set("customH", Math.max(400, Math.min(4000, Number(e.target.value) || 1080)))} />
           </div>
         )}
-        <Button size="sm" className="bg-red-600 text-white hover:bg-red-700" onClick={() => setExportOpen(true)}><Download className="h-4 w-4" /> Export</Button>
+        <Button size="sm" onClick={() => setExportOpen(true)}><Download className="h-4 w-4" /> Export</Button>
       </header>
 
-      <div className="flex min-h-0 flex-1">
-        <nav aria-label="Editor tools" className="flex w-[72px] shrink-0 flex-col items-center gap-1 overflow-y-auto border-e border-border bg-card/60 py-2">
+      <div className="relative flex min-h-0 flex-1">
+        <nav aria-label="Editor tools" className="flex w-[64px] shrink-0 flex-col items-center gap-0.5 overflow-y-auto border-e border-border py-2">
           {RAIL.map(([v, Icon, l]) => (
-            <button key={v} onClick={() => setTab(v)} aria-pressed={tab === v}
-              className={`flex w-[62px] flex-col items-center gap-1 rounded-lg py-2 text-[10.5px] font-medium transition ${tab === v ? "bg-primary/15 text-primary" : "text-muted-foreground hover:bg-accent hover:text-foreground"}`}>
+            <button key={v} onClick={() => { if (tab === v) setPanelOpen((o) => !o); else { setTab(v); setPanelOpen(true); } }} aria-pressed={tab === v && panelOpen}
+              className={`flex w-[56px] flex-col items-center gap-1 rounded-md py-2 text-[10px] transition ${tab === v && panelOpen ? "bg-secondary text-foreground" : "text-muted-foreground hover:bg-accent hover:text-foreground"}`}>
               <Icon className="h-5 w-5" />{l}
             </button>
           ))}
         </nav>
 
-        <aside ref={panelRef} className="w-[330px] shrink-0 overflow-y-auto border-e border-border">
+        <aside ref={panelRef} className={`w-[300px] shrink-0 overflow-y-auto border-e border-border ${panelOpen ? "" : "hidden"}`}>
           <Tabs value={tab} onValueChange={(v) => setTab(v as TabId)} className="p-4">
             <div className="sticky top-0 z-30 -mx-4 -mt-4 border-b border-border/60 bg-background/95 px-4 pb-2 pt-3 backdrop-blur">
-              <p className="text-base font-bold">{RAIL.find(([v]) => v === tab)?.[2]}</p>
+              <div className="flex items-center justify-between"><p className="text-sm font-semibold">{RAIL.find(([v]) => v === tab)?.[2]}</p><Button size="icon" variant="ghost" className="h-7 w-7" aria-label="Hide panel" onClick={() => setPanelOpen(false)}><X className="h-4 w-4" /></Button></div>
             {focus && !["presets", "quick", "news", "cutout"].includes(tab) && (
               <div className="mt-2 rounded-lg border border-primary/40 bg-primary/5 p-2.5">
                 <div className="flex items-center gap-2">
@@ -818,7 +819,7 @@ function Studio() {
           onWheel={(e) => { if (e.ctrlKey || e.metaKey) { e.preventDefault(); setZoom((z) => Math.min(3, Math.max(0.05, z * (e.deltaY > 0 ? 0.9 : 1.1)))); } }}
           onClick={(e) => { if (!hand && e.target === e.currentTarget) setSel(null); }}>
           <div className="absolute inset-0 bottom-12 flex items-center justify-center" onClick={(e) => { if (!hand && e.target === e.currentTarget) setSel(null); }}>
-            <div style={{ width: w * zoom, height: h * zoom, transform: `translate(${pan.x}px, ${pan.y}px)` }} className={`shadow-2xl ${hand ? "pointer-events-none" : "cursor-pointer"}`} onClick={onPosterClick}>
+            <div style={{ width: w * zoom, height: h * zoom, transform: `translate(${pan.x}px, ${pan.y}px)` }} className={`shadow-[0_8px_40px_rgba(0,0,0,.12)] ${hand ? "pointer-events-none" : "cursor-pointer"}`} onClick={onPosterClick}>
               <div style={{ width: w, height: h, transform: `scale(${zoom})`, transformOrigin: "top left" }}>
                 <Poster ref={posterRef} s={s} />
               </div>
@@ -872,9 +873,9 @@ function Studio() {
           </div>
         </main>
 
-        <aside className="hidden w-[290px] shrink-0 overflow-y-auto border-s border-border lg:block">
+        {sel && <aside className="absolute bottom-16 end-3 top-3 z-30 w-[260px] overflow-y-auto rounded-xl border border-border bg-background shadow-xl">
           <div className="sticky top-0 z-10 border-b border-border bg-background/95 px-4 py-3 backdrop-blur">
-            <p className="text-base font-bold">{sel ? EL_NAME[sel] : "Poster"}</p>
+            <div className="flex items-center justify-between"><p className="text-sm font-semibold">{sel ? EL_NAME[sel] : "Poster"}</p><Button size="icon" variant="ghost" className="h-7 w-7" aria-label="Close settings" onClick={() => setSel(null)}><X className="h-4 w-4" /></Button></div>
             <p className="text-xs text-muted-foreground">{sel ? "Settings for the selected item" : "Click any text, photo or logo on the poster"}</p>
             <div className="mt-2 flex flex-wrap gap-1">
               {(Object.keys(EL_NAME) as NonNullable<El>[]).map((k) => (
@@ -961,7 +962,7 @@ function Studio() {
               <Button size="sm" variant="ghost" className="w-full" onClick={() => setTab("style")}>Patterns & background →</Button>
             </>)}
           </div>
-        </aside>
+        </aside>}
       </div>
 
       <Dialog open={exportOpen} onOpenChange={setExportOpen}>
@@ -992,7 +993,7 @@ function Studio() {
                 </div>
               </Field>
               <p className="text-xs text-muted-foreground">{w * exportScale} × {h * exportScale} px</p>
-              <Button className="w-full bg-red-600 text-white hover:bg-red-700" onClick={async () => { await exportImg(); setExportOpen(false); }} disabled={busy}>
+              <Button className="w-full" onClick={async () => { await exportImg(); setExportOpen(false); }} disabled={busy}>
                 <Download className="h-4 w-4" /> {busy ? "Preparing…" : "Download"}
               </Button>
             </div>
