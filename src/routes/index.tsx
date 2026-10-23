@@ -188,15 +188,6 @@ function Studio() {
     setTab(f.tab);
     setFlash((x) => ({ k: String(f.keys[0]), n: (x?.n ?? 0) + 1 }));
   };
-  const presetNames = useMemo(() => Object.fromEntries(PRESETS.map((p) => [p.id, p.name])), []);
-  const applyNews = (v: { headline: string; quote: string; name: string; designation: string; category: string; translation: string }, id: string) => {
-    const p = PRESETS.find((x) => x.id === id);
-    setS((c) => {
-      const n = p ? withPreset(c, BASE, p.apply, locks) : c;
-      return { ...n, headline: v.headline, quote: v.quote, name: v.name, designation: v.designation, category: v.category, translation: v.translation, showTranslation: !!v.translation && n.showTranslation, showCategory: !!v.category || n.showCategory };
-    });
-    setFocus(null); setTab("text");
-  };
   const gotoKey = (k: PosterKey) => {
     const t = KEY_TAB[k];
     if (t) setTab(t);
