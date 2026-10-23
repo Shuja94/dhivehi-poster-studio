@@ -64,11 +64,11 @@ type El = "headline" | "quote" | "translation" | "name" | "category" | "photo" |
 const EL_NAME: Record<NonNullable<El>, string> = { headline: "Headline", quote: "Quote", translation: "Translation", name: "Name", category: "Category", photo: "Photo", outlet: "Logo", footer: "Socials", background: "Background" };
 const CATS = ["All", "News", "Quotes", "Portrait", "Editorial", "Minimal"];
 const CAT_RX: Record<string, RegExp> = {
-  News: /break|tabloid|news|red|photo|card|story|conference|agency|statement|blue/i,
-  Quotes: /quote|speech|kalam|arch|note|tweet|torn|bubble|glass|calligraph/i,
+  News: /wire|live|band|split|magazine|sidebar|break|tabloid|news|red|photo|card|story|conference|agency|statement|blue/i,
+  Quotes: /pullquote|notes|condolence|quote|speech|kalam|arch|note|tweet|torn|bubble|glass|calligraph/i,
   Portrait: /cutout|portrait|capsule|circle|speaker|collage|duotone|grid|montage/i,
-  Editorial: /editorial|investigation|montage|feature|mono|paper|chalk|archive|did you/i,
-  Minimal: /minimal|clean|mono|soft|paper|cream|sheet/i,
+  Editorial: /explainer|marker|polaroid|number|editorial|investigation|montage|feature|mono|paper|chalk|archive|did you/i,
+  Minimal: /minimal|gradient|duo|clean|mono|soft|paper|cream|sheet/i,
 };
 const catsOf = (p: { id: string; name: string }) => Object.keys(CAT_RX).filter((c) => CAT_RX[c]!.test(`${p.id} ${p.name}`));
 
