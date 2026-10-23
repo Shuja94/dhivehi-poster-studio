@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { memo, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { memo, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { toJpeg, toPng } from "html-to-image";
-import { Download, Keyboard, Upload, RotateCcw, Type, Image as ImageIcon, Palette, LayoutTemplate, Share2, Zap, Sparkles, Shuffle, Check, Scissors, Newspaper } from "lucide-react";
+import { Download, Keyboard, Upload, RotateCcw, Type, Image as ImageIcon, Palette, LayoutTemplate, Share2, Zap, Sparkles, Shuffle, Check, Scissors, Newspaper, Undo2, Redo2, Cloud, Loader2, Hand, MousePointer2, Minus, Plus, Maximize, X, Search } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Poster } from "@/components/poster/Poster";
 import { CutoutPanel, NewsPanel } from "@/components/poster/Tools";
 import { FOOTER_LABELS, FOOTER_PLACEHOLDERS } from "@/lib/poster/footer-labels";
@@ -59,7 +60,19 @@ function Section({ title, children, ctl }: { title: string; children: ReactNode;
   );
 }
 
-const THUMB_W = 160;
+type El = "headline" | "quote" | "translation" | "name" | "category" | "photo" | "outlet" | "footer" | "background" | null;
+const EL_NAME: Record<NonNullable<El>, string> = { headline: "Headline", quote: "Quote", translation: "Translation", name: "Name", category: "Category", photo: "Photo", outlet: "Logo", footer: "Socials", background: "Background" };
+const CATS = ["All", "News", "Quotes", "Portrait", "Editorial", "Minimal"];
+const CAT_RX: Record<string, RegExp> = {
+  News: /break|tabloid|news|red|photo|card|story|conference|agency|statement|blue/i,
+  Quotes: /quote|speech|kalam|arch|note|tweet|torn|bubble|glass|calligraph/i,
+  Portrait: /cutout|portrait|capsule|circle|speaker|collage|duotone|grid|montage/i,
+  Editorial: /editorial|investigation|montage|feature|mono|paper|chalk|archive|did you/i,
+  Minimal: /minimal|clean|mono|soft|paper|cream|sheet/i,
+};
+const catsOf = (p: { id: string; name: string }) => Object.keys(CAT_RX).filter((c) => CAT_RX[c].test(`${p.id} ${p.name}`));
+
+const THUMB_W = 136;
 const PresetThumb = memo(function PresetThumb({ state, active, name, onPick }: { state: PosterState; active: boolean; name: string; onPick: () => void }) {
   const { w, h } = sizeOf(state);
   const z = THUMB_W / w;
@@ -128,6 +141,8 @@ function Studio() {
   const [brandReady, setBrandReady] = useState(false);
   useEffect(() => {
     try {
+      const d = localStorage.getItem("akuru-doc");
+      if (d) setS((c) => ({ ...c, ...JSON.parse(d) }));
       const b = localStorage.getItem("akuru-current-brand");
       if (b) setS((c) => ({ ...c, ...JSON.parse(b) }));
     } catch { /* ignore */ }
@@ -186,7 +201,7 @@ function Studio() {
     const fit = () => {
       const el = stageRef.current;
       if (!el) return;
-      setZoom(Math.min((el.clientWidth - 48) / w, (el.clientHeight - 48) / h));
+      setZoom(Math.min((el.clientWidth - 64) / w, (el.clientHeight - 110) / h));
     };
     fit();
     window.addEventListener("resize", fit);
@@ -294,78 +309,146 @@ function Studio() {
     }
   };
 
+  // ---------- Canva-style shell state ----------
+  const [docName, setDocName] = useState("Untitled poster");
+  const [saved, setSaved] = useState<"saved" | "saving" | "session">("saved");
+  const [sel, setSel] = useState<El>(null);
+  const [hand, setHand] = useState(false);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [exportOpen, setExportOpen] = useState(false);
+  const [q, setQ] = useState("");
+  const [cat, setCat] = useState<string>("All");
+  const [box, setBox] = useState<{ x: number; y: number; w: number; h: number } | null>(null);
+  const hist = useRef<{ past: PosterState[]; future: PosterState[]; last: PosterState | null; skip: boolean }>({ past: [], future: [], last: null, skip: false });
+  const [, bump] = useState(0);
+  useEffect(() => {
+    const t = window.setTimeout(() => {
+      const hs = hist.current;
+      if (hs.skip) { hs.skip = false; hs.last = raw; bump((v) => v + 1); return; }
+      if (hs.last && hs.last !== raw) { hs.past.push(hs.last); if (hs.past.length > 80) hs.past.shift(); hs.future = []; }
+      hs.last = raw; bump((v) => v + 1);
+    }, 350);
+    return () => window.clearTimeout(t);
+  }, [raw]);
+  const undo = () => { const hs = hist.current; const prev = hs.past.pop(); if (!prev) return; hs.future.push(raw); hs.skip = true; setS(prev); };
+  const redo = () => { const hs = hist.current; const nx = hs.future.pop(); if (!nx) return; hs.past.push(raw); hs.skip = true; setS(nx); };
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement;
+      if (t.closest("input,textarea,[contenteditable]")) return;
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") { e.preventDefault(); if (e.shiftKey) redo(); else undo(); }
+      else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "y") { e.preventDefault(); redo(); }
+      else if (e.key === "Escape") setSel(null);
+      else if (e.key.toLowerCase() === "h") setHand((v) => !v);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  });
+  // Name + autosave of the current design (photos can be too big for the browser; then it's kept for this session).
+  useEffect(() => { try { const n = localStorage.getItem("akuru-doc-name"); if (n) setDocName(n); } catch { /* ignore */ } }, []);
+  useEffect(() => {
+    setSaved("saving");
+    const t = window.setTimeout(() => {
+      try { localStorage.setItem("akuru-doc-name", docName); localStorage.setItem("akuru-doc", JSON.stringify(raw)); setSaved("saved"); }
+      catch { setSaved("session"); }
+    }, 600);
+    return () => window.clearTimeout(t);
+  }, [raw, docName]);
+  // Selection outline on the canvas.
+  useLayoutEffect(() => {
+    if (!sel || sel === "background" || !posterRef.current || !stageRef.current) { setBox(null); return; }
+    const el = posterRef.current.querySelector<HTMLElement>(`[data-el="${sel}"]`);
+    if (!el) { setBox(null); return; }
+    const r = el.getBoundingClientRect(), st = stageRef.current.getBoundingClientRect();
+    setBox({ x: r.left - st.left, y: r.top - st.top, w: r.width, h: r.height });
+  }, [sel, s, zoom, pan, w, h]);
+  const onPosterClick = (e: React.MouseEvent) => {
+    if (hand) return;
+    const t = (e.target as HTMLElement).closest<HTMLElement>("[data-el]");
+    setSel(((t?.dataset.el as El) ?? "background"));
+  };
+  const drag = useRef<{ x: number; y: number; px: number; py: number } | null>(null);
+  const fitView = () => {
+    const el = stageRef.current;
+    if (!el) return;
+    setPan({ x: 0, y: 0 });
+    setZoom(Math.max(0.05, Math.min((el.clientWidth - 64) / w, (el.clientHeight - 110) / h)));
+  };
+  const shown = thumbs.filter(({ p }) => (cat === "All" || catsOf(p).includes(cat)) && p.name.toLowerCase().includes(q.trim().toLowerCase()));
+
+  const RAIL: [TabId, typeof Zap, string][] = [
+    ["presets", LayoutTemplate, "Templates"], ["quick", Zap, "Quick"], ["text", Type, "Text"], ["photo", ImageIcon, "Images"],
+    ["style", Palette, "Styles"], ["brand", Share2, "Brand"], ["news", Newspaper, "News"], ["cutout", Scissors, "Cutout"],
+  ];
+  const isText = sel === "headline" || sel === "quote" || sel === "translation" || sel === "name" || sel === "category" || sel === "outlet";
+  const textKey: Partial<Record<NonNullable<El>, keyof PosterState>> = { headline: "headline", quote: "quote", translation: "translation", name: "name", category: "category", outlet: "outlet" };
+  const sizeKey: Partial<Record<NonNullable<El>, [keyof PosterState, number, number]>> = { headline: ["headlineSize", 24, 120], quote: ["quoteSize", 18, 70], name: ["nameSize", 16, 60], outlet: ["logoSize", 40, 250] };
+
   return (
     <div className="flex h-screen flex-col bg-background text-foreground">
-      <header className="flex items-center justify-between gap-4 border-b border-border px-5 py-3">
-        <div className="flex items-center gap-3">
-          <div className="grid h-9 w-9 place-items-center rounded bg-primary text-lg font-bold text-primary-foreground" style={{ fontFamily: '"MV A Waheed"' }}>އ</div>
-          <div>
-            <h1 className="text-base font-bold leading-tight">Akuru Poster Studio</h1>
-            <p className="text-xs text-muted-foreground">ދިވެހި ޚަބަރު ޕޯސްޓަރު · News poster maker</p>
+      <header className="flex h-14 shrink-0 items-center gap-3 border-b border-border px-3">
+        <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-primary text-lg font-bold text-primary-foreground" style={{ fontFamily: '"MV A Waheed"' }}>އ</div>
+        <div className="hidden min-w-0 flex-col md:flex">
+          <input aria-label="Poster name" value={docName} onChange={(e) => setDocName(e.target.value)} className="w-48 truncate rounded bg-transparent px-1 text-sm font-semibold outline-none hover:bg-accent focus:bg-accent" />
+          <span className="flex items-center gap-1 px-1 text-[11px] text-muted-foreground">
+            {saved === "saving" ? <><Loader2 className="h-3 w-3 animate-spin" /> Saving…</> : saved === "saved" ? <><Cloud className="h-3 w-3" /> Saved</> : <><Cloud className="h-3 w-3" /> Kept for this session</>}
+          </span>
+        </div>
+        <div className="flex items-center gap-0.5 border-s border-border ps-2">
+          <Button size="icon" variant="ghost" aria-label="Undo" title="Undo (Ctrl+Z)" disabled={!hist.current.past.length} onClick={undo}><Undo2 className="h-4 w-4" /></Button>
+          <Button size="icon" variant="ghost" aria-label="Redo" title="Redo (Ctrl+Shift+Z)" disabled={!hist.current.future.length} onClick={redo}><Redo2 className="h-4 w-4" /></Button>
+        </div>
+        <div className="flex-1" />
+        <Button variant={thaanaKb ? "default" : "secondary"} size="sm" onClick={() => setThaanaKb((v) => !v)} title="Phonetic Thaana keyboard">
+          <Keyboard className="h-4 w-4" /> <span className="hidden lg:inline">{thaanaKb ? "ތާނަ ON" : "English"}</span>
+        </Button>
+        <Select value={s.aspect} onValueChange={(v) => set("aspect", v as Aspect)}>
+          <SelectTrigger className="h-9 w-[210px]"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            {(Object.keys(ASPECTS) as Aspect[]).map((a) => (
+              <SelectItem key={a} value={a}>
+                {ASPECTS[a].label}{a !== "custom" && <span className="text-muted-foreground"> · {ASPECTS[a].w}×{ASPECTS[a].h}</span>}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {s.aspect === "custom" && (
+          <div className="flex items-center gap-1">
+            <Input className="h-9 w-20" type="number" min={400} max={4000} value={s.customW} onChange={(e) => set("customW", Math.max(400, Math.min(4000, Number(e.target.value) || 1080)))} />
+            <span className="text-xs text-muted-foreground">×</span>
+            <Input className="h-9 w-20" type="number" min={400} max={4000} value={s.customH} onChange={(e) => set("customH", Math.max(400, Math.min(4000, Number(e.target.value) || 1080)))} />
           </div>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <Button variant={thaanaKb ? "default" : "secondary"} size="sm" onClick={() => setThaanaKb((v) => !v)}>
-            <Keyboard className="h-4 w-4" /> {thaanaKb ? "ތާނަ Phonetic ON" : "English typing"}
-          </Button>
-          <Select value={s.aspect} onValueChange={(v) => set("aspect", v as Aspect)}>
-            <SelectTrigger className="h-9 w-[260px]"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {(Object.keys(ASPECTS) as Aspect[]).map((a) => (
-                <SelectItem key={a} value={a}>
-                  {ASPECTS[a].label}{a !== "custom" && <span className="text-muted-foreground"> · {ASPECTS[a].w}×{ASPECTS[a].h}</span>}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {s.aspect === "custom" && (
-            <div className="flex items-center gap-1">
-              <Input className="h-9 w-20" type="number" min={400} max={4000} value={s.customW} onChange={(e) => set("customW", Math.max(400, Math.min(4000, Number(e.target.value) || 1080)))} />
-              <span className="text-xs text-muted-foreground">×</span>
-              <Input className="h-9 w-20" type="number" min={400} max={4000} value={s.customH} onChange={(e) => set("customH", Math.max(400, Math.min(4000, Number(e.target.value) || 1080)))} />
-            </div>
-          )}
-          <Select value={String(exportScale)} onValueChange={(v) => setExportScale(Number(v))}>
-            <SelectTrigger className="h-9 w-[150px]"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {[1, 2, 3, 4].map((x) => <SelectItem key={x} value={String(x)}>{x}× · {w * x}×{h * x}</SelectItem>)}
-            </SelectContent>
-          </Select>
-          <Select value={format} onValueChange={(v) => setFormat(v as "png" | "jpg")}>
-            <SelectTrigger className="h-9 w-[80px]"><SelectValue /></SelectTrigger>
-            <SelectContent><SelectItem value="png">PNG</SelectItem><SelectItem value="jpg">JPG</SelectItem></SelectContent>
-          </Select>
-          <Button size="sm" onClick={exportImg} disabled={busy}><Download className="h-4 w-4" /> {busy ? "Exporting…" : "Export"}</Button>
-        </div>
+        )}
+        <Button size="sm" className="bg-red-600 text-white hover:bg-red-700" onClick={() => setExportOpen(true)}><Download className="h-4 w-4" /> Export</Button>
       </header>
 
       <div className="flex min-h-0 flex-1">
-        <aside ref={panelRef} className="w-[380px] shrink-0 overflow-y-auto border-e border-border">
-          <Tabs value={tab} onValueChange={(v) => setTab(v as TabId)} className="p-4">
-            <div className="sticky top-0 z-30 -mx-4 -mt-4 border-b border-border/60 bg-background/95 px-4 pb-2 pt-4 backdrop-blur">
-            <TabsList className="grid h-auto w-full grid-cols-8">
-              {[["quick", Zap, "Quick"], ["news", Newspaper, "News"], ["cutout", Scissors, "Cutout"], ["presets", LayoutTemplate, "Styles"], ["text", Type, "Text"], ["photo", ImageIcon, "Images"], ["style", Palette, "Look"], ["brand", Share2, "Brand"]].map(([v, I, l]) => {
-                const Icon = I as typeof Zap;
-                return <TabsTrigger key={v as string} value={v as string} className="flex flex-col gap-0.5 px-1 py-1.5 text-[10px]"><Icon className="h-4 w-4" />{l as string}</TabsTrigger>;
-              })}
-            </TabsList>
+        <nav aria-label="Editor tools" className="flex w-[72px] shrink-0 flex-col items-center gap-1 overflow-y-auto border-e border-border bg-card/60 py-2">
+          {RAIL.map(([v, Icon, l]) => (
+            <button key={v} onClick={() => setTab(v)} aria-pressed={tab === v}
+              className={`flex w-[62px] flex-col items-center gap-1 rounded-lg py-2 text-[10.5px] font-medium transition ${tab === v ? "bg-primary/15 text-primary" : "text-muted-foreground hover:bg-accent hover:text-foreground"}`}>
+              <Icon className="h-5 w-5" />{l}
+            </button>
+          ))}
+        </nav>
 
+        <aside ref={panelRef} className="w-[330px] shrink-0 overflow-y-auto border-e border-border">
+          <Tabs value={tab} onValueChange={(v) => setTab(v as TabId)} className="p-4">
+            <div className="sticky top-0 z-30 -mx-4 -mt-4 border-b border-border/60 bg-background/95 px-4 pb-2 pt-3 backdrop-blur">
+              <p className="text-base font-bold">{RAIL.find(([v]) => v === tab)?.[2]}</p>
             {focus && !["presets", "quick", "news", "cutout"].includes(tab) && (
-              <div className="mt-3 rounded-lg border border-primary/40 bg-primary/5 p-2.5">
+              <div className="mt-2 rounded-lg border border-primary/40 bg-primary/5 p-2.5">
                 <div className="flex items-center gap-2">
                   <Sparkles className="h-4 w-4 shrink-0 text-primary" />
                   <p className="flex-1 text-xs font-semibold leading-tight">{focus.name} — its key controls</p>
                   <Button size="sm" variant="ghost" className="h-7 shrink-0 px-2 text-xs" onClick={() => setTab("presets")}>
-                    <LayoutTemplate className="h-3.5 w-3.5" /> Styles
+                    <LayoutTemplate className="h-3.5 w-3.5" /> Templates
                   </Button>
                 </div>
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   {focus.keys.map((k) => (
-                    <button
-                      key={k}
-                      onClick={() => gotoKey(k)}
-                      className={`rounded-full border px-2.5 py-1 text-[11px] transition hover:border-primary ${flash?.k === k ? "border-primary bg-primary/15" : "border-border bg-background"}`}
-                    >
+                    <button key={k} onClick={() => gotoKey(k)}
+                      className={`rounded-full border px-2.5 py-1 text-[11px] transition hover:border-primary ${flash?.k === k ? "border-primary bg-primary/15" : "border-border bg-background"}`}>
                       {KEY_LABEL[k] ?? k}
                     </button>
                   ))}
@@ -373,7 +456,6 @@ function Studio() {
               </div>
             )}
             </div>
-
             <TabsContent value="quick" className="mt-4 space-y-4">
               {!hasBrand && (
                 <button onClick={() => setTab("brand")} className="flex w-full items-center gap-3 rounded-lg border border-primary bg-primary/10 p-3 text-start text-sm">
@@ -431,9 +513,13 @@ function Studio() {
             </TabsContent>
 
             <TabsContent value="presets" className="mt-4 space-y-3">
-              <p className="text-xs text-muted-foreground">Tap a style. Your text, photos and brand stay the same.</p>
+              <div className="relative"><Search className="pointer-events-none absolute start-2.5 top-2.5 h-4 w-4 text-muted-foreground" /><Input className="ps-8" placeholder="Search templates" value={q} onChange={(e) => setQ(e.target.value)} /></div>
+              <div className="flex flex-wrap gap-1.5">
+                {CATS.map((c) => <button key={c} onClick={() => setCat(c)} className={`rounded-full border px-2.5 py-1 text-xs ${cat === c ? "border-primary bg-primary text-primary-foreground" : "border-border hover:border-primary"}`}>{c}</button>)}
+              </div>
+              <p className="text-xs text-muted-foreground">{shown.length} templates · your text, photos and brand stay the same.</p>
               <div className="grid grid-cols-2 gap-2">
-                {thumbs.map(({ p, state }) => <PresetThumb key={p.id} state={state} name={p.name} active={activeId === p.id} onPick={() => pickPreset(p)} />)}
+                {shown.map(({ p, state }) => <PresetThumb key={p.id} state={state} name={p.name} active={activeId === p.id} onPick={() => pickPreset(p)} />)}
               </div>
               <Field label="Layout">
                 <Select value={s.layout} onValueChange={(v) => set("layout", v as PosterState["layout"])}>
@@ -724,12 +810,46 @@ function Studio() {
           </Tabs>
         </aside>
 
-        <main ref={stageRef} className="relative flex min-w-0 flex-1 items-center justify-center overflow-hidden bg-canvas">
-          <div style={{ width: w * zoom, height: h * zoom }} className="shadow-2xl">
-            <div style={{ width: w, height: h, transform: `scale(${zoom})`, transformOrigin: "top left" }}>
-              <Poster ref={posterRef} s={s} />
+        <main ref={stageRef}
+          className={`relative min-w-0 flex-1 overflow-hidden bg-canvas ${hand ? (drag.current ? "cursor-grabbing" : "cursor-grab") : ""}`}
+          onPointerDown={(e) => { if (!hand) return; drag.current = { x: e.clientX, y: e.clientY, px: pan.x, py: pan.y }; (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId); }}
+          onPointerMove={(e) => { const d = drag.current; if (d) setPan({ x: d.px + e.clientX - d.x, y: d.py + e.clientY - d.y }); }}
+          onPointerUp={() => { drag.current = null; }}
+          onWheel={(e) => { if (e.ctrlKey || e.metaKey) { e.preventDefault(); setZoom((z) => Math.min(3, Math.max(0.05, z * (e.deltaY > 0 ? 0.9 : 1.1)))); } }}
+          onClick={(e) => { if (!hand && e.target === e.currentTarget) setSel(null); }}>
+          <div className="absolute inset-0 bottom-12 flex items-center justify-center" onClick={(e) => { if (!hand && e.target === e.currentTarget) setSel(null); }}>
+            <div style={{ width: w * zoom, height: h * zoom, transform: `translate(${pan.x}px, ${pan.y}px)` }} className={`shadow-2xl ${hand ? "pointer-events-none" : "cursor-pointer"}`} onClick={onPosterClick}>
+              <div style={{ width: w, height: h, transform: `scale(${zoom})`, transformOrigin: "top left" }}>
+                <Poster ref={posterRef} s={s} />
+              </div>
             </div>
           </div>
+
+          {box && !hand && (
+            <>
+              <div className="pointer-events-none absolute rounded-sm border-2 border-primary shadow-[0_0_0_1px_rgba(255,255,255,.6)]" style={{ left: box.x - 3, top: box.y - 3, width: box.w + 6, height: box.h + 6 }} />
+              <div className="absolute z-20 flex items-center gap-1 rounded-lg border border-border bg-background p-1 shadow-xl"
+                style={{ left: Math.max(8, box.x), top: Math.max(8, box.y - 50) }}>
+                <span className="px-1.5 text-xs font-semibold capitalize text-primary">{sel}</span>
+                {sel && sizeKey[sel] && (() => { const [k, mn, mx] = sizeKey[sel]!; const v = s[k] as number; return (<>
+                  <Button size="icon" variant="ghost" className="h-7 w-7" aria-label="Smaller" onClick={() => set(k, Math.max(mn, v - 2) as never)}><Minus className="h-3.5 w-3.5" /></Button>
+                  <span className="w-8 text-center text-xs tabular-nums">{v}</span>
+                  <Button size="icon" variant="ghost" className="h-7 w-7" aria-label="Bigger" onClick={() => set(k, Math.min(mx, v + 2) as never)}><Plus className="h-3.5 w-3.5" /></Button>
+                </>); })()}
+                {isText && <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => set("dir", s.dir === "rtl" ? "ltr" : "rtl")}>{s.dir === "rtl" ? "RTL" : "LTR"}</Button>}
+                {sel === "photo" && <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => setTab("cutout")}><Scissors className="h-3.5 w-3.5" /> Remove bg</Button>}
+                <Button size="icon" variant="ghost" className="h-7 w-7" aria-label="Deselect" onClick={() => setSel(null)}><X className="h-3.5 w-3.5" /></Button>
+              </div>
+              {sel && textKey[sel] && (
+                <div className="absolute z-20 w-[min(420px,90%)] rounded-lg border border-primary/50 bg-background p-2 shadow-xl"
+                  style={{ left: Math.max(8, Math.min(box.x, (stageRef.current?.clientWidth ?? 600) - 430)), top: Math.min(box.y + box.h + 10, (stageRef.current?.clientHeight ?? 600) - 150) }}>
+                  <p className="mb-1 text-[10px] uppercase tracking-wider text-muted-foreground">Edit text · *stars* = highlight</p>
+                  {txt(textKey[sel]!, true, sel === "quote" ? 3 : 2)}
+                </div>
+              )}
+            </>
+          )}
+
           {w / h > 1 && (
             <div className="absolute start-4 top-3 flex items-center gap-2 rounded-md border border-border bg-background/90 p-1.5 text-xs">
               <span className="px-1 text-muted-foreground">Wide layout:</span>
@@ -739,9 +859,146 @@ function Studio() {
               <label className="flex items-center gap-1.5 px-1">Brand panel <Switch checked={s.wideSide} onCheckedChange={(v) => set("wideSide", v)} /></label>
             </div>
           )}
-          <span className="absolute bottom-3 end-4 text-xs text-muted-foreground">{w}×{h} · {Math.round(zoom * 100)}%</span>
+
+          <div className="absolute bottom-2 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-full border border-border bg-background/95 px-2 py-1 shadow-lg">
+            <Button size="icon" variant={hand ? "default" : "ghost"} className="h-8 w-8 rounded-full" aria-label="Hand tool (H)" title="Hand tool — drag to move (H)" onClick={() => setHand((v) => !v)}><Hand className="h-4 w-4" /></Button>
+            <Button size="icon" variant={!hand ? "secondary" : "ghost"} className="h-8 w-8 rounded-full" aria-label="Select tool" title="Select — click any text or photo" onClick={() => setHand(false)}><MousePointer2 className="h-4 w-4" /></Button>
+            <span className="mx-1 h-5 w-px bg-border" />
+            <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full" aria-label="Zoom out" onClick={() => setZoom((z) => Math.max(0.05, z / 1.2))}><Minus className="h-4 w-4" /></Button>
+            <span className="w-12 text-center text-xs tabular-nums">{Math.round(zoom * 100)}%</span>
+            <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full" aria-label="Zoom in" onClick={() => setZoom((z) => Math.min(3, z * 1.2))}><Plus className="h-4 w-4" /></Button>
+            <Button size="sm" variant="ghost" className="h-8 rounded-full px-2 text-xs" onClick={fitView}><Maximize className="h-3.5 w-3.5" /> Fit</Button>
+            <span className="px-1 text-[11px] text-muted-foreground">{w}×{h}</span>
+          </div>
         </main>
+
+        <aside className="hidden w-[290px] shrink-0 overflow-y-auto border-s border-border lg:block">
+          <div className="sticky top-0 z-10 border-b border-border bg-background/95 px-4 py-3 backdrop-blur">
+            <p className="text-base font-bold">{sel ? EL_NAME[sel] : "Poster"}</p>
+            <p className="text-xs text-muted-foreground">{sel ? "Settings for the selected item" : "Click any text, photo or logo on the poster"}</p>
+            <div className="mt-2 flex flex-wrap gap-1">
+              {(Object.keys(EL_NAME) as NonNullable<El>[]).map((k) => (
+                <button key={k} onClick={() => setSel(k)} className={`rounded-full border px-2 py-0.5 text-[11px] ${sel === k ? "border-primary bg-primary/15 text-primary" : "border-border hover:border-primary"}`}>{EL_NAME[k]}</button>
+              ))}
+            </div>
+          </div>
+          <div className="space-y-4 p-4">
+            {(sel === "headline") && (<>
+              {toggle("Show headline", "showHeadline")}
+              <Field label="Text">{txt("headline", true, 3)}</Field>
+              {fontSel("Font", "headlineFont", thaanaFonts)}
+              {slider("Size", "headlineSize", 24, 120)}
+              {slider("Move up/down", "headlineOffset", -200, 200)}
+              {color("Text colour", "textColor")}{color("Highlight", "highlightColor")}{color("Highlight text", "highlightText")}
+            </>)}
+            {(sel === "quote") && (<>
+              <Field label="Text">{txt("quote", true, 4)}</Field>
+              {fontSel("Font", "bodyFont", thaanaFonts)}
+              {slider("Size", "quoteSize", 18, 70)}
+              {slider("Line spacing", "lineHeight", 1, 2.6, 0.05)}
+              {slider("Move up/down", "quoteOffset", -300, 300)}
+              {color("Card colour", "cardColor")}{color("Card text", "cardText")}{color("Highlight", "highlightColor")}
+            </>)}
+            {(sel === "translation") && (<>
+              {toggle("Show translation", "showTranslation")}
+              <Field label="English text"><Textarea rows={3} dir="ltr" value={s.translation} onChange={(e) => set("translation", e.target.value)} /></Field>
+              {fontSel("English font", "latinFont", LATIN_FONTS)}
+            </>)}
+            {(sel === "name") && (<>
+              <Field label="Name">{txt("name")}</Field>
+              <Field label="Title / role">{txt("designation")}</Field>
+              {fontSel("Font", "nameFont", thaanaFonts)}
+              {slider("Size", "nameSize", 16, 60)}
+              {color("Accent", "accent")}{color("Highlight", "highlightColor")}
+            </>)}
+            {(sel === "category") && (<>
+              {toggle("Show category", "showCategory")}
+              <Field label="Category">{txt("category")}</Field>
+              {color("Badge colour", "highlightColor")}{color("Badge text", "highlightText")}
+            </>)}
+            {(sel === "photo") && (<>
+              <div className="flex items-center gap-3">
+                {s.photo && <img src={s.photo} alt="" className="h-14 w-14 rounded-md bg-muted object-contain" />}
+                <div className="flex-1">{upload("photo")}</div>
+              </div>
+              <Button size="sm" variant="secondary" className="w-full" onClick={() => setTab("cutout")}><Scissors className="h-4 w-4" /> Remove background</Button>
+              {slider("Size %", "photoScale", 30, 200)}
+              {slider("Move sideways", "photoX", -600, 600)}
+              {slider("Move up/down", "photoY", -600, 600)}
+              {slider("Outline", "photoOutline", 0, 20)}
+              {toggle("Drop shadow", "photoShadow")}
+              <Button size="sm" variant="ghost" className="w-full" onClick={() => setTab("photo")}>More image settings →</Button>
+            </>)}
+            {(sel === "outlet") && (<>
+              {toggle("Show branding", "showOutlet")}
+              <div className="flex items-center gap-3">
+                {s.logo && <img src={s.logo} alt="" className="h-12 w-12 rounded border border-border object-contain" />}
+                <div className="flex-1">{upload("logo")}</div>
+              </div>
+              {s.logo && <Button size="sm" variant="ghost" className="w-full" onClick={() => set("logo", undefined)}>Remove logo</Button>}
+              <Field label="Outlet name">{txt("outlet")}</Field>
+              {fontSel("Font", "outletFont", thaanaFonts)}
+              {slider("Size %", "logoSize", 40, 250)}
+            </>)}
+            {(sel === "footer") && (<>
+              {toggle("Show social footer", "showFooter")}
+              <Field label="Main handle"><Input dir="ltr" value={s.handle} onChange={(e) => set("handle", e.target.value)} /></Field>
+              <Button size="sm" variant="secondary" className="w-full" onClick={() => setTab("brand")}><Share2 className="h-4 w-4" /> Edit social accounts</Button>
+            </>)}
+            {(!sel || sel === "background") && (<>
+              <Field label="Direction">
+                <div className="grid grid-cols-2 gap-2">
+                  <Button size="sm" variant={s.dir === "rtl" ? "default" : "secondary"} onClick={() => set("dir", "rtl")}>ދިވެހި RTL</Button>
+                  <Button size="sm" variant={s.dir === "ltr" ? "default" : "secondary"} onClick={() => set("dir", "ltr")}>English LTR</Button>
+                </div>
+              </Field>
+              <div className="grid grid-cols-2 gap-3">
+                {color("Background", "bgColor")}{color("Background 2", "bgColor2")}
+                {color("Accent", "accent")}{color("Accent 2", "accent2")}
+                {color("Text", "textColor")}{color("Highlight", "highlightColor")}
+              </div>
+              {slider("Pro finish", "finish", 0, 1, 0.05)}
+              <Button size="sm" variant="ghost" className="w-full" onClick={() => setTab("style")}>Patterns & background →</Button>
+            </>)}
+          </div>
+        </aside>
       </div>
+
+      <Dialog open={exportOpen} onOpenChange={setExportOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader><DialogTitle>Export poster</DialogTitle></DialogHeader>
+          <div className="grid gap-5 sm:grid-cols-[1fr_240px]">
+            <div className="grid place-items-center rounded-lg bg-canvas p-3">
+              {(() => { const z = Math.min(300 / w, 300 / h); return (
+                <div style={{ width: w * z, height: h * z }} className="pointer-events-none overflow-hidden shadow-lg">
+                  <div style={{ width: w, height: h, transform: `scale(${z})`, transformOrigin: "top left" }}>{exportOpen && <Poster s={s} />}</div>
+                </div>); })()}
+            </div>
+            <div className="space-y-3">
+              <Field label="Size">
+                <Select value={s.aspect} onValueChange={(v) => set("aspect", v as Aspect)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>{(Object.keys(ASPECTS) as Aspect[]).map((a) => <SelectItem key={a} value={a}>{ASPECTS[a].label}</SelectItem>)}</SelectContent>
+                </Select>
+              </Field>
+              <Field label="Quality">
+                <div className="grid grid-cols-4 gap-1">
+                  {[1, 2, 3, 4].map((x) => <Button key={x} size="sm" variant={exportScale === x ? "default" : "secondary"} onClick={() => setExportScale(x)}>{x}×</Button>)}
+                </div>
+              </Field>
+              <Field label="Format">
+                <div className="grid grid-cols-2 gap-1">
+                  {(["png", "jpg"] as const).map((f) => <Button key={f} size="sm" variant={format === f ? "default" : "secondary"} onClick={() => setFormat(f)}>{f.toUpperCase()}</Button>)}
+                </div>
+              </Field>
+              <p className="text-xs text-muted-foreground">{w * exportScale} × {h * exportScale} px</p>
+              <Button className="w-full bg-red-600 text-white hover:bg-red-700" onClick={async () => { await exportImg(); setExportOpen(false); }} disabled={busy}>
+                <Download className="h-4 w-4" /> {busy ? "Preparing…" : "Download"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
