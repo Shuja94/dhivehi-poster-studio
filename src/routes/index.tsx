@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { memo, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { toJpeg, toPng } from "html-to-image";
-import { Download, Keyboard, Upload, RotateCcw, Type, Image as ImageIcon, Palette, LayoutTemplate, Share2, Zap, Sparkles, Shuffle, Check, Scissors, Newspaper, Undo2, Redo2, Cloud, Loader2, Hand, MousePointer2, Minus, Plus, Maximize, X, Search } from "lucide-react";
+import { Download, Keyboard, Upload, RotateCcw, Type, Image as ImageIcon, Palette, LayoutTemplate, Share2, Zap, Sparkles, Shuffle, Check, Undo2, Redo2, Cloud, Loader2, Hand, MousePointer2, Minus, Plus, Maximize, X, Search } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Poster } from "@/components/poster/Poster";
 import { tracked } from "@/lib/poster/track";
