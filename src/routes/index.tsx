@@ -70,7 +70,7 @@ const CAT_RX: Record<string, RegExp> = {
   Editorial: /editorial|investigation|montage|feature|mono|paper|chalk|archive|did you/i,
   Minimal: /minimal|clean|mono|soft|paper|cream|sheet/i,
 };
-const catsOf = (p: { id: string; name: string }) => Object.keys(CAT_RX).filter((c) => CAT_RX[c].test(`${p.id} ${p.name}`));
+const catsOf = (p: { id: string; name: string }) => Object.keys(CAT_RX).filter((c) => CAT_RX[c]!.test(`${p.id} ${p.name}`));
 
 const THUMB_W = 136;
 const PresetThumb = memo(function PresetThumb({ state, active, name, onPick }: { state: PosterState; active: boolean; name: string; onPick: () => void }) {
@@ -365,7 +365,7 @@ function Studio() {
   const onPosterClick = (e: React.MouseEvent) => {
     if (hand) return;
     const t = (e.target as HTMLElement).closest<HTMLElement>("[data-el]");
-    setSel(((t?.dataset.el as El) ?? "background"));
+    setSel(((t?.dataset["el"] as El) ?? "background"));
   };
   const drag = useRef<{ x: number; y: number; px: number; py: number } | null>(null);
   const fitView = () => {
