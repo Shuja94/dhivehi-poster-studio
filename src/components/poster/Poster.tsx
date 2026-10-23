@@ -91,7 +91,7 @@ function body(s: PosterState, w: number, h: number): ReactNode {
           )} />
           <Layer style={{ top: "44%", bottom: 0, left: 0, right: 0 }}><Photo s={s} /></Layer>
           {(s.name || s.designation) && (
-            <div style={abs({ bottom: pad * 0.6, insetInlineStart: pad, background: s.textColor, color: s.bgColor, padding: "6px 20px", ...nm, fontSize: s.nameSize * 0.8, lineHeight: 1.6 })}>{s.name}{s.designation && ` · ${s.designation}`}</div>
+            <div data-el="name" style={abs({ bottom: pad * 0.6, insetInlineStart: pad, background: s.textColor, color: s.bgColor, padding: "6px 20px", ...nm, fontSize: s.nameSize * 0.8, lineHeight: 1.6 })}>{s.name}{s.designation && ` · ${s.designation}`}</div>
           )}
         </>
       );
@@ -214,7 +214,7 @@ function body(s: PosterState, w: number, h: number): ReactNode {
             <QuoteText s={s} color="#ffffffcc" size={s.quoteSize * 0.7} />
           </div>
           {(s.name || s.designation) && (
-            <div style={abs({ top: "56%", insetInlineEnd: "5%", width: "22%", ...nm, fontSize: s.nameSize * 0.6, color: s.textColor, opacity: 0.6, lineHeight: 1.6 })}>{s.name}{s.designation && <><br />{s.designation}</>}</div>
+            <div data-el="name" style={abs({ top: "56%", insetInlineEnd: "5%", width: "22%", ...nm, fontSize: s.nameSize * 0.6, color: s.textColor, opacity: 0.6, lineHeight: 1.6 })}>{s.name}{s.designation && <><br />{s.designation}</>}</div>
           )}
           <div style={abs({ bottom: pad * 0.7, insetInlineEnd: pad })}><Footer s={s} variant="icons" color={s.textColor} bg={s.bgColor} /></div>
         </>
@@ -263,7 +263,7 @@ function body(s: PosterState, w: number, h: number): ReactNode {
             </span>
           </div>
           <div style={abs({ top: "82%", insetInlineEnd: "18%", textAlign: "end" })}>
-            <div style={{ ...nm, fontSize: s.nameSize * 1.6, color: s.accent, fontWeight: 800, lineHeight: 1.3 }}>{s.name}</div>
+            <div data-el="name" style={{ ...nm, fontSize: s.nameSize * 1.6, color: s.accent, fontWeight: 800, lineHeight: 1.3 }}>{s.name}</div>
             {s.designation && <div style={{ ...nm, fontSize: s.nameSize * 0.7, color: s.accent, opacity: 0.75 }}>{s.designation}</div>}
           </div>
           <div style={abs({ bottom: 0, left: 0, right: 0 })}><Footer s={s} variant="bar" color="#fff" bg={s.accent2} /></div>
@@ -282,7 +282,7 @@ function body(s: PosterState, w: number, h: number): ReactNode {
               <QuoteGlyph s={s} size={80} color="#fff" bg={s.accent2} />
               <QuoteText s={s} color={s.cardText} />
               <div>
-                <div style={{ ...nm, fontSize: s.nameSize * 1.35, color: s.accent, fontWeight: 800, lineHeight: 1.4 }}>{s.name}</div>
+                <div data-el="name" style={{ ...nm, fontSize: s.nameSize * 1.35, color: s.accent, fontWeight: 800, lineHeight: 1.4 }}>{s.name}</div>
                 <div style={{ ...nm, fontSize: s.nameSize * 0.65, color: s.cardText, opacity: 0.75, lineHeight: 1.6 }}>{s.designation}</div>
               </div>
             </div>
@@ -303,7 +303,7 @@ function body(s: PosterState, w: number, h: number): ReactNode {
               <QuoteGlyph s={s} size={80} color={s.accent} bg="#fff" />
               <Headline s={s} color={s.textColor} />
               <QuoteText s={s} color={s.cardText} />
-              <div style={{ ...nm, fontSize: s.nameSize * 0.85, color: s.textColor, opacity: 0.9, marginTop: 10 }}>– {s.name} –</div>
+              <div data-el="name" style={{ ...nm, fontSize: s.nameSize * 0.85, color: s.textColor, opacity: 0.9, marginTop: 10 }}>– {s.name} –</div>
             </div>
           </div>
           <div style={abs({ top: 0, left: "50%", transform: "translateX(-50%)", background: "#fff", padding: "18px 44px 22px", borderRadius: "0 0 32px 32px", boxShadow: "0 10px 24px rgba(0,0,0,.15)" })}>
@@ -332,7 +332,7 @@ function body(s: PosterState, w: number, h: number): ReactNode {
             </div>
           )}
           <div style={abs({ top: "41%", insetInlineStart: "12%", filter: "drop-shadow(0 6px 8px rgba(0,0,0,.25))" })}>
-            <div style={{ background: s.cardColor, color: s.accent, ...nm, fontSize: s.nameSize, padding: "8px 30px", clipPath: torn(2, 8), lineHeight: 1.6, fontWeight: 700 }}>{s.name}</div>
+            <div data-el="name" style={{ background: s.cardColor, color: s.accent, ...nm, fontSize: s.nameSize, padding: "8px 30px", clipPath: torn(2, 8), lineHeight: 1.6, fontWeight: 700 }}>{s.name}</div>
           </div>
           <QuoteBox s={s} tail={false} style={abs({ top: "54%", left: "12%", right: "12%" })} pad="44px 50px">
             <QuoteText s={s} color={s.cardText} />
@@ -363,7 +363,7 @@ function body(s: PosterState, w: number, h: number): ReactNode {
             </QuoteBox>
             <div style={{ flex: 1 }} />
             <div style={{ alignSelf: "flex-end", textAlign: "end", marginBottom: 40, maxWidth: "50%" }}>
-              <div style={{ ...nm, fontSize: s.nameSize * 1.25, color: s.accent, lineHeight: 1.5 }}>{s.name}</div>
+              <div data-el="name" style={{ ...nm, fontSize: s.nameSize * 1.25, color: s.accent, lineHeight: 1.5 }}>{s.name}</div>
               <div style={{ ...nm, fontSize: s.nameSize * 0.85, color: s.textColor, opacity: 0.85, lineHeight: 1.6 }}>{s.designation}</div>
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 20 }}>
@@ -392,7 +392,7 @@ function body(s: PosterState, w: number, h: number): ReactNode {
             <QuoteGlyph s={s} size={100} color="#fff" mode={s.quoteMark === "none" ? "none" : "circle"} />
           </div>
           <div style={abs({ top: `${split + 6}%`, left: "21%", right: "21%", bottom: "12%", display: "flex", flexDirection: "column", alignItems: "center", gap: 20, textAlign: "center" })}>
-            <div style={{ ...nm, fontSize: s.nameSize, color: s.cardText, fontWeight: 800, lineHeight: 1.4 }}>{s.name}</div>
+            <div data-el="name" style={{ ...nm, fontSize: s.nameSize, color: s.cardText, fontWeight: 800, lineHeight: 1.4 }}>{s.name}</div>
             {s.designation && <div style={{ ...nm, fontSize: s.nameSize * 0.55, color: s.accent, marginTop: -12 }}>{s.designation}</div>}
             <QuoteText s={s} color={s.cardText} />
           </div>
@@ -437,7 +437,7 @@ function body(s: PosterState, w: number, h: number): ReactNode {
           <div style={abs({ bottom: 0, left: 0, right: 0, height: "19%", background: s.accent, clipPath: torn(5, 6) })} />
           <Layer style={{ bottom: 0, insetInlineEnd: 0, width: "68%", height: "48%" }}><Photo s={s} /></Layer>
           <div style={abs({ top: "58%", insetInlineStart: "22%", background: s.accent, color: "#fff", borderRadius: 18, padding: "12px 30px", textAlign: "center" })}>
-            <div style={{ ...nm, fontSize: s.nameSize * 1.1, lineHeight: 1.5 }}>{s.name}</div>
+            <div data-el="name" style={{ ...nm, fontSize: s.nameSize * 1.1, lineHeight: 1.5 }}>{s.name}</div>
             {s.designation && <div style={{ fontFamily: `"${s.latinFont}", "${s.nameFont}"`, fontSize: s.nameSize * 0.65, opacity: 0.9 }}>{s.designation}</div>}
             <div style={abs({ bottom: -34, insetInlineEnd: 40, width: 40, height: 36, background: s.accent, clipPath: "polygon(0 0,100% 0,100% 100%)" })} />
           </div>
@@ -508,7 +508,7 @@ function body(s: PosterState, w: number, h: number): ReactNode {
             <QuoteGlyph s={s} size={100} color={s.highlightText} bg={s.highlightColor} />
             <QuoteText s={s} color={s.cardText} />
             <div style={{ borderTop: `2px solid ${s.cardText}44`, paddingTop: 18 }}>
-              <div style={{ ...nm, fontSize: s.nameSize, color: s.cardText, fontWeight: 700, lineHeight: 1.5 }}>{s.name}</div>
+              <div data-el="name" style={{ ...nm, fontSize: s.nameSize, color: s.cardText, fontWeight: 700, lineHeight: 1.5 }}>{s.name}</div>
               {s.designation && <div style={{ ...nm, fontSize: s.nameSize * 0.7, color: s.cardText, opacity: 0.8, lineHeight: 1.6 }}>{s.designation}</div>}
             </div>
           </div>
@@ -544,7 +544,7 @@ function body(s: PosterState, w: number, h: number): ReactNode {
           <Extra s={s} fallback={dome} style={{ bottom: 0, insetInlineEnd: "30%", width: "34%" }} />
           <div style={abs({ top: "34%", insetInlineStart: "6%", width: "42%", transform: `translateY(${s.quoteOffset}px)` })}>
             <QuoteText s={s} color={s.textColor} />
-            {s.name && <div style={{ ...nm, fontSize: s.nameSize * 0.8, color: s.highlightColor, marginTop: 20 }}>— {s.name}{s.designation ? ` · ${s.designation}` : ""}</div>}
+            {s.name && <div data-el="name" style={{ ...nm, fontSize: s.nameSize * 0.8, color: s.highlightColor, marginTop: 20 }}>— {s.name}{s.designation ? ` · ${s.designation}` : ""}</div>}
           </div>
           <div style={abs({ bottom: "4%", insetInlineStart: "6%" })}><Footer s={s} variant="circles" color={s.textColor} bg={s.bgColor} /></div>
         </>
@@ -571,7 +571,7 @@ function body(s: PosterState, w: number, h: number): ReactNode {
               {s.photo && <img src={s.photo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top", transform: `translate(${s.photoX / 4}px, ${s.photoY / 4}px) scale(${s.photoScale / 100})`, filter: s.photoTone !== "color" ? "grayscale(1)" : undefined }} />}
             </div>
             <div>
-              <div style={{ ...nm, fontSize: s.nameSize * 1.1, color: s.textColor, fontStyle: s.dir === "ltr" ? "italic" : undefined, lineHeight: 1.4 }}>{s.name}</div>
+              <div data-el="name" style={{ ...nm, fontSize: s.nameSize * 1.1, color: s.textColor, fontStyle: s.dir === "ltr" ? "italic" : undefined, lineHeight: 1.4 }}>{s.name}</div>
               {s.designation && <div style={{ ...nm, fontSize: s.nameSize * 0.6, color: s.accent2 }}>{s.designation}</div>}
             </div>
           </div>
@@ -599,7 +599,7 @@ function body(s: PosterState, w: number, h: number): ReactNode {
             <QuoteText s={s} color={s.cardText} />
             <div style={{ position: "relative", marginTop: 20 }}>
               <div style={abs({ top: -20, insetInlineEnd: 0, width: 80, height: 26, background: s.accent2, clipPath: "polygon(0 100%,100% 0,100% 100%)" })} />
-              <div style={{ background: s.accent, color: "#fff", ...nm, fontSize: s.nameSize, padding: "12px 46px", lineHeight: 1.5, clipPath: "polygon(0 0,100% 0,100% 100%,4% 100%)" }}>{s.name}</div>
+              <div data-el="name" style={{ background: s.accent, color: "#fff", ...nm, fontSize: s.nameSize, padding: "12px 46px", lineHeight: 1.5, clipPath: "polygon(0 0,100% 0,100% 100%,4% 100%)" }}>{s.name}</div>
               {s.designation && <div style={{ ...nm, fontSize: s.nameSize * 0.65, color: s.cardText, opacity: 0.75, marginTop: 8 }}>{s.designation}</div>}
             </div>
           </div>
@@ -655,7 +655,7 @@ function body(s: PosterState, w: number, h: number): ReactNode {
           <Layer style={{ top: "19%", bottom: "39%", insetInlineEnd: "16%", width: "50%" }}><Photo s={s} /></Layer>
           <div style={abs({ top: "40%", insetInlineStart: "13%" })}>
             {s.designation && <div style={{ ...nm, fontSize: s.nameSize * 0.85, color: s.accent, lineHeight: 1.6 }}>{s.designation}</div>}
-            <div style={{ ...nm, fontSize: s.nameSize * 1.6, color: s.textColor, fontWeight: 800, lineHeight: 1.4 }}>{s.name}</div>
+            <div data-el="name" style={{ ...nm, fontSize: s.nameSize * 1.6, color: s.textColor, fontWeight: 800, lineHeight: 1.4 }}>{s.name}</div>
           </div>
           <div style={abs({ top: "58.5%", left: "13%", right: "13%", height: 58 })}>
             <div style={abs({ bottom: 0, left: 0, right: 0, height: 6, background: s.accent2 })} />
@@ -682,7 +682,7 @@ function body(s: PosterState, w: number, h: number): ReactNode {
             <div style={{ background: s.cardColor, padding: 4, clipPath: s.tornEdges ? torn(31, 1.5) : undefined }}>
               <div style={{ background: s.bgColor, padding: "40px 48px", clipPath: s.tornEdges ? torn(32, 1.5) : undefined }}>
                 <QuoteText s={s} color={s.textColor} align={s.quoteAlign} />
-                {s.name && <div style={{ ...nm, fontSize: s.nameSize * 0.7, color: s.highlightColor, textAlign: "center", marginTop: 14 }}>{s.name}{s.designation ? ` · ${s.designation}` : ""}</div>}
+                {s.name && <div data-el="name" style={{ ...nm, fontSize: s.nameSize * 0.7, color: s.highlightColor, textAlign: "center", marginTop: 14 }}>{s.name}{s.designation ? ` · ${s.designation}` : ""}</div>}
               </div>
             </div>
           </div>
@@ -708,7 +708,7 @@ function body(s: PosterState, w: number, h: number): ReactNode {
             <div style={abs({ top: "62%", left: "9%", right: "9%", transform: `translateY(${s.quoteOffset}px)` })}><QuoteText s={s} color={s.cardText} /></div>
             <div style={abs({ bottom: "6%", insetInlineEnd: "9%", width: "34%" })}>
               <div style={{ height: 2, background: s.accent, marginBottom: 14 }} />
-              <div style={{ ...nm, fontSize: s.nameSize * 0.8, color: s.cardText, lineHeight: 1.5 }}>{s.name}</div>
+              <div data-el="name" style={{ ...nm, fontSize: s.nameSize * 0.8, color: s.cardText, lineHeight: 1.5 }}>{s.name}</div>
               {s.designation && <div style={{ ...nm, fontSize: s.nameSize * 0.6, color: s.cardText, opacity: 0.7 }}>{s.designation}</div>}
             </div>
             <div style={abs({ bottom: "5%", insetInlineStart: "9%", border: `2px solid ${s.cardText}33`, padding: "10px 24px" })}><Outlet s={s} color={s.cardText} size={36} /></div>
@@ -728,7 +728,7 @@ function body(s: PosterState, w: number, h: number): ReactNode {
             <img src={paperTexture} alt="" style={abs({ inset: 0, width: "100%", height: "100%", objectFit: "cover", mixBlendMode: "multiply", opacity: s.textureOpacity * 0.6 })} />
           </div>
           <div style={abs({ top: "41%", left: "50%", transform: "translateX(-50%) rotate(-0.6deg)", background: "#fff", padding: "14px 40px", boxShadow: "0 10px 24px rgba(0,0,0,.2)", display: "flex", gap: 24, alignItems: "center", whiteSpace: "nowrap" })}>
-            <span style={{ ...nm, fontSize: s.nameSize, color: s.accent, fontWeight: 700, lineHeight: 1.5 }}>{s.name}</span>
+            <span data-el="name" style={{ ...nm, fontSize: s.nameSize, color: s.accent, fontWeight: 700, lineHeight: 1.5 }}>{s.name}</span>
             {s.handle && <span dir="ltr" style={{ fontFamily: `"${s.latinFont}"`, fontSize: s.nameSize * 0.9, color: s.cardText }}>{s.handle}</span>}
           </div>
           <div style={abs({ top: "39%", insetInlineStart: "6%" })}><QuoteGlyph s={s} size={120} color={s.accent} bg={s.accent} /></div>
@@ -773,7 +773,7 @@ function body(s: PosterState, w: number, h: number): ReactNode {
               {!archive && <div style={abs({ bottom: -40, left: "50%", transform: "translateX(-50%)" })}><QuoteGlyph s={s} size={110} color="#fff" /></div>}
               {archive && (
                 <div style={abs({ bottom: -24, insetInlineStart: "6%", display: "flex", alignItems: "flex-end", gap: 24 })}>
-                  <div style={{ background: s.accent, color: "#fff", ...nm, fontSize: s.nameSize * 1.5, padding: "6px 34px", border: "4px solid #fff", lineHeight: 1.5, transform: "rotate(-1deg)" }}>{s.name}</div>
+                  <div data-el="name" style={{ background: s.accent, color: "#fff", ...nm, fontSize: s.nameSize * 1.5, padding: "6px 34px", border: "4px solid #fff", lineHeight: 1.5, transform: "rotate(-1deg)" }}>{s.name}</div>
                   <QuoteGlyph s={s} size={110} color="#fff" />
                 </div>
               )}
@@ -781,7 +781,7 @@ function body(s: PosterState, w: number, h: number): ReactNode {
             {!archive && (
               <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4, marginTop: 30 }}>
                 {s.designation && <span style={{ background: s.highlightColor, color: s.highlightText, ...nm, fontSize: s.nameSize * 0.7, padding: "2px 14px", lineHeight: 1.7 }}>{s.designation}</span>}
-                {s.name && <span style={{ background: s.accent, color: "#fff", ...nm, fontSize: s.nameSize, padding: "2px 18px", lineHeight: 1.7 }}>{s.name}</span>}
+                {s.name && <span data-el="name" style={{ background: s.accent, color: "#fff", ...nm, fontSize: s.nameSize, padding: "2px 18px", lineHeight: 1.7 }}>{s.name}</span>}
               </div>
             )}
             <QuoteBox s={s} tail={s.quoteBox !== "torn"} style={{ marginTop: archive ? 30 : 0 }} pad="36px 44px">

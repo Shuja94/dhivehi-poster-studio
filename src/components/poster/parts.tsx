@@ -136,7 +136,7 @@ export function Photo({ s, style, ghost, noFx, scale = 1 }: { s: PosterState; st
     ghost ? "blur(1px)" : "",
   ].join(" ");
   return (
-    <div style={{ position: "absolute", bottom: 0, left: "50%", height: `${s.photoScale * scale}%`, transform: `translate(calc(-50% + ${s.photoX}px), ${s.photoY}px)`, opacity: ghost ? 0.22 : 1, ...style }}>
+    <div data-el="photo" style={{ position: "absolute", bottom: 0, left: "50%", height: `${s.photoScale * scale}%`, transform: `translate(calc(-50% + ${s.photoX}px), ${s.photoY}px)`, opacity: ghost ? 0.22 : 1, ...style }}>
       <img src={s.photo} alt="" style={{ height: "100%", width: "auto", maxWidth: "none", display: "block", filter: filters }} />
       {s.photoTone === "duotone" && (
         <div style={{ position: "absolute", inset: 0, background: s.accent, mixBlendMode: "color", maskImage: `url(${s.photo})`, maskSize: "100% 100%" }} />
@@ -164,7 +164,7 @@ export function QuoteGlyph({ s, size, color, bg, mode }: { s: PosterState; size:
 export function QuoteText({ s, color, size, align, style }: { s: PosterState; color: string; size?: number; align?: PosterState["quoteAlign"]; style?: CSSProperties }) {
   const a = align ?? s.quoteAlign;
   return (
-    <div style={{ fontFamily: fam(s.latinFont, s.bodyFont), fontSize: size ?? s.quoteSize, lineHeight: s.lineHeight, color, textAlign: a, textAlignLast: a === "justify" ? "start" : undefined, whiteSpace: "pre-wrap", ...THAANA_TYPO, ...style }}>
+    <div data-el="quote" style={{ fontFamily: fam(s.latinFont, s.bodyFont), fontSize: size ?? s.quoteSize, lineHeight: s.lineHeight, color, textAlign: a, textAlignLast: a === "justify" ? "start" : undefined, whiteSpace: "pre-wrap", ...THAANA_TYPO, ...style }}>
       <Rich text={s.quote} s={s} />
     </div>
   );
@@ -173,7 +173,7 @@ export function QuoteText({ s, color, size, align, style }: { s: PosterState; co
 export function Translation({ s, color, size = 24, style }: { s: PosterState; color: string; size?: number; style?: CSSProperties }) {
   if (!s.showTranslation || !s.translation) return null;
   return (
-    <div dir="ltr" style={{ fontFamily: `"${s.latinFont}", sans-serif`, fontSize: size, lineHeight: 1.55, color, opacity: 0.8, textAlign: s.dir === "rtl" ? "right" : "left", ...style }}>
+    <div data-el="translation" dir="ltr" style={{ fontFamily: `"${s.latinFont}", sans-serif`, fontSize: size, lineHeight: 1.55, color, opacity: 0.8, textAlign: s.dir === "rtl" ? "right" : "left", ...style }}>
       {s.translation}
     </div>
   );
@@ -186,7 +186,7 @@ export function Headline({ s, color, style }: { s: PosterState; color: string; s
   const wrap: CSSProperties = { transform: `translateY(${s.headlineOffset}px)`, ...style };
   if (s.headlineStyle === "strip")
     return (
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 10, ...wrap }}>
+      <div data-el="headline" style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 10, ...wrap }}>
         {lines.map((l, i) => (
           <div key={i} style={{ filter: "drop-shadow(0 6px 8px rgba(0,0,0,.2))", transform: `rotate(${i % 2 ? 0.6 : -0.6}deg)` }}>
             <div style={{ background: s.cardColor, color: s.cardText, fontFamily: font, fontSize: s.headlineSize, lineHeight: 1.55, padding: "6px 28px", clipPath: s.tornEdges ? torn(i + 3, 6) : undefined, ...THAANA_TYPO }}>
@@ -198,7 +198,7 @@ export function Headline({ s, color, style }: { s: PosterState; color: string; s
       </div>
     );
   return (
-    <div style={wrap}>
+    <div data-el="headline" style={wrap}>
       <div style={{ fontFamily: font, fontSize: s.headlineSize, lineHeight: 1.5, color, whiteSpace: "pre-wrap", ...THAANA_TYPO, ...(s.headlineStyle === "block" ? { background: s.cardColor, color: s.cardText, padding: "16px 28px" } : {}) }}>
         <Rich text={s.headline} s={s} />
       </div>
@@ -258,9 +258,9 @@ export function Outlet({ s, color, size = 56, style }: { s: PosterState; color: 
   if (!s.showOutlet) return null;
   const k = (s.logoSize ?? 100) / 100;
   return s.logo ? (
-    <img src={s.logo} alt="" style={{ height: size * 1.9 * k, maxWidth: 300 * k, objectFit: "contain", ...style }} />
+    <img data-el="outlet" src={s.logo} alt="" style={{ height: size * 1.9 * k, maxWidth: 300 * k, objectFit: "contain", ...style }} />
   ) : (
-    <div style={{ fontFamily: fam(s.latinFont, s.outletFont), fontSize: size * k, color, lineHeight: 1.2, fontWeight: 700, ...THAANA_TYPO, ...style }}>{s.outlet}</div>
+    <div data-el="outlet" style={{ fontFamily: fam(s.latinFont, s.outletFont), fontSize: size * k, color, lineHeight: 1.2, fontWeight: 700, ...THAANA_TYPO, ...style }}>{s.outlet}</div>
   );
 }
 
@@ -301,7 +301,7 @@ export function Waves({ color, style, width = 260 }: { color: string; style?: CS
 export function Category({ s, style }: { s: PosterState; style?: CSSProperties }) {
   if (!s.showCategory || !s.category) return null;
   return (
-    <span style={{ background: s.highlightColor, color: s.highlightText, fontFamily: fam(s.latinFont, s.nameFont), fontSize: 26, padding: "8px 22px", display: "inline-block", lineHeight: 1.5, ...THAANA_TYPO, ...style }}>
+    <span data-el="category" style={{ background: s.highlightColor, color: s.highlightText, fontFamily: fam(s.latinFont, s.nameFont), fontSize: 26, padding: "8px 22px", display: "inline-block", lineHeight: 1.5, ...THAANA_TYPO, ...style }}>
       {s.category}
     </span>
   );
@@ -345,7 +345,7 @@ export function Footer({ s, color, variant, bg, style }: { s: PosterState; color
 
   if (variant === "circles" || variant === "squares")
     return (
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10, ...style }}>
+      <div data-el="footer" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10, ...style }}>
         <div style={{ display: "flex", gap: 10, direction: "ltr" }}>
           {items.map((f) => {
             const I = ICONS[f.kind];
@@ -357,21 +357,21 @@ export function Footer({ s, color, variant, bg, style }: { s: PosterState; color
     );
   if (variant === "bar")
     return (
-      <div style={{ ...row, justifyContent: "center", gap: 36, background: bg ?? s.accent, padding: "18px 40px" }}>
+      <div data-el="footer" style={{ ...row, justifyContent: "center", gap: 36, background: bg ?? s.accent, padding: "18px 40px" }}>
         {textItems(color)}
         {socialGroup(color)}
       </div>
     );
   if (variant === "pill")
     return (
-      <div style={{ ...row, gap: 28, background: bg ?? "#ffffff", padding: "14px 34px", borderRadius: 999, boxShadow: "0 10px 30px rgba(0,0,0,.12)" }}>
+      <div data-el="footer" style={{ ...row, gap: 28, background: bg ?? "#ffffff", padding: "14px 34px", borderRadius: 999, boxShadow: "0 10px 30px rgba(0,0,0,.12)" }}>
         {socialGroup(color)}
         {textItems(color)}
       </div>
     );
   if (variant === "split")
     return (
-      <div style={{ ...row, height: 76, direction: s.dir }}>
+      <div data-el="footer" style={{ ...row, height: 76, direction: s.dir }}>
         <div style={{ flex: 1, height: "100%", background: s.accent2, display: "flex", alignItems: "center", padding: "0 36px", fontFamily: fam(s.latinFont, s.nameFont), fontSize: 30, color: "#fff", ...THAANA_TYPO }}>{s.category}</div>
         <div style={{ flex: 1.3, height: "100%", background: bg ?? "#fff", display: "flex", alignItems: "center", justifyContent: "center", gap: 22, borderStartEndRadius: 38, borderEndEndRadius: 38, direction: "ltr", padding: "0 24px" }}>
           {socialGroup(color)}
@@ -381,14 +381,14 @@ export function Footer({ s, color, variant, bg, style }: { s: PosterState; color
     );
   if (variant === "line")
     return (
-      <div style={{ ...row, justifyContent: "center", gap: 26, borderTop: `1.5px solid ${color}55`, paddingTop: 18, flexWrap: "wrap" }}>
+      <div data-el="footer" style={{ ...row, justifyContent: "center", gap: 26, borderTop: `1.5px solid ${color}55`, paddingTop: 18, flexWrap: "wrap" }}>
         {socialGroup(color)}
         {textItems(color)}
       </div>
     );
   if (variant === "stack")
     return (
-      <div style={{ ...row, justifyContent: "space-between", alignItems: "flex-end" }}>
+      <div data-el="footer" style={{ ...row, justifyContent: "space-between", alignItems: "flex-end" }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>{textItems(color, true)}</div>
         <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6 }}>
           {s.showCategory && <span style={{ fontFamily: fam(s.latinFont, s.nameFont), fontSize: 22, color, opacity: 0.8, ...THAANA_TYPO }}>{s.category.replace(/\n/g, " ")}</span>}
@@ -397,7 +397,7 @@ export function Footer({ s, color, variant, bg, style }: { s: PosterState; color
       </div>
     );
   return (
-    <div style={{ ...row, justifyContent: "space-between", gap: 20 }}>
+    <div data-el="footer" style={{ ...row, justifyContent: "space-between", gap: 20 }}>
       <div style={{ display: "flex", gap: 12 }}>{iconOnly.map((f) => icon(f.kind, color, true))}</div>
       <div style={{ display: "flex", gap: 24, alignItems: "center" }}>
         {textItems(color)}
