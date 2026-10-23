@@ -10,6 +10,7 @@ import {
   Background, Category, Extra, Footer, Headline, Outlet, Partners, Photo, QuoteBox, QuoteGlyph, QuoteText,
   Rich, THAANA_TYPO, Translation, Watermark, Waves, fam, torn,
 } from "./parts";
+import { body2 } from "./layouts2";
 
 /* Poster artwork is user-coloured: inline colour values here are intentional. */
 
@@ -43,6 +44,8 @@ function body(s: PosterState, w: number, h: number): ReactNode {
   const nm: CSSProperties = { fontFamily: nameFont, ...THAANA_TYPO };
 
   const latin = (f = s.latinFont): CSSProperties => ({ fontFamily: fam(f, s.nameFont), ...THAANA_TYPO });
+  const b2 = body2(s, w, h);
+  if (b2) return b2;
   switch (s.layout) {
     /* Full-bleed tinted photo, yellow kicker, giant outline number */
     case "photonews":

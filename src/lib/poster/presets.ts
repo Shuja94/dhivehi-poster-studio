@@ -276,6 +276,111 @@ export const PRESETS: Preset[] = [
     apply: { layout: "redstory", aspect: "9:16", bgType: "solid", bgColor: "#d11a1a", accent: "#d11a1a", textColor: "#ffffff", highlightColor: "#ffffff", highlightText: "#d11a1a", headlineStyle: "plain", headlineSize: 64, tagline: "ބްރޭކިންގް\nނިއުސް", category: "ސިޔާސީ", showCategory: true, showDate: true, cta: "ތަފްސީލަށް މައްޗަށް", photoOutline: 0, photoShadow: false, footer: foot([]) },
   },
   {
+    id: "wire", name: "Wire Service", description: "White newswire page, square brand mark, kicker, big headline, photo strip and rule footer",
+    swatch: ["#ffffff", "#ff8000", "#1a1a1a"],
+    apply: { layout: "wire", bgType: "solid", bgColor: "#ffffff", accent: "#ff8000", textColor: "#1a1a1a", highlightColor: "transparent", highlightText: "#ff8000", headlineSize: 58, quoteSize: 32, quoteBox: "none", quoteMark: "none", showDate: true, category: "ދުނިޔެ", showCategory: true, finish: 0.2, footer: foot(["x", "website"]) },
+  },
+  {
+    id: "pullquote", name: "Red Pull Quote", description: "Solid red, giant white quote mark, bold quote with yellow marker, name under a short bar",
+    swatch: ["#d7261e", "#ffffff", "#ffe14d"],
+    apply: { layout: "pullquote", bgType: "solid", bgColor: "#d7261e", cardColor: "#ffffff", textColor: "#ffffff", highlightColor: "#ffe14d", highlightText: "#1a1a1a", quoteSize: 40, quoteBox: "none", quoteMark: "none", showHeadline: false, finish: 0.4, footer: foot(["x", "instagram", "facebook"]) },
+  },
+  {
+    id: "splithalf", name: "Photo / Colour Split", description: "Photo on the top half, deep colour block with tab category and headline below",
+    swatch: ["#0f2747", "#e63946", "#ffffff"],
+    apply: { layout: "splithalf", bgType: "solid", bgColor2: "#0f2747", accent: "#e63946", accent2: "#ffffff", cardColor: "#ffffff", cardText: "#0f2747", textColor: "#ffffff", highlightColor: "#e63946", highlightText: "#ffffff", headlineSize: 56, quoteSize: 30, quoteBox: "none", quoteMark: "none", category: "ސިޔާސީ", showCategory: true, footer: foot(["x", "instagram", "facebook", "website"]) },
+  },
+  {
+    id: "stacked", name: "Stacked Line Boxes", description: "Documentary style: each headline line in its own box over a darkened photo",
+    swatch: ["#111111", "#ffffff", "#e11d48"],
+    apply: { layout: "stacked", bgType: "solid", bgColor: "#0b0b0b", accent: "#e11d48", cardColor: "#ffffff", cardText: "#111111", textColor: "#ffffff", highlightColor: "#e11d48", highlightText: "#ffffff", headlineSize: 58, headline: "ރައީސް ވިދާޅުވަނީ\n*ޤައުމީ ދުވަހެއް*\nފާހަގަކުރަން", category: "ޚާއްޞަ", showCategory: true, footer: foot(["x", "instagram"]) },
+  },
+  {
+    id: "circlequote", name: "Circle Portrait Quote", description: "Clean light card: ringed circle portrait, round quote badge, centred quote and name",
+    swatch: ["#f6f4ef", "#1e6f5c", "#e9c46a"],
+    apply: { layout: "circlequote", bgType: "solid", bgColor: "#f6f4ef", accent: "#1e6f5c", accent2: "#e9c46a", textColor: "#1f2a2a", highlightColor: "#e9c46a", highlightText: "#1f2a2a", quoteSize: 36, quoteAlign: "center", quoteBox: "none", showHeadline: false, finish: 0.2, footer: foot(["x", "instagram", "facebook"]) },
+  },
+  {
+    id: "livebar", name: "Live Broadcast Bar", description: "TV lower-third: LIVE tag, red topic tab, white headline bar and running ticker",
+    swatch: ["#c8102e", "#ffffff", "#0b2545"],
+    apply: { layout: "livebar", bgType: "solid", bgColor: "#000000", accent: "#0b2545", cardColor: "#ffffff", cardText: "#0b2545", highlightColor: "#c8102e", highlightText: "#ffffff", textColor: "#ffffff", headlineSize: 50, category: "ބްރޭކިންގް", showCategory: true, tagline: "މާލެ · ހުޅުމާލެ · އައްޑޫ · ކުޅުދުއްފުށި", photoOutline: 0, photoShadow: false, footer: foot([]) },
+  },
+  {
+    id: "magazine", name: "Magazine Cover", description: "Huge masthead, full-bleed photo, issue date and cover lines at the bottom",
+    swatch: ["#111111", "#ffcc00", "#ffffff"],
+    apply: { layout: "magazine", bgType: "solid", bgColor: "#111111", accent2: "#ffcc00", textColor: "#ffffff", highlightColor: "transparent", highlightText: "#ffcc00", headlineSize: 68, quoteSize: 30, quoteBox: "none", quoteMark: "none", showDate: true, category: "ޚާއްޞަ ރިޕޯޓު", showCategory: true, photoOutline: 0, footer: foot(["instagram"]) },
+  },
+  {
+    id: "bignumber", name: "Big Number Stat", description: "One giant figure, heavy rule, headline and short explanation — data-led posts",
+    swatch: ["#f2efe6", "#0a7f5a", "#111111"],
+    apply: { layout: "bignumber", bgType: "noise", bgColor: "#f2efe6", accent: "#0a7f5a", textColor: "#111111", highlightColor: "#0a7f5a", highlightText: "#ffffff", dateBig: "72%", headline: "ރަށްރަށުގެ ގޭބިސީތަކުން *72 އިންސައްތަ*އަށް ސާފު ފެން", headlineSize: 52, quoteSize: 30, quoteBox: "none", quoteMark: "none", category: "ޑޭޓާ", showCategory: true, footer: foot(["x", "website"]) },
+  },
+  {
+    id: "minimalquote", name: "Minimal Quote", description: "Lots of white space, short accent bar, large quote, tiny brand line",
+    swatch: ["#fafafa", "#111111", "#2563eb"],
+    apply: { layout: "minimalquote", bgType: "solid", bgColor: "#fafafa", accent: "#2563eb", textColor: "#111111", highlightColor: "transparent", highlightText: "#2563eb", quoteSize: 38, quoteBox: "none", quoteMark: "none", showHeadline: false, finish: 0, footer: foot([]) },
+  },
+  {
+    id: "darkportrait", name: "Dark Portrait Quote", description: "Speaker cut-out fading into a dark side, big quote mark, quote and gold name",
+    swatch: ["#0d1117", "#d4a72c", "#ffffff"],
+    apply: { layout: "darkportrait", bgType: "dark", bgColor: "#0d1117", bgColor2: "#1f2937", accent: "#d4a72c", textColor: "#ffffff", highlightColor: "#d4a72c", highlightText: "#0d1117", quoteSize: 36, quoteBox: "none", showHeadline: false, photoOutline: 0, footer: foot(["x", "instagram", "facebook"]) },
+  },
+  {
+    id: "thickframe", name: "Thick Colour Frame", description: "Bold coloured border around the photo, headline card overlapping the bottom edge",
+    swatch: ["#ffd60a", "#111111", "#ffffff"],
+    apply: { layout: "thickframe", bgType: "solid", bgColor: "#ffd60a", cardColor: "#111111", cardText: "#ffffff", textColor: "#111111", highlightColor: "#ffd60a", highlightText: "#111111", headlineSize: 50, category: "ޚަބަރު", showCategory: true, footer: foot(["x", "instagram", "facebook"]) },
+  },
+  {
+    id: "notes", name: "Notes App Statement", description: "Phone notes screen for official statements and apologies, date, headline and text",
+    swatch: ["#efe9dd", "#ffffff", "#e0a100"],
+    apply: { layout: "notes", bgType: "solid", bgColor: "#efe9dd", cardColor: "#ffffff", cardText: "#1c1c1e", accent: "#e0a100", textColor: "#1c1c1e", highlightColor: "#ffe08a", highlightText: "#1c1c1e", headlineSize: 46, quoteSize: 30, quoteBox: "none", quoteMark: "none", showDate: true, footer: foot(["x", "instagram"]) },
+  },
+  {
+    id: "polaroid", name: "Polaroid Snapshot", description: "Tilted instant photo with tape and caption, headline below — soft features",
+    swatch: ["#c9dfe8", "#ffffff", "#f4a261"],
+    apply: { layout: "polaroid", bgType: "paper", bgColor: "#c9dfe8", accent2: "#f4a261", textColor: "#1d3557", highlightColor: "#f4a261", highlightText: "#1d3557", headlineSize: 50, quoteSize: 28, quoteBox: "none", quoteMark: "none", category: "ފީޗަރ", photoOutline: 0, footer: foot(["instagram", "facebook"]) },
+  },
+  {
+    id: "duoblast", name: "Duotone Blast", description: "Full photo in brand duotone, huge headline at the bottom, minimal chrome",
+    swatch: ["#3a0ca3", "#f72585", "#ffffff"],
+    apply: { layout: "duoblast", bgType: "solid", bgColor: "#240046", accent: "#f72585", textColor: "#ffffff", highlightColor: "#f72585", highlightText: "#ffffff", headlineSize: 64, category: "ޒުވާނުން", showCategory: true, photoOutline: 0, footer: foot(["instagram", "tiktok"]) },
+  },
+  {
+    id: "bandnews", name: "Broadcaster Band", description: "Coloured top band with logo, thin accent bar, photo, headline and bottom social band",
+    swatch: ["#1d4ed8", "#facc15", "#ffffff"],
+    apply: { layout: "bandnews", bgType: "solid", bgColor: "#ffffff", accent: "#1d4ed8", accent2: "#facc15", textColor: "#0f172a", highlightColor: "#facc15", highlightText: "#0f172a", headlineSize: 52, quoteSize: 30, quoteBox: "none", quoteMark: "none", category: "ލޯކަލް", showCategory: true, footer: foot(["x", "instagram", "facebook", "website"]) },
+  },
+  {
+    id: "sidebar", name: "Side Category Bar", description: "Tall colour bar with rotated topic, photo, headline and summary on a clean page",
+    swatch: ["#f8fafc", "#0f766e", "#0f172a"],
+    apply: { layout: "sidebar", bgType: "solid", bgColor: "#f8fafc", accent: "#0f766e", textColor: "#0f172a", highlightColor: "#0f766e", highlightText: "#ffffff", headlineSize: 50, quoteSize: 30, quoteBox: "none", quoteMark: "none", category: "އިޤްތިޞާދު", showCategory: true, footer: foot(["x", "website"]) },
+  },
+  {
+    id: "marker", name: "Marker Explainer", description: "Explainer headline with thick yellow marker highlights, small round author photo",
+    swatch: ["#ffffff", "#ffe600", "#111111"],
+    apply: { layout: "marker", bgType: "grid", bgColor: "#ffffff", accent: "#6d28d9", accent2: "#ede9fe", textColor: "#111111", highlightColor: "#ffe600", highlightText: "#111111", headlineSize: 60, quoteSize: 30, quoteBox: "none", quoteMark: "none", category: "ހަމަޖެހުން", showCategory: true, patternOpacity: 0.5, footer: foot(["x", "instagram"]) },
+  },
+  {
+    id: "photoquote", name: "Photo + Quote Block", description: "Black-and-white photo with a solid colour quote block and square quote badge",
+    swatch: ["#2b2d42", "#ef233c", "#edf2f4"],
+    apply: { layout: "photoquote", bgType: "solid", bgColor: "#2b2d42", accent: "#ef233c", accent2: "#edf2f4", textColor: "#ffffff", highlightColor: "#2b2d42", highlightText: "#ffffff", quoteSize: 34, quoteBox: "none", showHeadline: false, photoOutline: 0, footer: foot(["x", "instagram", "facebook"]) },
+  },
+  {
+    id: "explainer", name: "What We Know", description: "Numbered key points (one per quote line) under a ruled headline — explainers & updates",
+    swatch: ["#fffaf0", "#b91c1c", "#1f2937"],
+    apply: { layout: "explainer", bgType: "paper", bgColor: "#fffaf0", accent: "#b91c1c", textColor: "#1f2937", highlightColor: "#fde68a", highlightText: "#1f2937", headline: "މިހާތަނަށް *އެނގިފައިވާ* ކަންކަން", headlineSize: 54, quoteSize: 32, lineHeight: 1.7, quote: "ހާދިސާ ހިނގީ ރޭގަނޑު 11:00 ހާއިރު\nއެއްވެސް މީހަކަށް *އަނިޔާއެއް ނުވޭ*\nފުލުހުން ތަޙުޤީޤު ކުރަމުން ދަނީ", quoteBox: "none", quoteMark: "none", category: "އަޕްޑޭޓް", showCategory: true, footer: foot(["x", "website"]) },
+  },
+  {
+    id: "condolence", name: "Condolence Notice", description: "Respectful black card with double gold frame, grey round portrait, name and message",
+    swatch: ["#0b0b0b", "#c9a227", "#f5f5f5"],
+    apply: { layout: "condolence", bgType: "solid", bgColor: "#0b0b0b", accent2: "#c9a227", textColor: "#f5f5f5", headline: "ތަޢުޒިޔާ", headlineSize: 64, quote: "އިންނާ ލިއްލާހި ވައިންނާ އިލައިހި ރާޖިޢޫން. ވަރަށް ހިތާމައާއެކު ތަޢުޒިޔާ ދަންނަވަމެވެ.", quoteSize: 30, quoteBox: "none", quoteMark: "none", showCategory: false, photoTone: "gray", finish: 0.3, footer: foot([]) },
+  },
+  {
+    id: "gradient", name: "Social Gradient Card", description: "Vivid two-colour gradient, white tag, oversized headline and pill social footer",
+    swatch: ["#ff4d6d", "#7b2cbf", "#ffffff"],
+    apply: { layout: "gradient", bgType: "solid", accent: "#7b2cbf", accent2: "#ff4d6d", textColor: "#ffffff", highlightColor: "#ffffff", highlightText: "#7b2cbf", headlineSize: 60, quoteSize: 30, quoteBox: "none", quoteMark: "none", category: "ވައިރަލް", showCategory: true, footer: foot(["instagram", "tiktok", "x"]) },
+  },
+  {
     id: "english", name: "English Editorial", description: "Left-to-right paper quote card for English posts",
     swatch: ["#e6e1d6", "#1d4ed8", "#111111"],
     apply: {
